@@ -1,20 +1,20 @@
 ---
-name: Caracteristica
-about: Caracteristica a añadir al proyecto
-title: 'feat: Caracteristica #X'
-labels: enhancement
+name: Feature
+about: Suggest an idea for this project
+title: "[FEATURE]"
+labels: ''
 assignees: ''
 
 ---
 
-**Descripción del funcionamiento**
-Aporta una descripción clara y sencilla de lo que debe ser añadido
+**Describe the addition to the project you'd like**
+A clear and concise description of what you want to happen.
 
-**Posibles soluciones**
-Describe aquí las posibles vías de implementar la característica antes descrita
+**Deadline**
+When the feature should be implemented.
 
-**Priorización de la actividad**
-introduce la prioridad de la actividad según los mecanismos introducidos (MOSCOW) y aporta una breve justificación del por que
+**Depends on**
+What other issues must be completed before starting this one.
 
-**Contexto adicional**
-Aquí puedes añadir cualquier info que se considere importante para entender la característica: Casos de uso, limitaciones, preferencias de implemnetación...
+**Additional context**
+Add any other context or screenshots about the feature request here.
