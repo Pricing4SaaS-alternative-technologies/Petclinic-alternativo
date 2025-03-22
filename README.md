@@ -4,12 +4,26 @@ Repositorio de código donde se almacenará el trabajo realizado en frontend a l
 ## Politicas y estilos a seguir (Borrador)
 
 - # Política de ramas:
-  En el proyecto se ha establecido la siguiente politica de ramas:
-  - Rama `main`: Rama principal, a esta rama solo se subiran cambios desde `develop` ya probados y funcionales, será a partir de esta rama desde la que se realizarán el resto de ramas.
-    
-  - Rama `develop`: Rama de integración de caracteristicas y resolución de bugs, aqui se realizarán las correcciones o posibles bugs encontrados tras cerrar el ciclo de vida de las ramas `feature`.
-    
-  - Ramas `feature` o `caracteristica` (pendiente de decisión): Estas ramas serán creadas para cada issue de tipo caracteristica (aquellas que comienzan con feat:...) desde `main`. En ellas se realizará el desarrollo. Tras finalizar con la caracteristica, se realizará una pull request hacia `develop`, y en caso de que no se encuentren problemas o bugs durnte el proceso de revisión, se implementarán los cambios a esta y se procederá con el borrado de la rama caracteristica pertinente.
+  Se ha decidido seguir la siguiente política para la creación y nombrado de ramas:
+* La rama principal del proyecto será la rama **main**, a la que se integrarán los cambios de la rama **develop** y de las ramas de **hotfix**, si las hubiera.
+* En la rama **develop** se integrarán el resto de ramas existentes.
+
+***
+
+A partir de la rama **develop**:
+* Por cada **Feature**, se creará una rama con la siguiente nomenclatura: **feat/nombre-de-la-funcionalidad/info-adicional-corta**.
+* Por cada **Bug**, se creará al menos una rama con la siguiente nomenclatura: **bug/nombre-del-bug**.
+* Por cada **Petición de Cambio**, se creará al menos una rama con la siguiente nomenclatura: **change/nombre-del-cambio**.
+
+A partir de la rama **main**:
+* Por cada **Hotfix**, se creará una rama con la siguiente nomenclatura: **hotfix/nueva-version**. Es decir, si la rama se crea sobre la versión `2.1.0` de la rama **main**, se llamará **hotfix/2.1.1**.
+
+***
+
+* Para integrar los cambios a la rama **main**, se hará creando pull requests desde la rama **develop** o de **hotfix**, que deberán ser revisadas y aprobadas por **al menos una persona**.
+* Una vez se integre una rama de **hotfix** con la rama **main**, dicha rama será **borrada**. Acto seguido, se integrarán los cambios de la rama **main** en la rama **develop**.
+* Para integrar los cambios a la rama **develop**, se hará creando pull requests desde las ramas de **feature, bug, petición de cambio o tarea de marketing**, que deberán ser revisadas y aprobadas por **al menos una persona**.
+* Una vez se integre una rama de estos tipos con la rama **develop**, dicha rama será **borrada**.
 
 
 - # Política de commits (estándar)
