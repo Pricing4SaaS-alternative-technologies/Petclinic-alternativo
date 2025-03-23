@@ -3,6 +3,10 @@ import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+from flask_jwt_extended import JWTManager
+from .routes import main as main_blueprint
+from .routes import auth as auth_blueprint
+
 
 db = SQLAlchemy()
 
@@ -19,6 +23,9 @@ def create_app():
 
     # Cargar configuración
     app.config.from_object('app.config.Config')
+    
+    #metemos esto siguiendo el tutorial
+    jwt = JWTManager(app)
 
     # Inicializar la base de datos
     db.init_app(app)
@@ -27,7 +34,7 @@ def create_app():
     CORS(app, resources={r"/api/*": {"origins": "*"}})
 
     # Registrar blueprints (rutas)
-    from .routes import main as main_blueprint
+    app.register_blueprint(auth_blueprint)
     app.register_blueprint(main_blueprint)
 
     # Para desarrollo: crear tablas si no existen

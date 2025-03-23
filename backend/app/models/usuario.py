@@ -12,3 +12,8 @@ class Usuario(db.Model):
         self.nombre = nombre
         self.correo = correo
         self.contraseña = contraseña
+        
+        
+    @classmethod
+    def find_by_username_or_email(cls, username, email):
+        return cls.query.filter((cls.username == username) | (cls.email == email)).first()
