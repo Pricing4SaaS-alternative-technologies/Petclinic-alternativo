@@ -42,7 +42,7 @@ def login():
     # usamos la función q hicimos antes
     user = User.find_by_username_or_email(username_or_email, username_or_email)
 
-    if not user or not (password == user.password):
+    if not user or (password != user.password):
         return jsonify({'message': 'Credenciales inválidas'}), 401
 
     # Crear el token JWT
