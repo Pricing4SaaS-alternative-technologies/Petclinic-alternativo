@@ -1,6 +1,7 @@
+import { useRouter } from 'vue-router'
+
 <template>
   <div>
-    <p>Petclinic Alternativo</p>
     <p>{{ mensaje }}</p>
   </div>
 </template>
@@ -15,6 +16,7 @@ export default {
     }
   },
   methods: {
+
     getMensaje () {
       // Obtener el token desde localStorage
       const token = localStorage.getItem('jwt')

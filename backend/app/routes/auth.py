@@ -2,16 +2,14 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from app.models import Usuario
-
 from app.extensions import db
 
 auth = Blueprint('auth', __name__, url_prefix='/api/auth')
 
 @auth.route('/register', methods=['POST'])
 def register():
-    ## conseguimos los datos
+    ## Conseguir los datos del request
     data = request.get_json()
-    
     username = data.get('username')
     email = data.get('email')
     password = data.get('password')
@@ -19,13 +17,16 @@ def register():
     if not username or not email or not password:
         return jsonify({'message': 'Faltan datos'}), 400
 
-    ## podriamos hacerlo mas especifico buscando si existe el username y despues si existe el email, devolviendo errores diferentes
+    ## Comprobar si ya existe el usuario o email
     existing_user = Usuario.find_by_username_or_email(username, email)
     if existing_user:
         return jsonify({'message': 'El usuario o email ya está en uso'}), 400
 
     ## Crear un nuevo usuario
     new_user = Usuario(username=username, email=email, password=password)
+    ## Hashear la contraseña antes de guardar
+    new_user.hash_password()
+
     db.session.add(new_user)
     db.session.commit()
 
@@ -34,24 +35,21 @@ def register():
 @auth.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
-    
     username_or_email = data.get('username_or_email')
     password = data.get('password')
 
     if not username_or_email or not password:
         return jsonify({'message': 'Faltan datos'}), 400
 
-    ## usamos la función q hicimos antes
+    ## Buscar usuario por username o email
     user = Usuario.find_by_username_or_email(username_or_email, username_or_email)
     
-    ##TODO: cambiar esto por el check_password
-    ## si se mete el check password al final, hay q cambiar aqui el metodo
-    if not user or (password != user.password):
+    ## Usar check_password para validar la contraseña
+    if not user or not user.check_password(password):
         return jsonify({'message': 'Credenciales inválidas'}), 401
 
     ## Crear el token JWT
     access_token = create_access_token(identity=str(user.id))
-
     return jsonify({
         'message': 'Login exitoso',
         'access_token': access_token,
@@ -65,7 +63,6 @@ def login():
 @auth.route('/protected', methods=['GET'])
 @jwt_required()
 def protected():
-    ## Ejemplo de ruta protegida con JWT
     current_user_id = get_jwt_identity()
     user = Usuario.query.get(current_user_id)
     return jsonify({

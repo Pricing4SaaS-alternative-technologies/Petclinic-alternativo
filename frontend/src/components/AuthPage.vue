@@ -74,6 +74,8 @@ export default {
         console.log('Login success:', response.data)
         // Guarda el token JWT en localStorage (o sessionStorage, según prefieras)
         localStorage.setItem('jwt', response.data.access_token)
+        localStorage.setItem('user', JSON.stringify(response.data.user))
+        window.dispatchEvent(new Event('login'))
         this.$router.push('/')
         // Aquí podrías redirigir o actualizar el estado de la aplicación
       } catch (error) {
