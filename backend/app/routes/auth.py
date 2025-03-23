@@ -43,12 +43,14 @@ def login():
 
     ## usamos la función q hicimos antes
     user = Usuario.find_by_username_or_email(username_or_email, username_or_email)
-
+    
+    ##TODO: cambiar esto por el check_password
+    ## si se mete el check password al final, hay q cambiar aqui el metodo
     if not user or (password != user.password):
         return jsonify({'message': 'Credenciales inválidas'}), 401
 
     ## Crear el token JWT
-    access_token = create_access_token(identity=user.id)
+    access_token = create_access_token(identity=str(user.id))
 
     return jsonify({
         'message': 'Login exitoso',

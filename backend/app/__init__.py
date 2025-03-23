@@ -30,7 +30,11 @@ def create_app():
     db.init_app(app)
 
     ## Habilitar CORS para las rutas de la API
-    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    CORS(app, 
+     resources={r"/api/*": {"origins": "*"}},
+     allow_headers=["Content-Type", "Authorization"],
+     supports_credentials=True
+)
 
     ## Registrar blueprints (rutas)
     app.register_blueprint(auth_blueprint)
