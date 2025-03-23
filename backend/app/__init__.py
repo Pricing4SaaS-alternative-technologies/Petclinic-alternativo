@@ -7,11 +7,10 @@ from flask_jwt_extended import JWTManager
 from .routes import main as main_blueprint
 from .routes import auth as auth_blueprint
 
-
-db = SQLAlchemy()
+from .extensions import db
 
 def create_app():
-    # Construir rutas absolutas para el frontend
+    ## Construir rutas absolutas para el frontend
     current_dir = os.path.dirname(os.path.abspath(__file__))
     parent_dir = os.path.abspath(os.path.join(current_dir, '..','..'))
     dist_dir = os.path.join(parent_dir, 'frontend', 'dist')
@@ -21,23 +20,23 @@ def create_app():
                 static_folder=static_dir,
                 template_folder=dist_dir)
 
-    # Cargar configuración
+    ## Cargar configuración
     app.config.from_object('app.config.Config')
     
-    #metemos esto siguiendo el tutorial
+    ## metemos esto siguiendo el tutorial
     jwt = JWTManager(app)
 
-    # Inicializar la base de datos
+    ## Inicializar la base de datos
     db.init_app(app)
 
-    # Habilitar CORS para las rutas de la API
+    ## Habilitar CORS para las rutas de la API
     CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-    # Registrar blueprints (rutas)
+    ## Registrar blueprints (rutas)
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(main_blueprint)
 
-    # Para desarrollo: crear tablas si no existen
+    ## Para desarrollo: crear tablas si no existen
     with app.app_context():
         db.create_all()
 

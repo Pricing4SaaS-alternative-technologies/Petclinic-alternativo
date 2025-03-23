@@ -1,5 +1,5 @@
 # backend/app/models.py
-from app import db
+from app.extensions import db
 
 class Ejemplo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
