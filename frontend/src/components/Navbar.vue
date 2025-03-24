@@ -1,9 +1,13 @@
 <template>
     <nav class="navbar">
         <div class="nav-links">
-            <router-link to="/" class="nav-link">Inicio</router-link>
-            <router-link to="/auth" class="nav-link" v-if="!loggedIn">Login</router-link>
-        </div>
+            <router-link to="/" class="nav-logo-link">
+            <img src="@/assets/logo.png" alt="Logo" class="nav-logo" style="height: 3rem; margin: 0 0.5rem;" />
+            </router-link>
+            </div>
+            <div v-if="!loggedIn" class="nav-links-right" style="margin-right: 1rem;">
+              <router-link to="/auth" class="nav-link">Login</router-link>
+            </div>
         <!-- Muestra el nombre de usuario y el botón de logout si está logueado -->
         <div v-if="loggedIn" class="user-info">
             <span class="username">Hola, {{ username }}</span>
