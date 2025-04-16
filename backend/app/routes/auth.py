@@ -1,36 +1,68 @@
 # backend/app/routes/auth.py
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from app.models import Usuario
-from app.extensions import db
+
+from app.models import Usuario, Prop_mascota, Vet, Prop_clinica
+from app.models.enums import TipoUsuarioEnum, EspecialidadEnum
 
 auth = Blueprint('auth', __name__, url_prefix='/api/auth')
 
+
 @auth.route('/register', methods=['POST'])
 def register():
-    ## Conseguir los datos del request
     data = request.get_json()
+
+    # datos del usuario basico
+    tipo_str = data.get('type')
+    first_name = data.get('first_name')
+    last_name = data.get('last_name')
     username = data.get('username')
     email = data.get('email')
     password = data.get('password')
 
-    if not username or not email or not password:
-        return jsonify({'message': 'Faltan datos'}), 400
+    if not tipo_str or not all([first_name, last_name, username, email, password]):
+        return jsonify({'message': 'Faltan datos obligatorios'}), 400
 
-    ## Comprobar si ya existe el usuario o email
-    existing_user = Usuario.find_by_username_or_email(username, email)
-    if existing_user:
-        return jsonify({'message': 'El usuario o email ya está en uso'}), 400
+    # Validar tipo
+    try:
+        tipo_enum = TipoUsuarioEnum(tipo_str)
+        if tipo_enum == TipoUsuarioEnum.USUARIO:
+            return jsonify({'message': 'Tipo de usuario no permitido'}), 400
+    except ValueError:
+        return jsonify({'message': 'Tipo de usuario inválido'}), 400
 
-    ## Crear un nuevo usuario
-    new_user = Usuario(username=username, email=email, password=password)
-    ## Hashear la contraseña antes de guardar
-    new_user.hash_password()
+    # Comprobar si ya existe usuario
+    if Usuario.find_by_username_or_email(username, email):
+        return jsonify({'message': 'Usuario o email ya registrado'}), 400
 
-    db.session.add(new_user)
-    db.session.commit()
+    # Crear instancia según tipo
+    user = None
 
-    return jsonify({'message': 'Usuario registrado con éxito'}), 201
+    if tipo_enum == TipoUsuarioEnum.PROP_MASCOTA:
+        direccion = data.get('direccion')
+        telefono = data.get('telefono')
+        if not direccion or not telefono:
+            return jsonify({'message': 'No estan rellenos los campos obligatorios para dueño de mascota'}), 400
+        user = Prop_mascota(first_name, last_name, username, email, password, direccion, telefono)
+
+    elif tipo_enum == TipoUsuarioEnum.VET:
+        ciudad = data.get('ciudad')
+        especialidades_raw = data.get('especialidades', [])
+        try:
+            especialidades_enum = [EspecialidadEnum(e) for e in especialidades_raw]
+        except ValueError:
+            return jsonify({'message': 'Especialidades inválidas'}), 400
+        user = Vet(first_name, last_name, username, email, password, especialidades_enum, ciudad)
+
+    elif tipo_enum == TipoUsuarioEnum.PROP_CLINICA:
+        user = Prop_clinica(first_name, last_name, username, email, password)
+
+    if user is None:
+        return jsonify({'message': 'Error al crear el usuario'}), 500
+
+    user.save()
+    return jsonify({'message': f'{tipo_enum.value.capitalize()} registrado con éxito'}), 201
+
 
 @auth.route('/login', methods=['POST'])
 def login():
@@ -41,31 +73,32 @@ def login():
     if not username_or_email or not password:
         return jsonify({'message': 'Faltan datos'}), 400
 
-    ## Buscar usuario por username o email
     user = Usuario.find_by_username_or_email(username_or_email, username_or_email)
-    
-    ## Usar check_password para validar la contraseña
+
     if not user or not user.check_password(password):
         return jsonify({'message': 'Credenciales inválidas'}), 401
 
-    ## Crear el token JWT
-    access_token = create_access_token(identity=str(user.id))
+    # Incluir tipo en el token
+    access_token = create_access_token(identity={"id": user.id, "tipo": user.type.value})
     return jsonify({
         'message': 'Login exitoso',
         'access_token': access_token,
         'user': {
             'id': user.id,
             'username': user.username,
-            'email': user.email
+            'email': user.email,
+            'tipo': user.type.value
         }
     }), 200
+
 
 @auth.route('/protected', methods=['GET'])
 @jwt_required()
 def protected():
-    current_user_id = get_jwt_identity()
-    user = Usuario.query.get(current_user_id)
+    identity = get_jwt_identity()
+    user = Usuario.query.get(identity["id"])
     return jsonify({
         'message': f'Bienvenido, {user.username}',
-        'user_id': current_user_id
+        'tipo': user.type.value,
+        'user_id': identity["id"]
     }), 200
