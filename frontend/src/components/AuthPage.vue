@@ -104,7 +104,7 @@ export default {
         this.mode = 'login'
       } catch (error) {
         console.error('Registration error:', error.response.data)
-        this.registerError = error.response.data.message || 'Registration-failed'
+        this.registerError = error.response.data.message || 'Registration failed'
       }
     }
   }
