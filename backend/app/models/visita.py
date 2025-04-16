@@ -1,18 +1,18 @@
 from app.extensions import db
 
-class Adoption(db.Model):
-    __tablename__ = 'adoptions'  # Nombre de la tabla en la base de datos
+class Visita(db.Model):
+    __tablename__ = 'visitas'  # Nombre de la tabla en la base de datos
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    date_time = db.Column(db.DateTime, nullable=False)
     description = db.Column(db.String(255), nullable=False)
-    stage = db.Column(db.String(50), nullable=False)
 
-    def __init__(self, description, stage):
+    def __init__(self, date_time, description):
+        self.date_time = date_time
         self.description = description
-        self.stage = stage
 
     def __repr__(self):
-        return f"<Adoption(description='{self.description}', stage='{self.stage}')>"
+        return f"<Visita(date_time='{self.date_time}', description='{self.description}')>"
 
     def save(self):
         db.session.add(self)

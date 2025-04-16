@@ -1,7 +1,7 @@
 from app.extensions import db
 
-class Booking(db.Model):
-    __tablename__ = 'bookings'  # Nombre de la tabla en la base de datos
+class Reserva(db.Model):
+    __tablename__ = 'reservas'  # Nombre de la tabla en la base de datos
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     start_date = db.Column(db.Date, nullable=False)
@@ -12,7 +12,7 @@ class Booking(db.Model):
         self.end_date = end_date
 
     def __repr__(self):
-        return f"<Booking(start_date='{self.start_date}', end_date='{self.end_date}')>"
+        return f"<Reserva(start_date='{self.start_date}', end_date='{self.end_date}')>"
 
     def save(self):
         db.session.add(self)
