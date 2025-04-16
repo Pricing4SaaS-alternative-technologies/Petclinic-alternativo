@@ -24,6 +24,7 @@ class Usuario(db.Model):
     }
     
     def __init__(self, first_name, last_name, username, email, password, type):
+        
         if type == TipoUsuarioEnum.USUARIO:
             raise ValueError("No se puede crear una instancia directa del tipo 'USUARIO'")
         

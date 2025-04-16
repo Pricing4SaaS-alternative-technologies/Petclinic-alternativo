@@ -16,10 +16,8 @@
         <div class="password-wrapper">
           <label for="login-password">Password</label>
           <div class="input-icon-wrapper">
-            <input :type="showPassword ? 'text' : 'password'" id="login-password" v-model="loginForm.password"
-              required />
-            <i :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'" @click="showPassword = !showPassword"
-              class="password-toggle-icon"></i>
+            <input :type="showPassword ? 'text' : 'password'" id="login-password" v-model="loginForm.password" required />
+            <i :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'" @click="showPassword = !showPassword" class="password-toggle-icon"></i>
           </div>
         </div>
         <button type="submit">Login</button>
@@ -32,6 +30,23 @@
       <h2>Register</h2>
       <form @submit.prevent="register">
         <div>
+          <label for="type">Tipo de Usuario</label>
+          <select v-model="registerForm.type" required>
+            <option disabled value="">Selecciona un tipo</option>
+            <option value="prop_mascota">Dueño de Mascota</option>
+            <option value="vet">Veterinario</option>
+            <option value="prop_clinica">Dueño de Clínica</option>
+          </select>
+        </div>
+        <div>
+          <label for="first_name">Nombre</label>
+          <input type="text" id="first_name" v-model="registerForm.first_name" required />
+        </div>
+        <div>
+          <label for="last_name">Apellido</label>
+          <input type="text" id="last_name" v-model="registerForm.last_name" required />
+        </div>
+        <div>
           <label for="username">Username</label>
           <input type="text" id="username" v-model="registerForm.username" required />
         </div>
@@ -42,12 +57,36 @@
         <div class="password-wrapper">
           <label for="register-password">Password</label>
           <div class="input-icon-wrapper">
-            <input :type="showPassword ? 'text' : 'password'" id="register-password" v-model="registerForm.password"
-              required />
-            <i :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'" @click="showPassword = !showPassword"
-              class="password-toggle-icon"></i>
+            <input :type="showPassword ? 'text' : 'password'" id="register-password" v-model="registerForm.password" required />
+            <i :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'" @click="showPassword = !showPassword" class="password-toggle-icon"></i>
           </div>
         </div>
+
+        <!-- Campos Condicionales según el tipo de usuario -->
+        <div v-if="registerForm.type === 'prop_mascota'">
+          <div>
+            <label for="direccion">Dirección</label>
+            <input type="text" id="direccion" v-model="registerForm.direccion" required />
+          </div>
+          <div>
+            <label for="telefono">Teléfono</label>
+            <input type="text" id="telefono" v-model="registerForm.telefono" required />
+          </div>
+        </div>
+
+        <div v-if="registerForm.type === 'vet'">
+          <div>
+            <label for="ciudad">Ciudad</label>
+            <input type="text" id="ciudad" v-model="registerForm.ciudad" required />
+          </div>
+          <div>
+            <label for="especialidades">Especialidades (separadas por comas)</label>
+            <input type="text" id="especialidades" v-model="registerForm.especialidades" placeholder="cirugia, dermatologia" required />
+          </div>
+        </div>
+
+        <!-- Prop_clinica no necesita campos adicionales -->
+
         <button type="submit">Register</button>
       </form>
       <p v-if="registerError" class="error">{{ registerError }}</p>
@@ -62,20 +101,26 @@ export default {
   name: 'AuthPage',
   data () {
     return {
-      mode: 'login', // modo inicial de la pagina, en este caso login
+      mode: 'login',
       loginForm: {
         username_or_email: '',
         password: ''
       },
       registerForm: {
+        type: '',
+        first_name: '',
+        last_name: '',
         username: '',
         email: '',
-        password: ''
+        password: '',
+        direccion: '',
+        telefono: '',
+        ciudad: '',
+        especialidades: ''
       },
       loginError: '',
       registerError: '',
       showPassword: false
-
     }
   },
   methods: {
@@ -83,32 +128,35 @@ export default {
       this.loginError = ''
       try {
         const response = await axios.post('http://localhost:5000/api/auth/login', this.loginForm)
-        console.log('Login success:', response.data)
-        // Guarda el token JWT en localStorage (o sessionStorage, según prefieras)
         localStorage.setItem('jwt', response.data.access_token)
         localStorage.setItem('user', JSON.stringify(response.data.user))
         window.dispatchEvent(new Event('login'))
         this.$router.push('/')
-        // Aquí podrías redirigir o actualizar el estado de la aplicación
       } catch (error) {
-        console.error('Login error:', error.response.data)
-        this.loginError = error.response.data.message || 'Login failed'
+        this.loginError = (error.response && error.response.data && error.response.data.message) || 'Login failed'
       }
     },
     async register () {
       this.registerError = ''
       try {
-        const response = await axios.post('http://localhost:5000/api/auth/register', this.registerForm)
-        console.log('Registration success:', response.data)
-        // Opcional: Cambia a modo login después de registrarte
+        const payload = { ...this.registerForm }
+
+        // Especialidades como lista
+        if (payload.type === 'vet') {
+          payload.especialidades = payload.especialidades
+            .split(',')
+            .map(e => e.trim())
+            .filter(Boolean)
+        }
+
+        const response = await axios.post('http://localhost:5000/api/auth/register', payload)
         this.mode = 'login'
+        console.log('Registration successful:', response.data)
       } catch (error) {
-        console.error('Registration error:', error.response.data)
-        this.registerError = error.response.data.message || 'Registration failed'
+        this.registerError = (error.response && error.response.data && error.response.data.message) || 'Registration failed'
       }
     }
   }
-
 }
 </script>
 

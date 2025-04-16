@@ -12,7 +12,7 @@ class Vet(Usuario):
     ciudad = db.Column(db.String(40))
 
     __mapper_args__ = {
-        'polymorphic_identity': TipoUsuarioEnum.DUENO.value,
+        'polymorphic_identity': TipoUsuarioEnum.VET.value,
     }
     def __init__(self, first_name, last_name, username, email, password, especialidades, ciudad):
         super().__init__(first_name, last_name, username, email, password, TipoUsuarioEnum.VET)
