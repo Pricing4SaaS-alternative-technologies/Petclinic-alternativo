@@ -30,7 +30,11 @@ def create_app():
     ## Inicializar la base de datos
     db.init_app(app)
 
-    CORS(app, origins=["http://localhost:8080"], supports_credentials=True)
+    CORS(app, 
+     resources={r"/api/*": {"origins": "*"}},
+     allow_headers=["Content-Type", "Authorization"],
+     supports_credentials=True
+    )
 
     ## Registrar blueprints (rutas)
     app.register_blueprint(auth_blueprint)
@@ -39,6 +43,8 @@ def create_app():
     ## Para desarrollo: crear tablas si no existen
     with app.app_context():
         from . import models
+        from .models import Usuario
+        print("Subclases de Usuario registradas:", Usuario.__subclasses__())
         db.create_all()
 
     return app

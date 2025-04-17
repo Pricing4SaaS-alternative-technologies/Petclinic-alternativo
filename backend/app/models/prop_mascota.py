@@ -11,7 +11,7 @@ class Prop_mascota(Usuario):
     telefono = db.Column(db.String(20),nullable=False)
 
     __mapper_args__ = {
-        'polymorphic_identity': TipoUsuarioEnum.PROP_MASCOTA.value,
+        'polymorphic_identity': TipoUsuarioEnum.PROP_MASCOTA,
     }
     
     

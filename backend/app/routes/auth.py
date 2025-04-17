@@ -11,7 +11,7 @@ auth = Blueprint('auth', __name__, url_prefix='/api/auth')
 @auth.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
-
+    print(data)
     # datos del usuario basico
     tipo_str = data.get('type')
     first_name = data.get('first_name')
@@ -25,12 +25,11 @@ def register():
 
     # Validar tipo
     try:
-        tipo_enum = TipoUsuarioEnum(tipo_str)
+        tipo_enum = TipoUsuarioEnum[tipo_str]  # ✅ accedemos por nombre
         if tipo_enum == TipoUsuarioEnum.USUARIO:
             return jsonify({'message': 'Tipo de usuario no permitido'}), 400
-    except ValueError:
+    except KeyError:
         return jsonify({'message': 'Tipo de usuario inválido'}), 400
-
     # Comprobar si ya existe usuario
     if Usuario.find_by_username_or_email(username, email):
         return jsonify({'message': 'Usuario o email ya registrado'}), 400
@@ -79,7 +78,7 @@ def login():
         return jsonify({'message': 'Credenciales inválidas'}), 401
 
     # Incluir tipo en el token
-    access_token = create_access_token(identity={"id": user.id, "tipo": user.type.value})
+    access_token = create_access_token(identity=str(user.id))
     return jsonify({
         'message': 'Login exitoso',
         'access_token': access_token,
@@ -96,7 +95,7 @@ def login():
 @jwt_required()
 def protected():
     identity = get_jwt_identity()
-    user = Usuario.query.get(identity["id"])
+    user = Usuario.query.get(identity)
     return jsonify({
         'message': f'Bienvenido, {user.username}',
         'tipo': user.type.value,

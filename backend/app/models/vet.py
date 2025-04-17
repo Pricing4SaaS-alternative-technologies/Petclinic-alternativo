@@ -6,13 +6,14 @@ from app.extensions import db
 
 class Vet(Usuario):
     __tablename__ = 'vets'
-
-    especialidades = db.Column(JSON, nullable=True)
     
+    id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), primary_key=True)
+    
+    especialidades = db.Column(JSON, nullable=True)
     ciudad = db.Column(db.String(40))
 
     __mapper_args__ = {
-        'polymorphic_identity': TipoUsuarioEnum.VET.value,
+        'polymorphic_identity': TipoUsuarioEnum.VET,
     }
     def __init__(self, first_name, last_name, username, email, password, especialidades, ciudad):
         super().__init__(first_name, last_name, username, email, password, TipoUsuarioEnum.VET)

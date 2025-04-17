@@ -33,9 +33,9 @@
           <label for="type">Tipo de Usuario</label>
           <select v-model="registerForm.type" required>
             <option disabled value="">Selecciona un tipo</option>
-            <option value="prop_mascota">Dueño de Mascota</option>
-            <option value="vet">Veterinario</option>
-            <option value="prop_clinica">Dueño de Clínica</option>
+            <option value="PROP_MASCOTA">Dueño de Mascota</option>
+            <option value="VET">Veterinario</option>
+            <option value="PROP_CLINICA">Dueño de Clínica</option>
           </select>
         </div>
         <div>
@@ -63,7 +63,7 @@
         </div>
 
         <!-- Campos Condicionales según el tipo de usuario -->
-        <div v-if="registerForm.type === 'prop_mascota'">
+        <div v-if="registerForm.type === 'PROP_MASCOTA'">
           <div>
             <label for="direccion">Dirección</label>
             <input type="text" id="direccion" v-model="registerForm.direccion" required />
@@ -74,7 +74,7 @@
           </div>
         </div>
 
-        <div v-if="registerForm.type === 'vet'">
+        <div v-if="registerForm.type === 'VET'">
           <div>
             <label for="ciudad">Ciudad</label>
             <input type="text" id="ciudad" v-model="registerForm.ciudad" required />

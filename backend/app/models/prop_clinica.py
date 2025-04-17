@@ -9,7 +9,7 @@ class Prop_clinica(Usuario):
     id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), primary_key=True)
 
     __mapper_args__ = {
-        'polymorphic_identity': TipoUsuarioEnum.PROP_CLINICA.value,
+        'polymorphic_identity': TipoUsuarioEnum.PROP_CLINICA,
     }
     
     def __init__(self, first_name, last_name, username, email, password):

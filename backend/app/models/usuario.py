@@ -19,7 +19,7 @@ class Usuario(db.Model):
     type = db.Column(SqlEnum(TipoUsuarioEnum), nullable=False)
     
     __mapper_args__ = {
-        'polymorphic_identity': TipoUsuarioEnum.USUARIO.value,
+        'polymorphic_identity': TipoUsuarioEnum.USUARIO,
         'polymorphic_on': type
     }
     

@@ -20,18 +20,17 @@ export default {
     getMensaje () {
       // Obtener el token desde localStorage
       const token = localStorage.getItem('jwt')
-      console.log('Token:', token)
       // Si no hay token, establecemos un mensaje por defecto
       if (!token) {
         this.mensaje = 'No estas loggeado!'
         return
       }
 
-      const path = 'http://localhost:5000/api/v1.0/mensaje'
-      axios.get(path, {
+      // const path = 'http://localhost:5000/api/v1.0/mensaje'
+      console.log('Token:', token)
+      axios.get('http://localhost:5000/api/v1.0/mensaje', {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Authorization': `Bearer ${token}`
         }
       })
         .then(respuesta => {
