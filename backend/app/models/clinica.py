@@ -15,6 +15,14 @@ class Clinica(db.Model):
     address = db.Column(db.String(100), unique=True, nullable=False)
     telephone = db.Column(db.String(9), unique=True, nullable=False)
     plan = db.Column(db.Enum(Plan), nullable=False, default=Plan.BASIC)
+    
+        # relación inversa: una clínica → muchas habitaciones
+    habitaciones = db.relationship(
+        'HabitacionHotel',
+        back_populates='clinica',
+        cascade='all, delete-orphan',
+        lazy='select'
+    )
 
     
     
