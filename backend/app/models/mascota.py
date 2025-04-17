@@ -25,6 +25,12 @@ class Mascota(db.Model):
 
     # Relación con Visita
     visitas = db.relationship('Visita', back_populates='mascota', cascade='all, delete-orphan', lazy='select')
+    
+    # Relación a consulta
+    consultas = db.relationship('Consulta', back_populates='mascota', cascade='all, delete-orphan', lazy='select')
+    
+    # Relación a consulta
+    adopciones = db.relationship('Adopcion', back_populates='mascota', cascade='all, delete-orphan', lazy='select')
 
     def __init__(self, name, birthDate, adopted, type):
         self.name = name

@@ -14,6 +14,12 @@ class Consulta(db.Model):
     title = db.Column(db.String(50), nullable=False)
     isClinicComment = db.Column(db.Boolean, nullable=False, default=False)
     status = db.Column(db.Enum(ConsultationStatus), nullable=False, default=ConsultationStatus.PENDING)
+    
+    # Foreign key a mascotas.id
+    mascota_id = db.Column(db.Integer, db.ForeignKey('mascotas.id'), nullable=False)
+    
+    # Relación hacia Mascota
+    mascota = db.relationship('Mascota', back_populates='consultas')
 
     
     def __init__(self, title, isClinicComment, status=ConsultationStatus.PENDING):

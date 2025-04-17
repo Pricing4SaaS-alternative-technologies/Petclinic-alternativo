@@ -6,6 +6,12 @@ class Adopcion(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     description = db.Column(db.String(255), nullable=False)
     stage = db.Column(db.String(50), nullable=False)
+    
+    #ForeignKey apuntando a mascotas.id
+    mascota_id = db.Column( db.Integer, db.ForeignKey('mascotas.id'), nullable=False)
+    
+    # Relación hacia Mascota
+    mascota = db.relationship('Mascota', back_populates='adopciones')
 
     def __init__(self, description, stage):
         self.description = description

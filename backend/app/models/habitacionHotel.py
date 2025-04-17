@@ -18,18 +18,13 @@ class HabitacionHotel(db.Model):
     size = db.Column(db.Integer, nullable=False, default=0)
     type = db.Column(db.Enum(PetType), nullable=False) # NO SE SI AL SER NULLABLE FALSE HAY QUE PONER DEFAULT
     
-    # 1) foreign key a clinicas.id
+    # Foreign key a clinicas.id
     clinica_id = db.Column(db.Integer, db.ForeignKey('clinicas.id'), nullable=False)
-    # 2) relación hacia Clinica
+    # Relación hacia Clinica
     clinica = db.relationship('Clinica', back_populates='habitaciones')
     
-        # relación nueva: una habitación → muchas reservas
-    reservas = db.relationship(
-        'Reserva',
-        back_populates='habitacion',
-        cascade='all, delete-orphan',
-        lazy='select'
-    )
+    # Relación nueva: una habitación → muchas reservas
+    reservas = db.relationship('Reserva', back_populates='habitacion', cascade='all, delete-orphan', lazy='select')
 
     
     def __init__(self, size, type):
