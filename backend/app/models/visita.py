@@ -7,6 +7,12 @@ class Visita(db.Model):
     date_time = db.Column(db.DateTime, nullable=False)
     description = db.Column(db.String(255), nullable=False)
 
+    # Foreign key hacia Mascota
+    mascota_id = db.Column(db.Integer, db.ForeignKey('mascotas.id'), nullable=False)
+
+    # Relación con Mascota
+    mascota = db.relationship('Mascota', back_populates='visitas')
+
     def __init__(self, date_time, description):
         self.date_time = date_time
         self.description = description
