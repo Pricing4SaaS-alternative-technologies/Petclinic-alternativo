@@ -20,6 +20,7 @@ class Vet(Usuario):
         self.ciudad = ciudad
         self.set_especialidades(especialidades)
     
+    #almacenamos los values del enum en la bbdd, para type se almacena el enum directamente por que es mas comodo
     def set_especialidades(self, especialidades_enum_list):
         self.especialidades = [e.value if isinstance(e, EspecialidadEnum) else EspecialidadEnum(e).value for e in especialidades_enum_list]
 
@@ -27,3 +28,11 @@ class Vet(Usuario):
         if self.especialidades:
             return [EspecialidadEnum(val) for val in self.especialidades]
         return []
+    
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+        
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()

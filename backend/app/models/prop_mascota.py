@@ -19,3 +19,11 @@ class Prop_mascota(Usuario):
         super().__init__(first_name, last_name, username, email, password, TipoUsuarioEnum.PROP_MASCOTA)
         self.direccion = direccion
         self.telefono = telefono
+        
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+        
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()

@@ -11,7 +11,7 @@ auth = Blueprint('auth', __name__, url_prefix='/api/auth')
 @auth.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
-    print(data)
+    # print(data)
     # datos del usuario basico
     tipo_str = data.get('type')
     first_name = data.get('first_name')
@@ -25,11 +25,12 @@ def register():
 
     # Validar tipo
     try:
-        tipo_enum = TipoUsuarioEnum[tipo_str]  # ✅ accedemos por nombre
+        tipo_enum = TipoUsuarioEnum[tipo_str]
         if tipo_enum == TipoUsuarioEnum.USUARIO:
             return jsonify({'message': 'Tipo de usuario no permitido'}), 400
     except KeyError:
         return jsonify({'message': 'Tipo de usuario inválido'}), 400
+    
     # Comprobar si ya existe usuario
     if Usuario.find_by_username_or_email(username, email):
         return jsonify({'message': 'Usuario o email ya registrado'}), 400
@@ -48,7 +49,8 @@ def register():
         ciudad = data.get('ciudad')
         especialidades_raw = data.get('especialidades', [])
         try:
-            especialidades_enum = [EspecialidadEnum(e) for e in especialidades_raw]
+            especialidades_enum = [EspecialidadEnum(e.strip()) for e in especialidades_raw.split(",")]
+            print("enum de especialidades",especialidades_enum)
         except ValueError:
             return jsonify({'message': 'Especialidades inválidas'}), 400
         user = Vet(first_name, last_name, username, email, password, especialidades_enum, ciudad)
