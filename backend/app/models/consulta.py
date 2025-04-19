@@ -17,9 +17,7 @@ class Consulta(db.Model):
     
     # Foreign key a mascotas.id
     mascota_id = db.Column(db.Integer, db.ForeignKey('mascotas.id'), nullable=False)
-    
-    # Relación hacia Mascota
-    mascota = db.relationship('Mascota', back_populates='consultas')
+    mascota = db.relationship('Mascota')
 
     
     def __init__(self, title, isClinicComment, status=ConsultationStatus.PENDING):

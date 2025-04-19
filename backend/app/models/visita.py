@@ -9,9 +9,7 @@ class Visita(db.Model):
 
     # Foreign key hacia Mascota
     mascota_id = db.Column(db.Integer, db.ForeignKey('mascotas.id'), nullable=False)
-
-    # Relación con Mascota
-    mascota = db.relationship('Mascota', back_populates='visitas')
+    mascota = db.relationship('Mascota')
 
     def __init__(self, date_time, description):
         self.date_time = date_time

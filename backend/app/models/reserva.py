@@ -9,15 +9,11 @@ class Reserva(db.Model):
     
     # Foreign key a la tabla de habitaciones
     habitacion_id = db.Column( db.Integer, db.ForeignKey('habitaciones_hotel.id'), nullable=False)
-    
-    # Relación hacia HabitacionHotel
-    habitacion = db.relationship('HabitacionHotel', back_populates='reservas')
+    habitacion = db.relationship('HabitacionHotel')
 
     # Foreign key hacia Mascota
     mascota_id = db.Column(db.Integer, db.ForeignKey('mascotas.id'), nullable=False)
-
-    # Relación con Mascota
-    mascota = db.relationship('Mascota', back_populates='reservas')
+    mascota = db.relationship('Mascota')
 
 
     def __init__(self, start_date, end_date):

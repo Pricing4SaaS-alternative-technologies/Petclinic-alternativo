@@ -20,17 +20,6 @@ class Mascota(db.Model):
     adopted = db.Column(db.Boolean, nullable=False, default=False)
     type = db.Column(db.Enum(PetType), nullable=False) # NO SE SI AL SER NULLABLE FALSE HAY QUE PONER DEFAULT
 
-    # Relación con Reserva
-    reservas = db.relationship('Reserva', back_populates='mascota', cascade='all, delete-orphan', lazy='select')
-
-    # Relación con Visita
-    visitas = db.relationship('Visita', back_populates='mascota', cascade='all, delete-orphan', lazy='select')
-    
-    # Relación a consulta
-    consultas = db.relationship('Consulta', back_populates='mascota', cascade='all, delete-orphan', lazy='select')
-    
-    # Relación a consulta
-    adopciones = db.relationship('Adopcion', back_populates='mascota', cascade='all, delete-orphan', lazy='select')
 
     def __init__(self, name, birthDate, adopted, type):
         self.name = name

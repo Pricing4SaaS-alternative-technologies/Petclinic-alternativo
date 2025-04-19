@@ -9,9 +9,7 @@ class Adopcion(db.Model):
     
     #ForeignKey apuntando a mascotas.id
     mascota_id = db.Column( db.Integer, db.ForeignKey('mascotas.id'), nullable=False)
-    
-    # Relación hacia Mascota
-    mascota = db.relationship('Mascota', back_populates='adopciones')
+    mascota = db.relationship('Mascota')
 
     def __init__(self, description, stage):
         self.description = description
