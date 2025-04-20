@@ -1,11 +1,13 @@
 from app.extensions import db
+from sqlalchemy import Enum as SqlEnum
+from .enums import Stage
 
 class Adopcion(db.Model):
     __tablename__ = 'adopciones'  # Nombre de la tabla en la base de datos
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     description = db.Column(db.String(255), nullable=False)
-    stage = db.Column(db.String(50), nullable=False)
+    stage = db.Column(SqlEnum(Stage), nullable=False)
     
     #ForeignKey apuntando a mascotas.id
     mascota_id = db.Column( db.Integer, db.ForeignKey('mascotas.id'), nullable=False)

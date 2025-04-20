@@ -1,6 +1,9 @@
 from enum import Enum as PyEnum
 from app.extensions import db
 
+from sqlalchemy import Enum as SqlEnum
+from .enums import Stage
+
 class PetType(PyEnum):
     CAT = "CAT"
     DOG = "DOG"
@@ -17,7 +20,7 @@ class Mascota(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(50), nullable=False)
     birthDate = db.Column(db.Date, nullable=False)
-    adopted = db.Column(db.Boolean, nullable=False, default=False)
+    adopted = db.Column(db.Enum(Stage), nullable=True)
     type = db.Column(db.Enum(PetType), nullable=False) # NO SE SI AL SER NULLABLE FALSE HAY QUE PONER DEFAULT
 
 

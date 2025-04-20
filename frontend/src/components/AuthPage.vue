@@ -34,7 +34,7 @@
           <select v-model="registerForm.type" required>
             <option disabled value="">Selecciona un tipo</option>
             <option value="PROP_MASCOTA">Dueño de Mascota</option>
-            <option value="VET">Veterinario</option>
+            <option value="VETERINARIO">Veterinario</option>
             <option value="PROP_CLINICA">Dueño de Clínica</option>
           </select>
         </div>
@@ -74,7 +74,7 @@
           </div>
         </div>
 
-        <div v-if="registerForm.type === 'VET'">
+        <div v-if="registerForm.type === 'VETERINARIO'">
           <div>
             <label for="ciudad">Ciudad</label>
             <input type="text" id="ciudad" v-model="registerForm.ciudad" required />
@@ -142,7 +142,7 @@ export default {
         const payload = { ...this.registerForm }
 
         // Especialidades como lista
-        if (payload.type === 'vet') {
+        if (payload.type === 'veterinario') {
           payload.especialidades = payload.especialidades
             .split(',')
             .map(e => e.trim())

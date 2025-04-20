@@ -4,7 +4,7 @@ class TipoUsuarioEnum(enum.Enum):
     USUARIO = "usuario"
     PROP_MASCOTA = "prop_mascota"
     PROP_CLINICA = "prop_clinica"
-    VET = "vet"
+    VETERINARIO = "veterinario"
     ADMIN = "admin"
     
 class EspecialidadEnum(enum.Enum):
@@ -13,3 +13,8 @@ class EspecialidadEnum(enum.Enum):
     OFTALMOLOGIA = "oftalmologia"
     MEDICINA_INTERNA = "medicina_interna"
     REHABILITACION = "rehabilitacion"
+    
+class Stage(enum.Enum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"

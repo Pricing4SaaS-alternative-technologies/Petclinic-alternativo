@@ -22,9 +22,6 @@ class HabitacionHotel(db.Model):
     clinica_id = db.Column(db.Integer, db.ForeignKey('clinicas.id'), nullable=False)
     # Relación hacia Clinica
     clinica = db.relationship('Clinica')
-    
-    # Relación nueva: una habitación → muchas reservas
-    reservas = db.relationship('Reserva', back_populates='habitacion', cascade='all, delete-orphan', lazy='select')
 
     
     def __init__(self, size, type):

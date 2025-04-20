@@ -2,7 +2,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
-from app.models import Usuario, Prop_mascota, Vet, Prop_clinica
+from app.models import Usuario, Prop_mascota, Veterinario, Prop_clinica
 from app.models.enums import TipoUsuarioEnum, EspecialidadEnum
 
 auth = Blueprint('auth', __name__, url_prefix='/api/auth')
@@ -45,7 +45,7 @@ def register():
             return jsonify({'message': 'No estan rellenos los campos obligatorios para dueño de mascota'}), 400
         user = Prop_mascota(first_name, last_name, username, email, password, direccion, telefono)
 
-    elif tipo_enum == TipoUsuarioEnum.VET:
+    elif tipo_enum == TipoUsuarioEnum.VETERINARIO:
         ciudad = data.get('ciudad')
         especialidades_raw = data.get('especialidades', [])
         try:
@@ -53,7 +53,7 @@ def register():
             print("enum de especialidades",especialidades_enum)
         except ValueError:
             return jsonify({'message': 'Especialidades inválidas'}), 400
-        user = Vet(first_name, last_name, username, email, password, especialidades_enum, ciudad)
+        user = Veterinario(first_name, last_name, username, email, password, especialidades_enum, ciudad)
 
     elif tipo_enum == TipoUsuarioEnum.PROP_CLINICA:
         user = Prop_clinica(first_name, last_name, username, email, password)

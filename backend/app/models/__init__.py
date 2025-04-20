@@ -2,7 +2,7 @@ from .enums import TipoUsuarioEnum
 
 from .usuario import Usuario
 from .prop_mascota import Prop_mascota
-from .vet import Vet
+from .veterinario import Veterinario
 from .prop_clinica import Prop_clinica
 from.adopcion import Adopcion
 from .mascota import Mascota
