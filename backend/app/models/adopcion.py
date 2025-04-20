@@ -12,6 +12,13 @@ class Adopcion(db.Model):
     #ForeignKey apuntando a mascotas.id
     mascota_id = db.Column( db.Integer, db.ForeignKey('mascotas.id'), nullable=False)
     mascota = db.relationship('Mascota')
+    
+    dueño_nuevo_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
+    dueño_nuevo = db.relationship('Usuario', foreign_keys=[dueño_nuevo_id])
+    
+    dueño_anterior_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
+    dueño_anterior = db.relationship('Usuario', foreign_keys=[dueño_anterior_id])
+    
 
     def __init__(self, description, stage):
         self.description = description

@@ -16,6 +16,10 @@ class Clinica(db.Model):
     telephone = db.Column(db.String(9), unique=True, nullable=False)
     plan = db.Column(db.Enum(Plan), nullable=False, default=Plan.BASIC)
     
+    propietario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
+    propietario = db.relationship('Usuario', foreign_keys=[propietario_id])
+
+    
     def __init__(self, name, address, telephone, plan=Plan.BASIC):
         self.name = name
         self.address = address

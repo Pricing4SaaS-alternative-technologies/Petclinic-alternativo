@@ -22,6 +22,9 @@ class Mascota(db.Model):
     birthDate = db.Column(db.Date, nullable=False)
     adopted = db.Column(db.Enum(Stage), nullable=True)
     type = db.Column(db.Enum(PetType), nullable=False) # NO SE SI AL SER NULLABLE FALSE HAY QUE PONER DEFAULT
+    
+    dueño_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
+    dueño = db.relationship('Usuario', foreign_keys=[dueño_id])
 
 
     def __init__(self, name, birthDate, adopted, type):

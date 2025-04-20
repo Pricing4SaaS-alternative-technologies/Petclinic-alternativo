@@ -15,6 +15,10 @@ class Consulta(db.Model):
     isClinicComment = db.Column(db.Boolean, nullable=False, default=False)
     status = db.Column(db.Enum(ConsultationStatus), nullable=False, default=ConsultationStatus.PENDING)
     
+    dueño_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
+    dueño = db.relationship('Usuario', foreign_keys=[dueño_id])
+
+    
     # Foreign key a mascotas.id
     mascota_id = db.Column(db.Integer, db.ForeignKey('mascotas.id'), nullable=False)
     mascota = db.relationship('Mascota')

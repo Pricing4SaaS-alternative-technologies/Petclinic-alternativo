@@ -11,6 +11,9 @@ class Veterinario(Usuario):
     
     especialidades = db.Column(JSON, nullable=True)
     ciudad = db.Column(db.String(40))
+    
+    clinica_id = db.Column(db.Integer, db.ForeignKey('clinicas.id'), nullable=False)
+    clinica = db.relationship('Clinica')
 
     __mapper_args__ = {
         'polymorphic_identity': TipoUsuarioEnum.VETERINARIO,
