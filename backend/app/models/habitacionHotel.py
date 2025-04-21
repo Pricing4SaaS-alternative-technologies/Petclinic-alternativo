@@ -18,6 +18,9 @@ class HabitacionHotel(db.Model):
     size = db.Column(db.Integer, nullable=False, default=0)
     type = db.Column(db.Enum(PetType), nullable=False) # NO SE SI AL SER NULLABLE FALSE HAY QUE PONER DEFAULT
     
+    propietario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
+    propietario = db.relationship('Usuario', foreign_keys=[propietario_id])
+    
     # Foreign key a clinicas.id
     clinica_id = db.Column(db.Integer, db.ForeignKey('clinicas.id'), nullable=False)
     # Relación hacia Clinica

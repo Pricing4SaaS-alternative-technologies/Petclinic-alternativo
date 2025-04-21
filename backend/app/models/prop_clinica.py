@@ -7,7 +7,7 @@ class Prop_clinica(Usuario):
     __tablename__ = 'props_clinicas'
 
     id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), primary_key=True)
-
+    
     __mapper_args__ = {
         'polymorphic_identity': TipoUsuarioEnum.PROP_CLINICA,
     }
