@@ -12,16 +12,19 @@ class Veterinario(Usuario):
     especialidades = db.Column(JSON, nullable=True)
     ciudad = db.Column(db.String(40))
     
+    
     clinica_id = db.Column(db.Integer, db.ForeignKey('clinicas.id'), nullable=False)
     clinica = db.relationship('Clinica')
+    
 
     __mapper_args__ = {
         'polymorphic_identity': TipoUsuarioEnum.VETERINARIO,
     }
-    def __init__(self, first_name, last_name, username, email, password, especialidades, ciudad):
+    def __init__(self, first_name, last_name, username, email, password, especialidades, ciudad, clinica_id):
         super().__init__(first_name, last_name, username, email, password, TipoUsuarioEnum.VETERINARIO)
         self.ciudad = ciudad
         self.set_especialidades(especialidades)
+        self.clinica_id = clinica_id
     
     #almacenamos los values del enum en la bbdd, para type se almacena el enum directamente por que es mas comodo
     def set_especialidades(self, especialidades_enum_list):

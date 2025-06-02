@@ -41,19 +41,22 @@ def register():
     if tipo_enum == TipoUsuarioEnum.PROP_MASCOTA:
         direccion = data.get('direccion')
         telefono = data.get('telefono')
-        if not direccion or not telefono:
+        clinica = data.get('clinica_id')
+        
+        if not direccion or not telefono or not clinica:
             return jsonify({'message': 'No estan rellenos los campos obligatorios para dueño de mascota'}), 400
-        user = Prop_mascota(first_name, last_name, username, email, password, direccion, telefono)
+        user = Prop_mascota(first_name, last_name, username, email, password, direccion, telefono, clinica)
 
     elif tipo_enum == TipoUsuarioEnum.VETERINARIO:
         ciudad = data.get('ciudad')
         especialidades_raw = data.get('especialidades', [])
+        clinica = data.get('clinica_id')
         try:
             especialidades_enum = [EspecialidadEnum(e.strip()) for e in especialidades_raw.split(",")]
             print("enum de especialidades",especialidades_enum)
         except ValueError:
             return jsonify({'message': 'Especialidades inválidas'}), 400
-        user = Veterinario(first_name, last_name, username, email, password, especialidades_enum, ciudad)
+        user = Veterinario(first_name, last_name, username, email, password, especialidades_enum, ciudad, clinica)
 
     elif tipo_enum == TipoUsuarioEnum.PROP_CLINICA:
         user = Prop_clinica(first_name, last_name, username, email, password)

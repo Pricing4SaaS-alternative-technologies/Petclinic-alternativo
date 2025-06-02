@@ -18,10 +18,11 @@ class Prop_mascota(Usuario):
     }
     
     
-    def __init__(self, first_name, last_name, username, email, password, direccion, telefono):
+    def __init__(self, first_name, last_name, username, email, password, direccion, telefono, clinica_id):
         super().__init__(first_name, last_name, username, email, password, TipoUsuarioEnum.PROP_MASCOTA)
         self.direccion = direccion
         self.telefono = telefono
+        self.clinica_id = clinica_id
         
     def save(self):
         db.session.add(self)

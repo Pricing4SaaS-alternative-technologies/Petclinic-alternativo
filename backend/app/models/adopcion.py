@@ -13,7 +13,7 @@ class Adopcion(db.Model):
     mascota_id = db.Column( db.Integer, db.ForeignKey('mascotas.id'), nullable=False)
     mascota = db.relationship('Mascota')
     
-    dueño_nuevo_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
+    dueño_nuevo_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=True)
     dueño_nuevo = db.relationship('Usuario', foreign_keys=[dueño_nuevo_id])
     
     dueño_anterior_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)

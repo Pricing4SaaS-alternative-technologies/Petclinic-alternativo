@@ -15,7 +15,6 @@ class Reserva(db.Model):
     mascota_id = db.Column(db.Integer, db.ForeignKey('mascotas.id'), nullable=False)
     mascota = db.relationship('Mascota')
 
-
     def __init__(self, start_date, end_date):
         self.start_date = start_date
         self.end_date = end_date
