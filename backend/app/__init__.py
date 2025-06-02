@@ -4,6 +4,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+
 from .routes import main as main_blueprint
 from .routes import auth as auth_blueprint
 
@@ -29,12 +30,11 @@ def create_app():
     ## Inicializar la base de datos
     db.init_app(app)
 
-    ## Habilitar CORS para las rutas de la API
     CORS(app, 
      resources={r"/api/*": {"origins": "*"}},
      allow_headers=["Content-Type", "Authorization"],
      supports_credentials=True
-)
+    )
 
     ## Registrar blueprints (rutas)
     app.register_blueprint(auth_blueprint)
@@ -42,6 +42,9 @@ def create_app():
 
     ## Para desarrollo: crear tablas si no existen
     with app.app_context():
+        from . import models
+        from .models import Usuario
+        print("Subclases de Usuario registradas:", Usuario.__subclasses__())
         db.create_all()
 
     return app

@@ -2,7 +2,9 @@ import { useRouter } from 'vue-router'
 
 <template>
   <div>
-    <p>{{ mensaje }}</p>
+    <p>{{ mensaje.message }}</p>
+    <p> {{ mensaje.tipo }}</p>
+    <p v-if="mensaje.error" class="error">{{ mensaje.error }}</p>
   </div>
 </template>
 
@@ -12,7 +14,10 @@ export default {
   name: 'Home',
   data () {
     return {
-      mensaje: 'Sin mensaje!'
+      mensaje: {
+        message: 'Sin mensaje!',
+        tipo: 'usuario no loggeado'
+      }
     }
   },
   methods: {
@@ -23,12 +28,12 @@ export default {
       console.log('Token:', token)
       // Si no hay token, establecemos un mensaje por defecto
       if (!token) {
-        this.mensaje = 'No estas loggeado!'
+        this.mensaje.message = 'No estas loggeado!'
+        this.mensaje.tipo = 'usuario no loggeado'
         return
       }
 
-      const path = 'http://localhost:5000/api/v1.0/mensaje'
-      axios.get(path, {
+      axios.get('http://localhost:5000/api/v1.0/mensaje', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -40,7 +45,6 @@ export default {
         })
         .catch(error => {
           console.log('Error al obtener mensaje:', error)
-          // Si hay un error (por ejemplo, 401 Unauthorized), mostramos "No hay mensaje"
           this.mensaje = 'Hubo un error procesando la solicitud'
         })
     }
