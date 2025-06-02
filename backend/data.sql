@@ -51,8 +51,8 @@ INSERT IGNORE INTO adopciones (id, description, stage, mascota_id, dueño_nuevo_
 (2, 'Adopción de Lorito', 'APPROVED', 3, 1, 3);
 
 INSERT IGNORE INTO consultas (id, title, description , isClinicComment, status, dueño_id, vet_id, mascota_id) VALUES
-(1, 'Consulta sobre la salud de Firulais', 'Firulais lleva varios días malo.' , TRUE, 'PENDING', 1, 1, 1),
-(2, 'Consulta sobre la adopción de Misifú', ' ¿Cómo va la adopción?' , TRUE, 'ANSWERED', 2, 2, 2),
+(1, 'Consulta sobre la salud de Firulais', 'Firulais lleva varios días malo.' , TRUE, 'PENDING', 1, null, 1),
+(2, 'Consulta sobre la adopción de Misifú', ' ¿Cómo va la adopción?' , TRUE, 'ANSWERED', 2, null, 2),
 (3, 'Consulta sobre la vacunación de Lorito', '¿Es monodosis o hay que poner la vacuna más veces?' , FALSE, 'CLOSED', 3, 3, 3);
 
 INSERT IGNORE INTO reservas (id, start_date, end_date, habitacion_id, mascota_id) VALUES
