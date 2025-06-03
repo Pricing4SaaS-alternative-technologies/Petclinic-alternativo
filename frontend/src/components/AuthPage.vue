@@ -5,7 +5,7 @@
       <button @click="mode = 'register'" :class="{ active: mode === 'register' }">Register</button>
     </div>
 
-    <!-- Formulario de Login -->
+    <!-- Login -->
     <div v-if="mode === 'login'" class="login-form">
       <h2>Login</h2>
       <form @submit.prevent="login">
@@ -25,7 +25,7 @@
       <p v-if="loginError" class="error">{{ loginError }}</p>
     </div>
 
-    <!-- Formulario de Registro -->
+    <!-- Registro -->
     <div v-if="mode === 'register'" class="register-form">
       <h2>Register</h2>
       <form @submit.prevent="register">
@@ -62,7 +62,7 @@
           </div>
         </div>
 
-        <!-- Campos Condicionales según el tipo de usuario -->
+        <!-- PROP_MASCOTA -->
         <div v-if="registerForm.type === 'PROP_MASCOTA'">
           <div>
             <label for="direccion">Dirección</label>
@@ -72,20 +72,41 @@
             <label for="telefono">Teléfono</label>
             <input type="text" id="telefono" v-model="registerForm.telefono" required />
           </div>
+          <div>
+            <label for="clinica_id">Clínica</label>
+            <select v-model="registerForm.clinica_id" required>
+              <option disabled value="">Selecciona una clínica</option>
+              <option v-for="clinica in clinicasDisponibles" :key="clinica.id" :value="clinica.id">
+                {{ clinica.nombre }}
+              </option>
+            </select>
+          </div>
         </div>
 
+        <!-- VETERINARIO -->
         <div v-if="registerForm.type === 'VETERINARIO'">
           <div>
             <label for="ciudad">Ciudad</label>
             <input type="text" id="ciudad" v-model="registerForm.ciudad" required />
           </div>
           <div>
-            <label for="especialidades">Especialidades (separadas por comas)</label>
-            <input type="text" id="especialidades" v-model="registerForm.especialidades" placeholder="cirugia, dermatologia" required />
+            <label for="especialidades">Especialidades</label>
+            <select id="especialidades" v-model="registerForm.especialidades" multiple required>
+              <option v-for="esp in especialidadesDisponibles" :key="esp" :value="esp">
+                {{ esp }}
+              </option>
+            </select>
+          </div>
+          <div>
+            <label for="clinica_id">Clínica</label>
+            <select v-model="registerForm.clinica_id" required>
+              <option disabled value="">Selecciona una clínica</option>
+              <option v-for="clinica in clinicasDisponibles" :key="clinica.id" :value="clinica.id">
+                {{ clinica.nombre }}
+              </option>
+            </select>
           </div>
         </div>
-
-        <!-- Prop_clinica no necesita campos adicionales -->
 
         <button type="submit">Register</button>
       </form>
@@ -102,6 +123,7 @@ export default {
   data () {
     return {
       mode: 'login',
+      showPassword: false,
       loginForm: {
         username_or_email: '',
         password: ''
@@ -116,14 +138,36 @@ export default {
         direccion: '',
         telefono: '',
         ciudad: '',
-        especialidades: ''
+        clinica_id: '',
+        especialidades: []
       },
+      especialidadesDisponibles: [],
+      clinicasDisponibles: [],
       loginError: '',
-      registerError: '',
-      showPassword: false
+      registerError: ''
     }
   },
+  created () {
+    this.fetchEspecialidades()
+    this.fetchClinicas()
+  },
   methods: {
+    async fetchEspecialidades () {
+      try {
+        const res = await axios.get('http://localhost:5000/api/auth/especialidades')
+        this.especialidadesDisponibles = res.data
+      } catch (err) {
+        console.error('Error al cargar especialidades', err)
+      }
+    },
+    async fetchClinicas () {
+      try {
+        const res = await axios.get('http://localhost:5000/api/clinicas')
+        this.clinicasDisponibles = res.data
+      } catch (err) {
+        console.error('Error al cargar clínicas', err)
+      }
+    },
     async login () {
       this.loginError = ''
       try {
@@ -140,20 +184,11 @@ export default {
       this.registerError = ''
       try {
         const payload = { ...this.registerForm }
-
-        // Especialidades como lista
-        if (payload.type === 'veterinario') {
-          payload.especialidades = payload.especialidades
-            .split(',')
-            .map(e => e.trim())
-            .filter(Boolean)
-        }
-
         const response = await axios.post('http://localhost:5000/api/auth/register', payload)
+        console.log('Registro correcto', response.data)
         this.mode = 'login'
-        console.log('Registration successful:', response.data)
       } catch (error) {
-        this.registerError = (error.response && error.response.data && error.response.data.message) || 'Registration failed'
+        this.registerError = (error.response && error.response.data && error.response.data.message) || 'Registro fallido'
       }
     }
   }
@@ -168,7 +203,6 @@ export default {
   background: #ffffff;
   border-radius: 16px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease -in -out;
 }
 
 .auth-toggle {
@@ -186,7 +220,6 @@ export default {
   background-color: #f0f0f0;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease-in-out;
 }
 
 .auth-toggle button.active {
@@ -207,15 +240,15 @@ label {
   color: #333;
 }
 
-input {
+input, select {
   width: 90%;
   padding: 10px 12px;
   border: 1px solid #ccc;
   border-radius: 8px;
-  transition: border - color 0.3s;
+  transition: border-color 0.3s;
 }
 
-input:focus {
+input:focus, select:focus {
   border-color: #007bff;
   outline: none;
 }
@@ -229,7 +262,6 @@ button[type="submit"] {
   color: white;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s;
 }
 
 button[type="submit"]:hover {
@@ -248,29 +280,6 @@ button[type="submit"]:hover {
   width: 100%;
 }
 
-.input-icon-wrapper i {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  cursor: pointer;
-  color: #666;
-}
-.password-wrapper {
-  width: 100%;
-}
-
-.input-icon-wrapper {
-  position: relative;
-  width: 100%;
-}
-
-.input-icon-wrapper input {
-  width: 100%;
-  padding-right: 40px;
-  box-sizing: border-box;
-}
-
 .password-toggle-icon {
   position: absolute;
   top: 50%;
@@ -280,5 +289,4 @@ button[type="submit"]:hover {
   color: #666;
   font-size: 1rem;
 }
-
 </style>

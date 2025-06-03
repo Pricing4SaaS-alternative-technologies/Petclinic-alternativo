@@ -7,6 +7,7 @@ from flask_jwt_extended import JWTManager
 
 from .routes import main as main_blueprint
 from .routes import auth as auth_blueprint
+from .routes.clinicas import clinicas_bp
 
 from .extensions import db
 
@@ -39,6 +40,8 @@ def create_app():
     ## Registrar blueprints (rutas)
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(main_blueprint)
+    app.register_blueprint(clinicas_bp)
+
 
     ## Para desarrollo: crear tablas si no existen
     with app.app_context():
@@ -48,3 +51,6 @@ def create_app():
         db.create_all()
 
     return app
+
+
+from flask_cors import CORS

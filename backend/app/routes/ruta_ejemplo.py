@@ -23,7 +23,3 @@ def get_message():
         'user_id': int(identity)
     })
 
-@main.route('/', defaults={'path': ''})
-@main.route('/<path:path>')
-def render_vue(path):
-    return render_template("index.html")

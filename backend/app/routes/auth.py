@@ -50,10 +50,14 @@ def register():
     elif tipo_enum == TipoUsuarioEnum.VETERINARIO:
         ciudad = data.get('ciudad')
         especialidades_raw = data.get('especialidades', [])
+        valores_validos = [e.value for e in EspecialidadEnum]
+        
+        if not all(e in valores_validos for e in especialidades_raw):
+            return jsonify({'message': 'Algunas especialidades no son válidas'}), 400
+        
         clinica = data.get('clinica_id')
         try:
-            especialidades_enum = [EspecialidadEnum(e.strip()) for e in especialidades_raw.split(",")]
-            print("enum de especialidades",especialidades_enum)
+            especialidades_enum = [EspecialidadEnum(e) for e in especialidades_raw]
         except ValueError:
             return jsonify({'message': 'Especialidades inválidas'}), 400
         user = Veterinario(first_name, last_name, username, email, password, especialidades_enum, ciudad, clinica)
@@ -106,3 +110,9 @@ def protected():
         'tipo': user.type.value,
         'user_id': identity["id"]
     }), 200
+
+
+@auth.route('/especialidades', methods=['GET'])
+def get_especialidades():
+    from app.models.enums import EspecialidadEnum
+    return jsonify([e.value for e in EspecialidadEnum])
