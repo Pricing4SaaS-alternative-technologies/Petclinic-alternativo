@@ -10,7 +10,7 @@
             </div>
         <!-- Muestra el nombre de usuario y el botón de logout si está logueado -->
         <div v-if="loggedIn" class="user-info">
-            <span class="username">Hola, {{ username }}</span>
+            <span class="usuario">Hola, {{ usuario }}</span>
             <button class="logout" @click="logout">Cerrar sesión</button>
         </div>
     </nav>
@@ -25,9 +25,9 @@ export default {
     }
   },
   computed: {
-    username () {
+    usuario () {
       const user = localStorage.getItem('user')
-      return user ? JSON.parse(user).username : ''
+      return user ? JSON.parse(user).usuario : ''
     }
   },
   methods: {
@@ -92,7 +92,7 @@ export default {
     align-items: center;
 }
 
-.username {
+.usuario {
     color: white;
     margin-right: 1rem;
     font-size: 1rem;

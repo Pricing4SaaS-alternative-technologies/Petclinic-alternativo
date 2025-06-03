@@ -18,8 +18,8 @@ def get_message():
     if message:
         return jsonify(message.text)
     return jsonify({
-        'message': f'Bienvenido, {user.username}, si estas viendo esto estas loggeado de forma correcta con JWT',
-        'tipo': f'Actualmente eres un usuario de tipo {user.type.value}',
+        'message': f'Bienvenido, {user.usuario}, si estas viendo esto estas loggeado de forma correcta con JWT',
+        'tipo': f'Actualmente eres un usuario de tipo {user.tipo_usuario.value}',
         'user_id': int(identity)
     })
 

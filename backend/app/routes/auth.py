@@ -13,14 +13,14 @@ def register():
     data = request.get_json()
     # print(data)
     # datos del usuario basico
-    tipo_str = data.get('type')
-    first_name = data.get('first_name')
-    last_name = data.get('last_name')
-    username = data.get('username')
+    tipo_str = data.get('tipo_usuario')
+    nombre = data.get('nombre')
+    apellidos = data.get('apellidos')
+    usuario = data.get('usuario')
     email = data.get('email')
-    password = data.get('password')
+    contraseña = data.get('contraseña')
 
-    if not tipo_str or not all([first_name, last_name, username, email, password]):
+    if not tipo_str or not all([nombre, apellidos, usuario, email, contraseña]):
         return jsonify({'message': 'Faltan datos obligatorios'}), 400
 
     # Validar tipo
@@ -32,7 +32,7 @@ def register():
         return jsonify({'message': 'Tipo de usuario inválido'}), 400
     
     # Comprobar si ya existe usuario
-    if Usuario.find_by_username_or_email(username, email):
+    if Usuario.find_by_usuario_or_email(usuario, email):
         return jsonify({'message': 'Usuario o email ya registrado'}), 400
 
     # Crear instancia según tipo
@@ -45,7 +45,7 @@ def register():
         
         if not direccion or not telefono or not clinica:
             return jsonify({'message': 'No estan rellenos los campos obligatorios para dueño de mascota'}), 400
-        user = Prop_mascota(first_name, last_name, username, email, password, direccion, telefono, clinica)
+        user = Prop_mascota(nombre, apellidos, usuario, email, contraseña, direccion, telefono, clinica)
 
     elif tipo_enum == TipoUsuarioEnum.VETERINARIO:
         ciudad = data.get('ciudad')
@@ -60,10 +60,10 @@ def register():
             especialidades_enum = [EspecialidadEnum(e) for e in especialidades_raw]
         except ValueError:
             return jsonify({'message': 'Especialidades inválidas'}), 400
-        user = Veterinario(first_name, last_name, username, email, password, especialidades_enum, ciudad, clinica)
+        user = Veterinario(nombre, apellidos, usuario, email, contraseña, especialidades_enum, ciudad, clinica)
 
     elif tipo_enum == TipoUsuarioEnum.PROP_CLINICA:
-        user = Prop_clinica(first_name, last_name, username, email, password)
+        user = Prop_clinica(nombre, apellidos, usuario, email, contraseña)
 
     if user is None:
         return jsonify({'message': 'Error al crear el usuario'}), 500
@@ -75,27 +75,27 @@ def register():
 @auth.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
-    username_or_email = data.get('username_or_email')
-    password = data.get('password')
+    user_o_mail = data.get('usuario_o_email')
+    contraseña = data.get('contraseña')
 
-    if not username_or_email or not password:
+    if not user_o_mail or not contraseña:
         return jsonify({'message': 'Faltan datos'}), 400
 
-    user = Usuario.find_by_username_or_email(username_or_email, username_or_email)
+    usuario = Usuario.find_by_usuario_or_email(user_o_mail, user_o_mail)
 
-    if not user or not user.check_password(password):
+    if not usuario or not usuario.check_password(contraseña):
         return jsonify({'message': 'Credenciales inválidas'}), 401
 
     # Incluir tipo en el token
-    access_token = create_access_token(identity=str(user.id))
+    access_token = create_access_token(identity=str(usuario.id))
     return jsonify({
         'message': 'Login exitoso',
         'access_token': access_token,
-        'user': {
-            'id': user.id,
-            'username': user.username,
-            'email': user.email,
-            'tipo': user.type.value
+        'usuario': {
+            'id': usuario.id,
+            'usuario': usuario.usuario,
+            'email': usuario.email,
+            'tipo': usuario.tipo_usuario.value
         }
     }), 200
 
@@ -104,10 +104,10 @@ def login():
 @jwt_required()
 def protected():
     identity = get_jwt_identity()
-    user = Usuario.query.get(identity)
+    usuario = Usuario.query.get(identity)
     return jsonify({
-        'message': f'Bienvenido, {user.username}',
-        'tipo': user.type.value,
+        'message': f'Bienvenido, {usuario.usuario}',
+        'tipo': usuario.tipo_usuario.value,
         'user_id': identity["id"]
     }), 200
 

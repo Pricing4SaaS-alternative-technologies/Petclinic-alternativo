@@ -10,13 +10,13 @@
       <h2>Login</h2>
       <form @submit.prevent="login">
         <div>
-          <label for="username_or_email">Username or Email</label>
-          <input type="text" id="username_or_email" v-model="loginForm.username_or_email" required />
+          <label for="usuario_o_email">Usuario o Email</label>
+          <input type="text" id="usuario_o_email" v-model="loginForm.usuario_o_email" required />
         </div>
         <div class="password-wrapper">
-          <label for="login-password">Password</label>
+          <label for="contraseña-login">Contraseña</label>
           <div class="input-icon-wrapper">
-            <input :type="showPassword ? 'text' : 'password'" id="login-password" v-model="loginForm.password" required />
+            <input :type="showPassword ? 'text' : 'password'" id="contraseña-login" v-model="loginForm.contraseña" required />
             <i :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'" @click="showPassword = !showPassword" class="password-toggle-icon"></i>
           </div>
         </div>
@@ -30,8 +30,8 @@
       <h2>Register</h2>
       <form @submit.prevent="register">
         <div>
-          <label for="type">Tipo de Usuario</label>
-          <select v-model="registerForm.type" required>
+          <label for="tipo_usuario">Tipo de Usuario</label>
+          <select v-model="registerForm.tipo_usuario" required>
             <option disabled value="">Selecciona un tipo</option>
             <option value="PROP_MASCOTA">Dueño de Mascota</option>
             <option value="VETERINARIO">Veterinario</option>
@@ -39,31 +39,31 @@
           </select>
         </div>
         <div>
-          <label for="first_name">Nombre</label>
-          <input type="text" id="first_name" v-model="registerForm.first_name" required />
+          <label for="nombre">Nombre</label>
+          <input type="text" id="nombre" v-model="registerForm.nombre" required />
         </div>
         <div>
-          <label for="last_name">Apellido</label>
-          <input type="text" id="last_name" v-model="registerForm.last_name" required />
+          <label for="apellidos">Apellido</label>
+          <input type="text" id="apellidos" v-model="registerForm.apellidos" required />
         </div>
         <div>
-          <label for="username">Username</label>
-          <input type="text" id="username" v-model="registerForm.username" required />
+          <label for="usuario">Username</label>
+          <input type="text" id="usuario" v-model="registerForm.usuario" required />
         </div>
         <div>
           <label for="email">Email</label>
           <input type="email" id="email" v-model="registerForm.email" required />
         </div>
         <div class="password-wrapper">
-          <label for="register-password">Password</label>
+          <label for="contraseña-registro">Contraseña</label>
           <div class="input-icon-wrapper">
-            <input :type="showPassword ? 'text' : 'password'" id="register-password" v-model="registerForm.password" required />
+            <input :type="showPassword ? 'text' : 'password'" id="contraseña-registro" v-model="registerForm.contraseña" required />
             <i :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'" @click="showPassword = !showPassword" class="password-toggle-icon"></i>
           </div>
         </div>
 
         <!-- PROP_MASCOTA -->
-        <div v-if="registerForm.type === 'PROP_MASCOTA'">
+        <div v-if="registerForm.tipo_usuario === 'PROP_MASCOTA'">
           <div>
             <label for="direccion">Dirección</label>
             <input type="text" id="direccion" v-model="registerForm.direccion" required />
@@ -84,7 +84,7 @@
         </div>
 
         <!-- VETERINARIO -->
-        <div v-if="registerForm.type === 'VETERINARIO'">
+        <div v-if="registerForm.tipo_usuario === 'VETERINARIO'">
           <div>
             <label for="ciudad">Ciudad</label>
             <input type="text" id="ciudad" v-model="registerForm.ciudad" required />
@@ -125,16 +125,16 @@ export default {
       mode: 'login',
       showPassword: false,
       loginForm: {
-        username_or_email: '',
-        password: ''
+        usuario_o_email: '',
+        contraseña: ''
       },
       registerForm: {
-        type: '',
-        first_name: '',
-        last_name: '',
-        username: '',
+        tipo_usuario: '',
+        nombre: '',
+        apellidos: '',
+        usuario: '',
         email: '',
-        password: '',
+        contraseña: '',
         direccion: '',
         telefono: '',
         ciudad: '',
@@ -173,7 +173,7 @@ export default {
       try {
         const response = await axios.post('http://localhost:5000/api/auth/login', this.loginForm)
         localStorage.setItem('jwt', response.data.access_token)
-        localStorage.setItem('user', JSON.stringify(response.data.user))
+        localStorage.setItem('user', JSON.stringify(response.data.usuario))
         window.dispatchEvent(new Event('login'))
         this.$router.push('/')
       } catch (error) {

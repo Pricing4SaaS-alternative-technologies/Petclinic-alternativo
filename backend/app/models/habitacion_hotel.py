@@ -1,22 +1,14 @@
 from enum import Enum as PyEnum
 from app.extensions import db
-
-class PetType(PyEnum):
-    CAT = "CAT"
-    DOG = "DOG"
-    LIZARD = "LIZARD"
-    SNAKE = "SNAKE"
-    BIRD = "BIRD"
-    HAMSTER = "HAMSTER"
-    TURTLE = "TURTLE"
+from .enums import TipoMascota
 
 
-class HabitacionHotel(db.Model):
+class Habitacion_hotel(db.Model):
     __tablename__ = 'habitaciones_hotel'  ## Nombre de la tabla en la BD
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    size = db.Column(db.Integer, nullable=False, default=0)
-    type = db.Column(db.Enum(PetType), nullable=False) # NO SE SI AL SER NULLABLE FALSE HAY QUE PONER DEFAULT
+    tamaño = db.Column(db.Integer, nullable=False, default=0)
+    tipo = db.Column(db.Enum(TipoMascota), nullable=False) # NO SE SI AL SER NULLABLE FALSE HAY QUE PONER DEFAULT
     
     # Foreign key a clinicas.id
     clinica_id = db.Column(db.Integer, db.ForeignKey('clinicas.id'), nullable=False)
@@ -24,9 +16,9 @@ class HabitacionHotel(db.Model):
     clinica = db.relationship('Clinica')
 
     
-    def __init__(self, size, type):
-        self.size = size
-        self.type = type
+    def __init__(self, tamaño, tipo):
+        self.tamaño = tamaño
+        self.tipo = tipo
         
     
     def save(self):

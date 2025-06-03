@@ -9,5 +9,5 @@ from .mascota import Mascota
 from .consulta import Consulta
 from .reserva import Reserva
 from .visita import Visita
-from .habitacionHotel import HabitacionHotel
+from .habitacion_hotel import Habitacion_hotel
 from .clinica import Clinica
