@@ -12,6 +12,9 @@ class Prop_mascota(Usuario):
     
     clinica_id = db.Column(db.Integer, db.ForeignKey('clinicas.id'), nullable=False)
     clinica = db.relationship('Clinica', foreign_keys=[clinica_id])
+    
+    mascotas = db.relationship('Mascota', backref='propietario', lazy=True, foreign_keys='Mascota.dueño_id')
+
 
     __mapper_args__ = {
         'polymorphic_identity': TipoUsuarioEnum.PROP_MASCOTA,
