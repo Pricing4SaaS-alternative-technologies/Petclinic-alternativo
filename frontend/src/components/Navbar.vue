@@ -35,26 +35,29 @@ export default {
       localStorage.removeItem('jwt')
       localStorage.removeItem('user')
       this.loggedIn = false
-      this.$router.push('/')
+      window.dispatchEvent(new Event('logout'))
+
+      // nos cargamos el error de la consola de duplicateNav
+      if (this.$route.path !== '/') {
+        this.$router.push('/')
+      }
+    },
+    // manejamos el inicio de sesión y cierre de sesión
+    handleLogin () {
+      this.loggedIn = true
+    },
+    handleLogout () {
+      this.loggedIn = false
     }
   },
   created () {
-    // Escucha cambios en el estado de inicio de sesión
-    window.addEventListener('login', () => {
-      this.loggedIn = true
-    })
-    window.addEventListener('logout', () => {
-      this.loggedIn = false
-    })
+    window.addEventListener('login', this.handleLogin)
+    window.addEventListener('logout', this.handleLogout)
     console.log('Usuario en localStorage:', localStorage.getItem('user'))
   },
   beforeUnmount () {
-    window.removeEventListener('login', () => {
-      this.loggedIn = true
-    })
-    window.removeEventListener('logout', () => {
-      this.loggedIn = false
-    })
+    window.removeEventListener('login', this.handleLogin)
+    window.removeEventListener('logout', this.handleLogout)
   }
 }
 </script>

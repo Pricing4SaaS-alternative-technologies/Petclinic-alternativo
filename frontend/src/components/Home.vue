@@ -2,55 +2,90 @@ import { useRouter } from 'vue-router'
 
 <template>
   <div>
-    <p>{{ mensaje.message }}</p>
-    <p> {{ mensaje.tipo }}</p>
-    <p v-if="mensaje.error" class="error">{{ mensaje.error }}</p>
+    <div v-if="!jwtValido">
+      <p class="error"> No estás logueado. Por favor, inicia sesión.</p>
+    </div>
+    <div v-else>
+      <h2>Bienvenido {{ info_usuario.usuario }}</h2>
+      <component :is="componenteRol" />
+    </div>
   </div>
 </template>
 
 <script>
-import axios from 'axios'
+import HomeMascota from './HomeMascota.vue'
+import HomeClinica from './HomeClinica.vue'
+import HomeVeterinario from './HomeVeterinario.vue'
+import HomeAdmin from './HomeAdmin.vue'
+
 export default {
-  name: 'Home',
+  components: {
+    HomeMascota,
+    HomeClinica,
+    HomeVeterinario,
+    HomeAdmin
+  },
   data () {
     return {
-      mensaje: {
-        message: 'Sin mensaje!',
-        tipo: 'usuario no loggeado'
-      }
-    }
-  },
-  methods: {
-
-    getMensaje () {
-      // Obtener el token desde localStorage
-      const token = localStorage.getItem('jwt')
-      console.log('Token:', token)
-      // Si no hay token, establecemos un mensaje por defecto
-      if (!token) {
-        this.mensaje.message = 'No estas loggeado!'
-        this.mensaje.tipo = 'usuario no loggeado'
-        return
-      }
-
-      axios.get('http://localhost:5000/api/v1.0/mensaje', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-        .then(respuesta => {
-        // Si la solicitud es exitosa, se muestra el mensaje devuelto
-          this.mensaje = respuesta.data
-        })
-        .catch(error => {
-          console.log('Error al obtener mensaje:', error)
-          this.mensaje = 'Hubo un error procesando la solicitud'
-        })
+      info_usuario: null,
+      jwtValido: false,
+      componenteRol: null
     }
   },
   created () {
-    this.getMensaje()
+    this.checkAuth()
+    window.addEventListener('logout', this.checkAuth)
+  },
+  beforeUnmount () {
+    window.removeEventListener('logout', this.checkAuth)
+  },
+  methods: {
+    checkAuth () {
+      const token = localStorage.getItem('jwt')
+      // user tiene tipo, usuario, email e id como campos que se guardan
+      const rawUser = localStorage.getItem('user')
+
+      // Verificamos si hay token y usuario
+      if (!token || !rawUser) {
+        this.jwtValido = false
+        return
+      }
+
+      try {
+        this.info_usuario = JSON.parse(rawUser)
+        this.jwtValido = true
+        this.asignarComponentePorRol(this.info_usuario.tipo)
+      } catch (e) {
+        console.error('Error al parsear el usuario:', e)
+        this.jwtValido = false
+      }
+    },
+    asignarComponentePorRol (tipo) {
+      switch (tipo) {
+        case 'prop_mascota':
+          this.componenteRol = HomeMascota
+          break
+        case 'prop_clinica':
+          this.componenteRol = HomeClinica
+          break
+        case 'veterinario':
+          this.componenteRol = HomeVeterinario
+          break
+        case 'admin':
+          this.componenteRol = HomeAdmin // Asignar un componente por defecto para ADMIN
+          break
+        default:
+          this.componenteRol = null
+      }
+    }
   }
 }
 </script>
+
+<style scoped>
+.error {
+  color: red;
+  font-weight: bold;
+  padding: 1em;
+}
+</style>
