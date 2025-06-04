@@ -4,23 +4,23 @@ class Reserva(db.Model):
     __tablename__ = 'reservas'  # Nombre de la tabla en la base de datos
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    start_date = db.Column(db.Date, nullable=False)
-    end_date = db.Column(db.Date, nullable=False)
+    fecha_inicio = db.Column(db.Date, nullable=False)
+    fecha_fin = db.Column(db.Date, nullable=False)
     
     # Foreign key a la tabla de habitaciones
     habitacion_id = db.Column( db.Integer, db.ForeignKey('habitaciones_hotel.id'), nullable=False)
-    habitacion = db.relationship('HabitacionHotel')
+    habitacion = db.relationship('Habitacion_hotel')
 
     # Foreign key hacia Mascota
     mascota_id = db.Column(db.Integer, db.ForeignKey('mascotas.id'), nullable=False)
     mascota = db.relationship('Mascota')
 
-    def __init__(self, start_date, end_date):
-        self.start_date = start_date
-        self.end_date = end_date
+    def __init__(self, fecha_inicio, fecha_fin):
+        self.fecha_inicio = fecha_inicio
+        self.fecha_fin = fecha_fin
 
     def __repr__(self):
-        return f"<Reserva(start_date='{self.start_date}', end_date='{self.end_date}')>"
+        return f"<Reserva(fecha_inicio='{self.fecha_inicio}', fecha_fin='{self.fecha_fin}')>"
 
     def save(self):
         db.session.add(self)

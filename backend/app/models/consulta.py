@@ -1,20 +1,15 @@
 from enum import Enum as PyEnum
 from app.extensions import db
-
-class ConsultationStatus(PyEnum):
-    PENDING = "PENDING"
-    ANSWERED = "ANSWERED"
-    CLOSED = "CLOSED"
-
+from .enums import EstadoConsulta
 
 class Consulta(db.Model):
     __tablename__ = 'consultas'  ## Nombre de la tabla en la BD
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    title = db.Column(db.String(50), nullable=False)
-    description = db.Column(db.String(500), nullable=False)
-    isClinicComment = db.Column(db.Boolean, nullable=False, default=False)
-    status = db.Column(db.Enum(ConsultationStatus), nullable=False, default=ConsultationStatus.PENDING)
+    titulo = db.Column(db.String(50), nullable=False)
+    descripcion = db.Column(db.String(500), nullable=False)
+    comentario_clinica = db.Column(db.Boolean, nullable=False, default=False)
+    estado_consulta = db.Column(db.Enum(EstadoConsulta), nullable=False, default=EstadoConsulta.PENDIENTE)
     
     # ref a dueño de la mascota
     dueño_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
@@ -29,10 +24,10 @@ class Consulta(db.Model):
     mascota = db.relationship('Mascota')
 
     
-    def __init__(self, title, isClinicComment, status=ConsultationStatus.PENDING):
-        self.title = title
-        self.isClinicComment = isClinicComment
-        self.status = status
+    def __init__(self, titulo, coment_clinica, estado=EstadoConsulta.PENDIENTE):
+        self.titulo = titulo
+        self.comentario_clinica = coment_clinica
+        self.estado_consulta = estado
         
     
     def save(self):

@@ -1,13 +1,13 @@
 from app.extensions import db
 from sqlalchemy import Enum as SqlEnum
-from .enums import Stage
+from .enums import EstadoAdopcion
 
 class Adopcion(db.Model):
     __tablename__ = 'adopciones'  # Nombre de la tabla en la base de datos
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    description = db.Column(db.String(255), nullable=False)
-    stage = db.Column(SqlEnum(Stage), nullable=False)
+    descripcion = db.Column(db.String(255), nullable=False)
+    estado_adopcion = db.Column(SqlEnum(EstadoAdopcion), nullable=False)
     
     #ForeignKey apuntando a mascotas.id
     mascota_id = db.Column( db.Integer, db.ForeignKey('mascotas.id'), nullable=False)
@@ -20,12 +20,12 @@ class Adopcion(db.Model):
     dueño_anterior = db.relationship('Usuario', foreign_keys=[dueño_anterior_id])
     
 
-    def __init__(self, description, stage):
-        self.description = description
-        self.stage = stage
+    def __init__(self, desc, estado):
+        self.descripcion = desc
+        self.estado_adopcion = estado
 
     def __repr__(self):
-        return f"<Adopcion(description='{self.description}', stage='{self.stage}')>"
+        return f"<Adopcion(descripcion='{self.descripcion}', estado='{self.estado_adopcion}')>"
 
     def save(self):
         db.session.add(self)
