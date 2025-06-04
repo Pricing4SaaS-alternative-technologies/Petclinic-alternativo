@@ -162,7 +162,7 @@ export default {
     },
     async fetchClinicas () {
       try {
-        const res = await axios.get('http://localhost:5000/api/clinicas')
+        const res = await axios.get('http://localhost:5000/api/clinicas/listar-todas')
         this.clinicasDisponibles = res.data
       } catch (err) {
         console.error('Error al cargar clínicas', err)

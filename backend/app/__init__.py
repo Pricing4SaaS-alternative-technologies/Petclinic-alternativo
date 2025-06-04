@@ -5,7 +5,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 
-from .routes import main as main_blueprint
 from .routes import auth as auth_blueprint
 from .routes.clinicas import clinicas_bp
 
@@ -39,7 +38,6 @@ def create_app():
 
     ## Registrar blueprints (rutas)
     app.register_blueprint(auth_blueprint)
-    app.register_blueprint(main_blueprint)
     app.register_blueprint(clinicas_bp)
 
 
