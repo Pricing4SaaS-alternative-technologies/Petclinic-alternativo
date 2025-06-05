@@ -52,7 +52,7 @@ INSERT IGNORE INTO adopciones (id, descripcion, estado_adopcion, mascota_id, due
 
 INSERT IGNORE INTO consultas (id, titulo, descripcion, comentario_clinica, estado_consulta, dueño_id, vet_id, mascota_id) VALUES
 (1, 'Consulta sobre la salud de Roco', 'Roco lleva varios días malo.' , TRUE, 'PENDIENTE', 1, null, 1),
-(2, 'Consulta sobre la adopción de Misifú', '¿Cómo va la adopción?' , TRUE, 'RESEULTA', 2, null, 2),
+(2, 'Consulta sobre la adopción de Misifú', '¿Cómo va la adopción?' , TRUE, 'RESUELTA', 2, null, 2),
 (3, 'Consulta sobre la vacunación de Lorito', '¿Es monodosis o hay que poner la vacuna más veces?' , FALSE, 'CERRADA', 3, 3, 3);
 
 INSERT IGNORE INTO reservas (id, fecha_inicio, fecha_fin, habitacion_id, mascota_id) VALUES

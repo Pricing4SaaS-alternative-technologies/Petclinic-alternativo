@@ -33,7 +33,6 @@ class TipoMascota(enum.Enum):
     GATO = "gato"
     PERRO = "perro"
     REPTIL = "reptil"
-    SERPIENTE = "serpiente"
     PAJARO = "pajaro"
     HAMSTER = "hamster"
     TORTUGA = "tortuga"

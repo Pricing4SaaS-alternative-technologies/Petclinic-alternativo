@@ -8,7 +8,6 @@
     <div v-if="!loggedIn" class="nav-links-right" style="margin-right: 1rem;">
       <router-link to="/auth" class="nav-link">Login</router-link>
     </div>
-    <router-link v-if="tipoUsuario === 'prop_mascota'" to="/mis-mascotas" class="nav-link">Mis Mascotas</router-link>
     <!-- Muestra el nombre de usuario y el botón de logout si está logueado -->
     <div v-if="loggedIn" class="user-info">
       <span class="usuario">Hola, {{ usuario }}</span>

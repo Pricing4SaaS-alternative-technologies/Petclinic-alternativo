@@ -1,15 +1,22 @@
+from datetime import datetime, date
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models.mascota import Mascota
 from app.models.usuario import Usuario
+from app.models.enums import TipoMascota
 from app.extensions import db
 from datetime import datetime
 
 mascotas_bp = Blueprint('mascotas', __name__, url_prefix='/api/mascotas')
 
-@mascotas_bp.route('/<int:duenio_id>', methods=['GET'])
-def get_mascotas_por_duenio(duenio_id):
-    mascotas = Mascota.query.filter_by(dueño_id=duenio_id).all()
+from flask_jwt_extended import jwt_required, get_jwt_identity
+
+@mascotas_bp.route('/listar-tus-mascotas', methods=['GET'])
+@jwt_required()
+def get_mis_mascotas():
+    user_id = get_jwt_identity()
+    mascotas = Mascota.query.filter_by(dueño_id=user_id).all()
+
     return jsonify([
         {
             'id': m.id,
@@ -19,7 +26,7 @@ def get_mascotas_por_duenio(duenio_id):
         } for m in mascotas
     ])
 
-@mascotas_bp.route('', methods=['POST'])
+@mascotas_bp.route('/crear-mascota', methods=['POST'])
 @jwt_required()
 def crear_mascota():
     data = request.get_json()
@@ -27,20 +34,23 @@ def crear_mascota():
     nombre = data.get('nombre')
     cumpleaños = data.get('cumpleaños')
     tipo = data.get('tipo')
+    dueño_id_enviado = data.get('dueño_id')
 
     if not nombre or not cumpleaños or not tipo:
         return jsonify({'error': 'Faltan campos obligatorios'}), 400
 
     try:
-        cumpleaños_dt = datetime.strptime(cumpleaños, '%Y-%m-%d')
+        cumpleaños_dt = datetime.strptime(cumpleaños, '%Y-%m-%d').date()
     except ValueError:
         return jsonify({'error': 'Formato de fecha inválido (esperado: yyyy-MM-dd)'}), 400
 
-    user_id = get_jwt_identity()
-    dueño = Usuario.query.get(user_id)
+    if cumpleaños_dt > date.today():
+        return jsonify({'error': 'La fecha de cumpleaños no puede ser futura'}), 400
 
-    if not dueño:
-        return jsonify({'error': 'Usuario no encontrado'}), 404
+    user_id = get_jwt_identity()
+
+    if dueño_id_enviado and int(dueño_id_enviado) != user_id:
+        return jsonify({'error': 'No tienes permiso para crear mascotas para otro usuario'}), 403
 
     nueva_mascota = Mascota(
         nombre=nombre,
@@ -63,9 +73,17 @@ def editar_nombre_mascota(mascota_id):
     if not nuevo_nombre:
         return jsonify({'error': 'Nombre requerido'}), 400
 
+    try:
+        user_id = int(get_jwt_identity())
+    except Exception:
+        return jsonify({'error': 'Identidad del token inválida'}), 401
+
     mascota = Mascota.query.get(mascota_id)
     if not mascota:
         return jsonify({'error': 'Mascota no encontrada'}), 404
+
+    if mascota.dueño_id != user_id:
+        return jsonify({'error': 'No tienes permiso para editar esta mascota'}), 403
 
     mascota.nombre = nuevo_nombre
     db.session.commit()
