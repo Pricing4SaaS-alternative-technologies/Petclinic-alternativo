@@ -12,12 +12,13 @@ import { useRouter } from 'vue-router'
           <p><strong>Dirección:</strong> {{ clinica.direccion }}</p>
           <p><strong>Teléfono:</strong> {{ clinica.telefono }}</p>
           <p><strong>Plan:</strong> {{ clinica.plan }}</p>
+          <button class="boton-grande" @click="iniciaEdicion(clinica)">Editar clinica</button>
+          <button class="boton-grande" @click="eliminarClinica(clinica)">Borrar clinica</button>
         </div>
       </div>
 
       <div v-else class="sin-clinicas">
         <p>No tienes clínicas registradas.</p>
-        <button class="boton-grande" @click="modalCreacion = true">Añadir Clínica</button>
       </div>
     </div>
 
@@ -31,17 +32,40 @@ import { useRouter } from 'vue-router'
         <form @submit.prevent="crearClinica">
 
           <label>Nombre:</label>
-          <input type="text" v-model="nuevaClinica.nombre" required />
+          <input type="text" v-model="clinicaForm.nombre" required />
 
           <label>Dirección</label>
-          <input type="text" v-model="nuevaClinica.direccion" required />
+          <input type="text" v-model="clinicaForm.direccion" required />
 
           <label>Teléfono:</label>
-          <input type="text" v-model="nuevaClinica.telefono" required />
+          <input type="text" v-model="clinicaForm.telefono" required />
 
           <div class="modal-buttons">
             <button type="submit">Guardar</button>
-            <button type="button" class="cancelar" @click="mostrarModal = false">Cancelar</button>
+            <button type="button" class="cancelar" @click="modalCreacion = false">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+        <!-- Modal para editar Clinica -->
+    <div class="modal-overlay" v-if="modalEdicion">
+      <div class="modal">
+        <h3>Editando Clinica: {{ clinicaSeleccionada.nombre }}</h3>
+        <form @submit.prevent="editarClinica">
+
+          <label>Nombre:</label>
+          <input type="text" v-model="clinicaForm.nombre" required />
+
+          <label>Dirección</label>
+          <input type="text" v-model="clinicaForm.direccion" required />
+
+          <label>Teléfono:</label>
+          <input type="text" v-model="clinicaForm.telefono" required />
+
+          <div class="modal-buttons">
+            <button type="submit">Guardar</button>
+            <button type="button" class="cancelar" @click="modalEdicion = false">Cancelar</button>
           </div>
         </form>
       </div>
@@ -59,11 +83,12 @@ export default {
       jwtValido: false,
       clinicas: [],
       modalCreacion: false,
-      nuevaClinica: {
+      modalEdicion: false,
+      clinicaSeleccionada: null,
+      clinicaForm: {
         nombre: '',
         direccion: '',
-        telefono: '',
-        plan: 'BASICO' // Por defecto, el plan es BASICO
+        telefono: ''
       }
     }
   },
@@ -105,13 +130,14 @@ export default {
         console.error('Error al cargar clínicas', err)
       }
     },
+
     async crearClinica () {
       if (this.jwtValido) {
-        const payload = {...this.nuevaClinica}
+        const payload = {...this.clinicaForm}
         api.post('http://localhost:5000/api/clinicas/crear', payload)
           .then(response => {
             this.modalCreacion = false
-            this.nuevaClinica = { nombre: '', direccion: '', telefono: '', plan: 'BASICO' }
+            this.clinicaForm = { nombre: '', direccion: '', telefono: '' }
           })
         await this.fetchClinicasPropias()
           .catch(error => {
@@ -119,6 +145,45 @@ export default {
           })
       } else {
         alert('No tienes permiso para crear clínicas.')
+      }
+    },
+    async eliminarClinica (clinica) {
+      if (this.jwtValido) {
+        if (confirm(`¿Estás seguro de que quieres eliminar la clínica ${clinica.nombre}?`)) {
+          try {
+            await api.delete(`http://localhost:5000/api/clinicas/eliminar/${clinica.id}`)
+            await this.fetchClinicasPropias()
+          } catch (error) {
+            console.error('Error al eliminar clínica:', error.message, error)
+          }
+        }
+      } else {
+        alert('No tienes permiso para eliminar clínicas.')
+      }
+    },
+    iniciaEdicion (clinica) {
+      if (this.jwtValido) {
+        this.clinicaSeleccionada = clinica
+        this.clinicaForm = { ...clinica }
+        this.modalEdicion = true
+      } else {
+        alert('No tienes permiso para editar clínicas.')
+      }
+    },
+    async editarClinica () {
+      if (this.jwtValido) {
+        const payload = {...this.clinicaForm}
+        api.put(`http://localhost:5000/api/clinicas/editar/${this.clinicaSeleccionada.id}`, payload)
+          .then(response => {
+            this.modalEdicion = false
+            this.clinicaForm = { nombre: '', direccion: '', telefono: '' }
+          })
+        await this.fetchClinicasPropias()
+          .catch(error => {
+            console.error('Error al editar clínica:', error.message, error)
+          })
+      } else {
+        alert('No tienes permiso para editar clínicas.')
       }
     }
   }

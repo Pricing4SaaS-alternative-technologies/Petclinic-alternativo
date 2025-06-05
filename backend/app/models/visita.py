@@ -11,8 +11,8 @@ class Visita(db.Model):
     veterinario = db.relationship('Usuario', foreign_keys=[veterinario_id])
 
     # Foreign key hacia Mascota
-    mascota_id = db.Column(db.Integer, db.ForeignKey('mascotas.id'), nullable=False)
-    mascota = db.relationship('Mascota')
+    mascota_id = db.Column(db.Integer, db.ForeignKey('mascotas.id', ondelete='CASCADE'), nullable=False)
+    mascota = db.relationship('Mascota', passive_deletes=True)
 
     def __init__(self, fecha, descripcion):
         self.fecha = fecha

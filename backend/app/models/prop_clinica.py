@@ -21,5 +21,7 @@ class Prop_clinica(Usuario):
         db.session.commit()
         
     def delete(self):
-        db.session.delete(self)
-        db.session.commit()
+        usuario = Usuario.query.get(self.id)
+        if usuario:
+            db.session.delete(usuario)
+            db.session.commit()

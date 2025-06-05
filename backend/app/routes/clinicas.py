@@ -1,6 +1,8 @@
 from flask import Blueprint, request, jsonify
 from app.models.clinica import Clinica
 from app.models.usuario import Usuario
+from app.models.veterinario import Veterinario
+from app.models.prop_mascota import Prop_mascota
 from app.models.enums import TipoUsuarioEnum, Plan
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
@@ -66,7 +68,7 @@ def create_clinica():
     
     # Comprobar si el usuario es propietario de clínica
     usuario = Usuario.query.filter_by(id=id_usuario).first()
-    if not usuario or usuario.tipo_usuario != TipoUsuarioEnum.PROP_CLINICA:
+    if not usuario or (usuario.tipo_usuario != TipoUsuarioEnum.PROP_CLINICA and usuario.tipo_usuario != TipoUsuarioEnum.ADMIN):
         return jsonify({'message': 'No tienes permiso para crear clínicas'}), 403
     
     nombre = data.get('nombre')
@@ -101,7 +103,7 @@ def edit_clinica(clinica_id):
         
         usuario = Usuario.query.filter_by(id=id_usuario).first()
         
-        if not usuario or (usuario.tipo_usuario != TipoUsuarioEnum.PROP_CLINICA and usuario.tipo_usuario != TipoUsuarioEnum.ADMIN) or id_usuario != clinica.propietario_id:
+        if (id_usuario != clinica.propietario_id and usuario.tipo_usuario != TipoUsuarioEnum.PROP_CLINICA) and usuario.tipo_usuario != TipoUsuarioEnum.ADMIN:
             return jsonify({'message': 'No tienes permiso para editar esta clínica'}), 403
         
         nombre = data.get('nombre')
@@ -163,11 +165,19 @@ def delete_clinica(clinica_id):
     
     usuario = Usuario.query.filter_by(id=id_usuario).first()
     
-    if not usuario or (usuario.tipo_usuario != TipoUsuarioEnum.PROP_CLINICA and usuario.tipo_usuario != TipoUsuarioEnum.ADMIN) or id_usuario != clinica.propietario_id:
+    if (id_usuario != clinica.propietario_id and usuario.tipo_usuario != TipoUsuarioEnum.PROP_CLINICA) and usuario.tipo_usuario != TipoUsuarioEnum.ADMIN:
         return jsonify({'message': 'No tienes permiso para eliminar esta clínica'}), 403
     
     try:
+        # nos cargamos primero a todos los usuarios base ligados a la clinica a borrar
+        for propietario in Prop_mascota.query.filter_by(clinica_id=clinica.id).all():
+            propietario.delete()
+        for veterinario in Veterinario.query.filter_by(clinica_id=clinica.id).all():
+            veterinario.delete()
+        # Ahora sí, borra la clínica
         clinica.delete()
         return jsonify({'message': 'Clínica eliminada correctamente'}), 200
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return jsonify({'message': str(e)}), 500
