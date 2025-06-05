@@ -29,7 +29,7 @@ def get_clinicas():
                 'nombre': c.nombre,
                 'direccion': c.direccion,
                 'telefono': c.telefono,
-                'plan': c.plan,
+                'plan': c.plan.value,
                 'propietario': c.propietario
             }
             for c in clinicas
@@ -42,7 +42,7 @@ def get_clinicas_by_propietario(propietario_id):
     # rol del usuairo por si es admin
     rol_usuario = Usuario.query.filter_by(id=id_usuario).first().tipo_usuario
     
-    if id_usuario != propietario_id and (rol_usuario.value != TipoUsuarioEnum.ADMIN or rol_usuario.value != TipoUsuarioEnum.PROP_CLINICA):
+    if (id_usuario != propietario_id and rol_usuario != TipoUsuarioEnum.PROP_CLINICA) and rol_usuario != TipoUsuarioEnum.ADMIN:
         return jsonify({'message': 'No tienes permiso para ver estas clínicas'}), 403
     
     clinicas = Clinica.query.filter_by(propietario_id=propietario_id).all()
@@ -53,7 +53,7 @@ def get_clinicas_by_propietario(propietario_id):
             'nombre': c.nombre,
             'direccion': c.direccion,
             'telefono': c.telefono,
-            'plan': c.plan
+            'plan': c.plan.value
         }
         for c in clinicas
     ]), 200
@@ -75,6 +75,9 @@ def create_clinica():
     
     if not all([nombre, direccion, telefono]):
         return jsonify({'message': 'Faltan datos obligatorios'}), 400
+    
+    if telefono and len(telefono) != 9:
+        return jsonify({'message': 'El teléfono debe tener 9 dígitos'}), 400
     
     nueva_clinica = Clinica(nombre=nombre, direccion=direccion, telefono=telefono, propietario_id=id_usuario)
     
