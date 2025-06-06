@@ -1,7 +1,6 @@
 from enum import Enum as PyEnum
 from app.extensions import db
 
-from sqlalchemy import Enum as SqlEnum
 from .enums import TipoMascota
 
 
@@ -13,10 +12,9 @@ class Mascota(db.Model):
     cumpleaños = db.Column(db.Date, nullable=False)
     tipo = db.Column(db.Enum(TipoMascota), nullable=False) # NO SE SI AL SER NULLABLE FALSE HAY QUE PONER DEFAULT
     
-    dueño_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
-    dueño = db.relationship('Usuario', foreign_keys=[dueño_id])
-
-
+    dueño_id = db.Column(db.Integer, db.ForeignKey('usuarios.id', ondelete='CASCADE'), nullable=False)
+    dueño = db.relationship('Usuario', foreign_keys=[dueño_id], passive_deletes=True)
+    
     def __init__(self, nombre, cumpleaños, adopted, tipo):
         self.nombre = nombre
         self.cumpleaños = cumpleaños

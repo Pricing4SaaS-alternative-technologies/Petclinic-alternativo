@@ -11,9 +11,9 @@ class Habitacion_hotel(db.Model):
     tipo = db.Column(db.Enum(TipoMascota), nullable=False) # NO SE SI AL SER NULLABLE FALSE HAY QUE PONER DEFAULT
     
     # Foreign key a clinicas.id
-    clinica_id = db.Column(db.Integer, db.ForeignKey('clinicas.id'), nullable=False)
+    clinica_id = db.Column(db.Integer, db.ForeignKey('clinicas.id', ondelete='CASCADE'), nullable=False)
     # Relación hacia Clinica
-    clinica = db.relationship('Clinica')
+    clinica = db.relationship('Clinica',passive_deletes=True)
 
     
     def __init__(self, tamaño, tipo):

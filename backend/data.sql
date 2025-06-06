@@ -27,9 +27,9 @@ INSERT IGNORE INTO mascotas (id, nombre, cumpleaños, tipo, dueño_id) VALUES
 (3, 'Lorito', '2021-03-10', 'PAJARO', 3);
 
 INSERT IGNORE INTO props_clinicas (id) VALUES
-(1),
-(2),
-(3);
+(4),
+(5),
+(6);
 
 INSERT IGNORE INTO props_mascotas (id, direccion, telefono, clinica_id) VALUES
 (1, 'Calle Falsa 123', '123456789', 1),
@@ -37,9 +37,9 @@ INSERT IGNORE INTO props_mascotas (id, direccion, telefono, clinica_id) VALUES
 (3, 'Boulevard de los Sueños Rotos 456', '456789123', 3);
 
 INSERT IGNORE INTO veterinarios (id, especialidades, ciudad, clinica_id) VALUES
-(1, '["DERMATOLOGIA", "OFTALMOLOGIA"]', 'Sevilla', 1),
-(2, '["CIRUGIA", "MEDICINA_INTERNA"]', 'Sevilla', 2),
-(3, '["DERMATOLOGIA", "REHABILITACION"]', 'Sevilla', 3);
+(7, '["DERMATOLOGIA", "OFTALMOLOGIA"]', 'Sevilla', 1),
+(8, '["CIRUGIA", "MEDICINA_INTERNA"]', 'Sevilla', 2),
+(9, '["DERMATOLOGIA", "REHABILITACION"]', 'Sevilla', 3);
 
 INSERT IGNORE INTO visitas (id, fecha, descripcion, veterinario_id, mascota_id) VALUES
 (1, '2023-10-01 10:00:00', 'Consulta general', 1, 1),
@@ -52,7 +52,7 @@ INSERT IGNORE INTO adopciones (id, descripcion, estado_adopcion, mascota_id, due
 
 INSERT IGNORE INTO consultas (id, titulo, descripcion, comentario_clinica, estado_consulta, dueño_id, vet_id, mascota_id) VALUES
 (1, 'Consulta sobre la salud de Roco', 'Roco lleva varios días malo.' , TRUE, 'PENDIENTE', 1, null, 1),
-(2, 'Consulta sobre la adopción de Misifú', '¿Cómo va la adopción?' , TRUE, 'RESEULTA', 2, null, 2),
+(2, 'Consulta sobre la adopción de Misifú', '¿Cómo va la adopción?' , TRUE, 'RESUELTA', 2, null, 2),
 (3, 'Consulta sobre la vacunación de Lorito', '¿Es monodosis o hay que poner la vacuna más veces?' , FALSE, 'CERRADA', 3, 3, 3);
 
 INSERT IGNORE INTO reservas (id, fecha_inicio, fecha_fin, habitacion_id, mascota_id) VALUES
