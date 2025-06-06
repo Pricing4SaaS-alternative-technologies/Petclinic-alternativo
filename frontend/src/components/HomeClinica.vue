@@ -133,16 +133,15 @@ export default {
 
     async crearClinica () {
       if (this.jwtValido) {
-        const payload = {...this.clinicaForm}
-        api.post('http://localhost:5000/api/clinicas/crear', payload)
-          .then(response => {
-            this.modalCreacion = false
-            this.clinicaForm = { nombre: '', direccion: '', telefono: '' }
-          })
-        await this.fetchClinicasPropias()
-          .catch(error => {
-            console.error('Error al crear clínica:', error.message, error)
-          })
+        const payload = { ...this.clinicaForm }
+        try {
+          await api.post('http://localhost:5000/api/clinicas/crear', payload)
+          this.modalCreacion = false
+          this.clinicaForm = { nombre: '', direccion: '', telefono: '' }
+          await this.fetchClinicasPropias()
+        } catch (error) {
+          console.error('Error al crear clínica:', error.message, error)
+        }
       } else {
         alert('No tienes permiso para crear clínicas.')
       }
