@@ -171,16 +171,15 @@ export default {
     },
     async editarClinica () {
       if (this.jwtValido) {
-        const payload = {...this.clinicaForm}
-        api.put(`http://localhost:5000/api/clinicas/editar/${this.clinicaSeleccionada.id}`, payload)
-          .then(response => {
-            this.modalEdicion = false
-            this.clinicaForm = { nombre: '', direccion: '', telefono: '' }
-          })
-        await this.fetchClinicasPropias()
-          .catch(error => {
-            console.error('Error al editar clínica:', error.message, error)
-          })
+        try {
+          const payload = {...this.clinicaForm}
+          await api.put(`http://localhost:5000/api/clinicas/editar/${this.clinicaSeleccionada.id}`, payload)
+          this.modalEdicion = false
+          this.clinicaForm = { nombre: '', direccion: '', telefono: '' }
+          await this.fetchClinicasPropias()
+        } catch (error) {
+          console.error('Error al editar clínica:', error.message, error)
+        }
       } else {
         alert('No tienes permiso para editar clínicas.')
       }
