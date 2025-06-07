@@ -1,15 +1,30 @@
+from datetime import datetime, date
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models.mascota import Mascota
 from app.models.usuario import Usuario
+from app.models.enums import TipoMascota
+from app.models.enums import TipoUsuarioEnum, Plan
 from app.extensions import db
 from datetime import datetime
 
 mascotas_bp = Blueprint('mascotas', __name__, url_prefix='/api/mascotas')
 
-@mascotas_bp.route('/<int:duenio_id>', methods=['GET'])
-def get_mascotas_por_duenio(duenio_id):
-    mascotas = Mascota.query.filter_by(dueño_id=duenio_id).all()
+from flask_jwt_extended import jwt_required, get_jwt_identity
+
+@mascotas_bp.route('/listar-tus-mascotas', methods=['GET'])
+@jwt_required()
+def get_mis_mascotas():
+    user_id = get_jwt_identity()
+    rol_usuario = Usuario.query.filter_by(id=user_id).first().tipo_usuario
+    
+    if (rol_usuario != TipoUsuarioEnum.PROP_MASCOTA) and rol_usuario != TipoUsuarioEnum.ADMIN:
+        return jsonify({'message': 'No tienes permiso para ver estas mascotas'}), 403
+    
+    mascotas = Mascota.query.filter_by(dueño_id=user_id).all()
+    if not mascotas:
+        return jsonify([]), 200
+
     return jsonify([
         {
             'id': m.id,
@@ -17,9 +32,9 @@ def get_mascotas_por_duenio(duenio_id):
             'cumpleaños': m.cumpleaños.isoformat(),
             'tipo': m.tipo.value
         } for m in mascotas
-    ])
+    ]), 200
 
-@mascotas_bp.route('', methods=['POST'])
+@mascotas_bp.route('/crear-mascota', methods=['POST'])
 @jwt_required()
 def crear_mascota():
     data = request.get_json()
@@ -32,15 +47,22 @@ def crear_mascota():
         return jsonify({'error': 'Faltan campos obligatorios'}), 400
 
     try:
-        cumpleaños_dt = datetime.strptime(cumpleaños, '%Y-%m-%d')
+        cumpleaños_dt = datetime.strptime(cumpleaños, '%Y-%m-%d').date()
     except ValueError:
         return jsonify({'error': 'Formato de fecha inválido (esperado: yyyy-MM-dd)'}), 400
 
-    user_id = get_jwt_identity()
-    dueño = Usuario.query.get(user_id)
+    if cumpleaños_dt > date.today():
+        return jsonify({'error': 'La fecha de cumpleaños no puede ser futura'}), 400
 
-    if not dueño:
-        return jsonify({'error': 'Usuario no encontrado'}), 404
+
+    user_id = get_jwt_identity()
+    usuario = Usuario.query.filter_by(id=user_id).first()
+    
+    if not user_id:
+        return jsonify({'error': 'Identidad del token inválida'}), 401
+    
+    if not usuario or (usuario.tipo_usuario != TipoUsuarioEnum.PROP_MASCOTA and usuario.tipo_usuario != TipoUsuarioEnum.ADMIN):
+        return jsonify({'message': 'No tienes permiso para crear mascotas'}), 403
 
     nueva_mascota = Mascota(
         nombre=nombre,
@@ -63,9 +85,21 @@ def editar_nombre_mascota(mascota_id):
     if not nuevo_nombre:
         return jsonify({'error': 'Nombre requerido'}), 400
 
+    try:
+        user_id = int(get_jwt_identity())
+        usuario = Usuario.query.filter_by(id=user_id).first()
+    except Exception:
+        return jsonify({'error': 'Identidad del token inválida'}), 401
+
     mascota = Mascota.query.get(mascota_id)
+    
     if not mascota:
         return jsonify({'error': 'Mascota no encontrada'}), 404
+
+    if (user_id != mascota.dueño_id and usuario.tipo_usuario != TipoUsuarioEnum.PROP_MASCOTA) and usuario.tipo_usuario != TipoUsuarioEnum.ADMIN:
+        return jsonify({'message': 'No tienes permiso para editar esta mascota'}), 403
+    if mascota.dueño_id != user_id:
+        return jsonify({'error': 'No tienes permiso para editar esta mascota'}), 403
 
     mascota.nombre = nuevo_nombre
     db.session.commit()
@@ -74,6 +108,11 @@ def editar_nombre_mascota(mascota_id):
 @mascotas_bp.route('/<int:id>', methods=['DELETE'])
 @jwt_required()
 def eliminar_mascota(id):
+    user_id = get_jwt_identity()
+    usuario = Usuario.query.filter_by(id=user_id).first()
+    if not usuario or (usuario.tipo_usuario != TipoUsuarioEnum.PROP_MASCOTA and usuario.tipo_usuario != TipoUsuarioEnum.ADMIN):
+        return jsonify({'message': 'No tienes permiso para eliminar mascotas'}), 403
+    
     mascota = Mascota.query.get(id)
     if not mascota:
         return jsonify({'error': 'Mascota no encontrada'}), 404
