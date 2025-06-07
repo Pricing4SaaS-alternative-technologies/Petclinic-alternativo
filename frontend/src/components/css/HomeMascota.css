@@ -1,4 +1,4 @@
-/* src/components/css/misMascotas.css */
+/* src/components/css/HomeMascota.css */
 
 .mascotas-container {
   max-width: 600px;
@@ -48,7 +48,6 @@
   margin-top: 1rem;
 }
 
-/* Modal */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -106,4 +105,11 @@
 
 .modal-buttons .cancelar:hover {
   background-color: #d32f2f;
+}
+
+.mensaje-error {
+  color: red;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+  text-align: center;
 }
