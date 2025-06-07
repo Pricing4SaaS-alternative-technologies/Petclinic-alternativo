@@ -116,7 +116,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import api from '../api/axios'
 
 export default {
   name: 'AuthPage',
@@ -154,7 +154,7 @@ export default {
   methods: {
     async fetchEspecialidades () {
       try {
-        const res = await axios.get('http://localhost:5000/api/auth/especialidades')
+        const res = await api.get('http://localhost:5000/api/auth/especialidades')
         this.especialidadesDisponibles = res.data
       } catch (err) {
         console.error('Error al cargar especialidades', err)
@@ -162,7 +162,7 @@ export default {
     },
     async fetchClinicas () {
       try {
-        const res = await axios.get('http://localhost:5000/api/clinicas')
+        const res = await api.get('http://localhost:5000/api/clinicas/listar-todas')
         this.clinicasDisponibles = res.data
       } catch (err) {
         console.error('Error al cargar clínicas', err)
@@ -171,7 +171,7 @@ export default {
     async login () {
       this.loginError = ''
       try {
-        const response = await axios.post('http://localhost:5000/api/auth/login', this.loginForm)
+        const response = await api.post('http://localhost:5000/api/auth/login', this.loginForm)
         localStorage.setItem('jwt', response.data.access_token)
         localStorage.setItem('user', JSON.stringify(response.data.usuario))
         window.dispatchEvent(new Event('login'))
@@ -184,7 +184,7 @@ export default {
       this.registerError = ''
       try {
         const payload = { ...this.registerForm }
-        const response = await axios.post('http://localhost:5000/api/auth/register', payload)
+        const response = await api.post('http://localhost:5000/api/auth/register', payload)
         console.log('Registro correcto', response.data)
         this.mode = 'login'
       } catch (error) {

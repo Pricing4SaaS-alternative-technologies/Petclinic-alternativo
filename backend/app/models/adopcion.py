@@ -1,5 +1,4 @@
 from app.extensions import db
-from sqlalchemy import Enum as SqlEnum
 from .enums import EstadoAdopcion
 
 class Adopcion(db.Model):
@@ -7,17 +6,17 @@ class Adopcion(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     descripcion = db.Column(db.String(255), nullable=False)
-    estado_adopcion = db.Column(SqlEnum(EstadoAdopcion), nullable=False)
+    estado_adopcion = db.Column(db.Enum(EstadoAdopcion), nullable=False)
     
     #ForeignKey apuntando a mascotas.id
-    mascota_id = db.Column( db.Integer, db.ForeignKey('mascotas.id'), nullable=False)
-    mascota = db.relationship('Mascota')
+    mascota_id = db.Column( db.Integer, db.ForeignKey('mascotas.id',ondelete='CASCADE'), nullable=False)
+    mascota = db.relationship('Mascota', passive_deletes=True)
     
-    dueño_nuevo_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=True)
-    dueño_nuevo = db.relationship('Usuario', foreign_keys=[dueño_nuevo_id])
+    dueño_nuevo_id = db.Column(db.Integer, db.ForeignKey('usuarios.id',ondelete='CASCADE'), nullable=True)
+    dueño_nuevo = db.relationship('Usuario', foreign_keys=[dueño_nuevo_id], passive_deletes=True)
     
-    dueño_anterior_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
-    dueño_anterior = db.relationship('Usuario', foreign_keys=[dueño_anterior_id])
+    dueño_anterior_id = db.Column(db.Integer, db.ForeignKey('usuarios.id', ondelete='CASCADE'), nullable=False)
+    dueño_anterior = db.relationship('Usuario', foreign_keys=[dueño_anterior_id], passive_deletes=True)
     
 
     def __init__(self, desc, estado):

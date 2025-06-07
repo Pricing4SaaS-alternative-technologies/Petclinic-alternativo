@@ -14,12 +14,12 @@ class Clinica(db.Model):
     propietario = db.relationship('Usuario', foreign_keys=[propietario_id])
 
     
-    def __init__(self, nombre, dir, tlf, plan=Plan.BASIC):
+    def __init__(self, nombre, direccion, telefono, propietario_id, plan=Plan.BASIC):
         self.nombre = nombre
-        self.direccion = dir
-        self.telefono = tlf
+        self.direccion = direccion
+        self.telefono = telefono
         self.plan = plan
-        
+        self.propietario_id = propietario_id
     
     def save(self):
         db.session.add(self)

@@ -8,12 +8,12 @@ class Reserva(db.Model):
     fecha_fin = db.Column(db.Date, nullable=False)
     
     # Foreign key a la tabla de habitaciones
-    habitacion_id = db.Column( db.Integer, db.ForeignKey('habitaciones_hotel.id'), nullable=False)
-    habitacion = db.relationship('Habitacion_hotel')
+    habitacion_id = db.Column( db.Integer, db.ForeignKey('habitaciones_hotel.id',ondelete='CASCADE'), nullable=False)
+    habitacion = db.relationship('Habitacion_hotel', passive_deletes=True)
 
     # Foreign key hacia Mascota
-    mascota_id = db.Column(db.Integer, db.ForeignKey('mascotas.id'), nullable=False)
-    mascota = db.relationship('Mascota')
+    mascota_id = db.Column(db.Integer, db.ForeignKey('mascotas.id', ondelete='CASCADE'), nullable=False)
+    mascota = db.relationship('Mascota', passive_deletes=True)
 
     def __init__(self, fecha_inicio, fecha_fin):
         self.fecha_inicio = fecha_inicio
