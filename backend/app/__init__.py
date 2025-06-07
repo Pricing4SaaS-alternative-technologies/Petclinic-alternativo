@@ -7,6 +7,8 @@ from flask_jwt_extended import JWTManager
 
 from .routes import auth as auth_blueprint
 from .routes.clinicas import clinicas_bp
+from .routes.mascotas import mascotas_bp
+
 
 from .extensions import db
 
@@ -24,6 +26,11 @@ def create_app():
     ## Cargar configuración
     app.config.from_object('app.config.Config')
     
+    app.config["JWT_TOKEN_LOCATION"] = ["headers"]
+    app.config["JWT_HEADER_NAME"] = "Authorization"
+    app.config["JWT_HEADER_TYPE"] = "Bearer"
+
+    
     ## metemos esto siguiendo el tutorial
     jwt = JWTManager(app)
 
@@ -39,6 +46,7 @@ def create_app():
     ## Registrar blueprints (rutas)
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(clinicas_bp)
+    app.register_blueprint(mascotas_bp)
 
 
     ## Para desarrollo: crear tablas si no existen
@@ -50,5 +58,3 @@ def create_app():
 
     return app
 
-
-from flask_cors import CORS

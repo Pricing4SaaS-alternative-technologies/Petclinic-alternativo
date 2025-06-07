@@ -5,8 +5,8 @@ from .enums import TipoMascota
 
 
 class Mascota(db.Model):
-    __tablename__ = 'mascotas'  ## Nombre de la tabla en la BD
-    
+    __tablename__ = 'mascotas'
+
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     nombre = db.Column(db.String(50), nullable=False)
     cumpleaños = db.Column(db.Date, nullable=False)
@@ -15,13 +15,12 @@ class Mascota(db.Model):
     dueño_id = db.Column(db.Integer, db.ForeignKey('usuarios.id', ondelete='CASCADE'), nullable=False)
     dueño = db.relationship('Usuario', foreign_keys=[dueño_id], passive_deletes=True)
     
-    def __init__(self, nombre, cumpleaños, adopted, tipo):
+    def __init__(self, nombre, cumpleaños, tipo, dueño_id):
         self.nombre = nombre
         self.cumpleaños = cumpleaños
-        self.adopted = adopted
         self.tipo = tipo
-        
-    
+        self.dueño_id = dueño_id
+       
     def save(self):
         db.session.add(self)
         db.session.commit()
