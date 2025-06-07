@@ -16,12 +16,16 @@ class Consulta(db.Model):
     dueño = db.relationship('Usuario', foreign_keys=[dueño_id], passive_deletes=True)
 
     # Foreign key a veterinarios
-    vet_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=True)
+    vet_id = db.Column(db.Integer, db.ForeignKey('usuarios.id', ondelete='SET NULL'), nullable=True)
     vet = db.relationship('Usuario', foreign_keys=[vet_id])
     
     # Foreign key a mascotas.id
     mascota_id = db.Column(db.Integer, db.ForeignKey('mascotas.id', ondelete='CASCADE'), nullable=False)
     mascota = db.relationship('Mascota', passive_deletes=True)
+    
+    # Foreign key a clinicas.id
+    clinica_id = db.Column(db.Integer, db.ForeignKey('clinicas.id', ondelete='SET NULL'), nullable=True)
+    clinica = db.relationship('Clinica', foreign_keys=[clinica_id])
 
     
     def __init__(self, titulo, coment_clinica, estado=EstadoConsulta.PENDIENTE):

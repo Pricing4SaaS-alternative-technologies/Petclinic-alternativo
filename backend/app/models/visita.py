@@ -7,7 +7,7 @@ class Visita(db.Model):
     fecha = db.Column(db.DateTime, nullable=False)
     descripcion = db.Column(db.String(255), nullable=False)
 
-    veterinario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
+    veterinario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id', ondelete='SET NULL'), nullable=True)
     veterinario = db.relationship('Usuario', foreign_keys=[veterinario_id])
 
     # Foreign key hacia Mascota
