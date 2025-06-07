@@ -22,10 +22,14 @@ export default {
   data () {
     return {
       loggedIn: !!localStorage.getItem('jwt'), // Estado inicial basado en el token
-      usuarioActual: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).usuario : ''
+      usuarioActual: this.getUsuarioActual()
     }
   },
   methods: {
+    getUsuarioActual () {
+      const user = localStorage.getItem('user')
+      return user ? JSON.parse(user).usuario : ''
+    },
     logout () {
       localStorage.removeItem('jwt')
       localStorage.removeItem('user')
