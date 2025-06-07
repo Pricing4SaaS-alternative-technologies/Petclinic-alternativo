@@ -27,12 +27,12 @@
           <label>Tipo:</label>
           <select v-model="nuevaMascota.tipo" required>
             <option disabled value="">Seleccione un tipo</option>
-            <option>PERRO</option>
-            <option>GATO</option>
-            <option>REPTIL</option>
-            <option>PAJARO</option>
-            <option>HAMSTER</option>
-            <option>TORTUGA</option>
+            <option value="perro">PERRO</option>
+            <option value="gato">GATO</option>
+            <option value="reptil">REPTIL</option>
+            <option value="pajaro">PAJARO</option>
+            <option value="hamster">HAMSTER</option>
+            <option value="tortuga">TORTUGA</option>
           </select>
 
           <label>Cumpleaños:</label>
