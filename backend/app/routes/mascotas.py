@@ -4,6 +4,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models.mascota import Mascota
 from app.models.usuario import Usuario
 from app.models.enums import TipoMascota
+from app.models.enums import TipoUsuarioEnum, Plan
 from app.extensions import db
 from datetime import datetime
 
@@ -15,7 +16,14 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 @jwt_required()
 def get_mis_mascotas():
     user_id = get_jwt_identity()
+    rol_usuario = Usuario.query.filter_by(id=user_id).first().tipo_usuario
+    
+    if (rol_usuario != TipoUsuarioEnum.PROP_MASCOTA) and rol_usuario != TipoUsuarioEnum.ADMIN:
+        return jsonify({'message': 'No tienes permiso para ver estas mascotas'}), 403
+    
     mascotas = Mascota.query.filter_by(dueño_id=user_id).all()
+    if not mascotas:
+        return jsonify({'mensaje': 'No tienes mascotas registradas'}), 404
 
     return jsonify([
         {
@@ -24,7 +32,7 @@ def get_mis_mascotas():
             'cumpleaños': m.cumpleaños.isoformat(),
             'tipo': m.tipo.value
         } for m in mascotas
-    ])
+    ]), 200
 
 @mascotas_bp.route('/crear-mascota', methods=['POST'])
 @jwt_required()
@@ -48,9 +56,13 @@ def crear_mascota():
 
 
     user_id = get_jwt_identity()
+    usuario = Usuario.query.filter_by(id=user_id).first()
     
     if not user_id:
         return jsonify({'error': 'Identidad del token inválida'}), 401
+    
+    if not usuario or (usuario.tipo_usuario != TipoUsuarioEnum.PROP_MASCOTA and usuario.tipo_usuario != TipoUsuarioEnum.ADMIN):
+        return jsonify({'message': 'No tienes permiso para crear mascotas'}), 403
 
     nueva_mascota = Mascota(
         nombre=nombre,
@@ -75,10 +87,15 @@ def editar_nombre_mascota(mascota_id):
 
     try:
         user_id = int(get_jwt_identity())
+        usuario = Usuario.query.filter_by(id=user_id).first()
     except Exception:
         return jsonify({'error': 'Identidad del token inválida'}), 401
 
     mascota = Mascota.query.get(mascota_id)
+    
+    if (user_id != mascota.dueño_id and usuario.tipo_usuario != TipoUsuarioEnum.PROP_MASCOTA) and usuario.tipo_usuario != TipoUsuarioEnum.ADMIN:
+            return jsonify({'message': 'No tienes permiso para editar esta mascota'}), 403
+
     if not mascota:
         return jsonify({'error': 'Mascota no encontrada'}), 404
 
@@ -92,6 +109,11 @@ def editar_nombre_mascota(mascota_id):
 @mascotas_bp.route('/<int:id>', methods=['DELETE'])
 @jwt_required()
 def eliminar_mascota(id):
+    user_id = get_jwt_identity()
+    usuario = Usuario.query.filter_by(id=user_id).first()
+    if not usuario or (usuario.tipo_usuario != TipoUsuarioEnum.PROP_MASCOTA and usuario.tipo_usuario != TipoUsuarioEnum.ADMIN):
+        return jsonify({'message': 'No tienes permiso para eliminar mascotas'}), 403
+    
     mascota = Mascota.query.get(id)
     if not mascota:
         return jsonify({'error': 'Mascota no encontrada'}), 404

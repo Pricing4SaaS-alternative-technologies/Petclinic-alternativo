@@ -30,7 +30,6 @@
             <option>PERRO</option>
             <option>GATO</option>
             <option>REPTIL</option>
-            <option>SERPIENTE</option>
             <option>PAJARO</option>
             <option>HAMSTER</option>
             <option>TORTUGA</option>
