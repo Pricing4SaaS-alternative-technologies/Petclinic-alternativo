@@ -3,6 +3,8 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
+// eslint-disable-next-line no-unused-vars
+import api from './api/axios'
 
 Vue.config.productionTip = false
 

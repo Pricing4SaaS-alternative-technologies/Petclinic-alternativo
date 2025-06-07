@@ -10,11 +10,8 @@ class Prop_mascota(Usuario):
     direccion = db.Column(db.String(100),nullable=False)
     telefono = db.Column(db.String(20),nullable=False)
     
-    clinica_id = db.Column(db.Integer, db.ForeignKey('clinicas.id'), nullable=False)
-    clinica = db.relationship('Clinica', foreign_keys=[clinica_id])
-    
-    mascotas = db.relationship('Mascota', backref='propietario', lazy=True, foreign_keys='Mascota.dueño_id')
-
+    clinica_id = db.Column(db.Integer, db.ForeignKey('clinicas.id', ondelete='CASCADE'), nullable=False)
+    clinica = db.relationship('Clinica', foreign_keys=[clinica_id], passive_deletes=True)
 
     __mapper_args__ = {
         'polymorphic_identity': TipoUsuarioEnum.PROP_MASCOTA,
@@ -32,5 +29,7 @@ class Prop_mascota(Usuario):
         db.session.commit()
         
     def delete(self):
-        db.session.delete(self)
-        db.session.commit()
+        usuario = Usuario.query.get(self.id)
+        if usuario:
+            db.session.delete(usuario)
+            db.session.commit()
