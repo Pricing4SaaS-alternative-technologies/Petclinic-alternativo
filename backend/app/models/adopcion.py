@@ -12,11 +12,11 @@ class Adopcion(db.Model):
     mascota_id = db.Column( db.Integer, db.ForeignKey('mascotas.id',ondelete='CASCADE'), nullable=False)
     mascota = db.relationship('Mascota', passive_deletes=True)
     
-    dueño_nuevo_id = db.Column(db.Integer, db.ForeignKey('usuarios.id',ondelete='CASCADE'), nullable=True)
-    dueño_nuevo = db.relationship('Usuario', foreign_keys=[dueño_nuevo_id], passive_deletes=True)
+    dueño_nuevo_id = db.Column(db.Integer, db.ForeignKey('usuarios.id',ondelete='SET NULL'), nullable=True)
+    dueño_nuevo = db.relationship('Usuario', foreign_keys=[dueño_nuevo_id])
     
-    dueño_anterior_id = db.Column(db.Integer, db.ForeignKey('usuarios.id', ondelete='CASCADE'), nullable=False)
-    dueño_anterior = db.relationship('Usuario', foreign_keys=[dueño_anterior_id], passive_deletes=True)
+    dueño_anterior_id = db.Column(db.Integer, db.ForeignKey('usuarios.id', ondelete='SET NULL'), nullable=True)
+    dueño_anterior = db.relationship('Usuario', foreign_keys=[dueño_anterior_id])
     
 
     def __init__(self, desc, estado):
