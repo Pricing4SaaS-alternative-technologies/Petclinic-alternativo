@@ -98,8 +98,6 @@ def editar_nombre_mascota(mascota_id):
 
     if (user_id != mascota.dueño_id and usuario.tipo_usuario != TipoUsuarioEnum.PROP_MASCOTA) and usuario.tipo_usuario != TipoUsuarioEnum.ADMIN:
         return jsonify({'message': 'No tienes permiso para editar esta mascota'}), 403
-    if mascota.dueño_id != user_id:
-        return jsonify({'error': 'No tienes permiso para editar esta mascota'}), 403
 
     mascota.nombre = nuevo_nombre
     db.session.commit()
