@@ -23,7 +23,7 @@ def get_mis_mascotas():
     
     mascotas = Mascota.query.filter_by(dueño_id=user_id).all()
     if not mascotas:
-        return jsonify({'mensaje': 'No tienes mascotas registradas'}), 404
+        return jsonify({'message': 'No tienes mascotas registradas'}), 404
 
     return jsonify([
         {
