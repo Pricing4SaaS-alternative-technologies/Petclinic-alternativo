@@ -24,7 +24,8 @@ INSERT IGNORE INTO habitaciones_hotel (id, tamaño, tipo, clinica_id) VALUES
 INSERT IGNORE INTO mascotas (id, nombre, cumpleaños, tipo, dueño_id) VALUES
 (1, 'Roco', '2020-01-01', 'PERRO', 1),
 (2, 'Misifú', '2019-05-15', 'GATO', 2),
-(3, 'Lorito', '2021-03-10', 'PAJARO', 3);
+(3, 'Lorito', '2021-03-10', 'PAJARO', 1),
+(4, 'Saturnino', '2023-03-10', 'HAMSTER', 3);
 
 INSERT IGNORE INTO props_clinicas (id) VALUES
 (4),
