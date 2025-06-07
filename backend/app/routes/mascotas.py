@@ -93,12 +93,11 @@ def editar_nombre_mascota(mascota_id):
 
     mascota = Mascota.query.get(mascota_id)
     
-    if (user_id != mascota.dueño_id and usuario.tipo_usuario != TipoUsuarioEnum.PROP_MASCOTA) and usuario.tipo_usuario != TipoUsuarioEnum.ADMIN:
-            return jsonify({'message': 'No tienes permiso para editar esta mascota'}), 403
-
     if not mascota:
         return jsonify({'error': 'Mascota no encontrada'}), 404
 
+    if (user_id != mascota.dueño_id and usuario.tipo_usuario != TipoUsuarioEnum.PROP_MASCOTA) and usuario.tipo_usuario != TipoUsuarioEnum.ADMIN:
+        return jsonify({'message': 'No tienes permiso para editar esta mascota'}), 403
     if mascota.dueño_id != user_id:
         return jsonify({'error': 'No tienes permiso para editar esta mascota'}), 403
 
