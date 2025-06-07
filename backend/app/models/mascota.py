@@ -15,7 +15,7 @@ class Mascota(db.Model):
     dueño_id = db.Column(db.Integer, db.ForeignKey('usuarios.id', ondelete='CASCADE'), nullable=False)
     dueño = db.relationship('Usuario', foreign_keys=[dueño_id], passive_deletes=True)
     
-    def __init__(self, nombre, cumpleaños, adopted, tipo, dueño_id):
+    def __init__(self, nombre, cumpleaños, tipo, dueño_id):
         self.nombre = nombre
         self.cumpleaños = cumpleaños
         self.tipo = tipo

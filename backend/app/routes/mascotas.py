@@ -34,7 +34,6 @@ def crear_mascota():
     nombre = data.get('nombre')
     cumpleaños = data.get('cumpleaños')
     tipo = data.get('tipo')
-    dueño_id_enviado = data.get('dueño_id')
 
     if not nombre or not cumpleaños or not tipo:
         return jsonify({'error': 'Faltan campos obligatorios'}), 400
@@ -47,10 +46,11 @@ def crear_mascota():
     if cumpleaños_dt > date.today():
         return jsonify({'error': 'La fecha de cumpleaños no puede ser futura'}), 400
 
-    user_id = get_jwt_identity()
 
-    if dueño_id_enviado and int(dueño_id_enviado) != user_id:
-        return jsonify({'error': 'No tienes permiso para crear mascotas para otro usuario'}), 403
+    user_id = get_jwt_identity()
+    
+    if not user_id:
+        return jsonify({'error': 'Identidad del token inválida'}), 401
 
     nueva_mascota = Mascota(
         nombre=nombre,
