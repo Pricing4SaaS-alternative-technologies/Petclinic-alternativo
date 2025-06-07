@@ -10,7 +10,7 @@
     </div>
     <!-- Muestra el nombre de usuario y el botón de logout si está logueado -->
     <div v-if="loggedIn" class="user-info">
-      <span class="usuario">Hola, {{ usuario }}</span>
+      <span class="usuario">Hola, {{ usuarioActual }}</span>
       <button class="logout" @click="logout">Cerrar sesión</button>
     </div>
   </nav>
@@ -21,17 +21,8 @@ export default {
   name: 'Navbar',
   data () {
     return {
-      loggedIn: !!localStorage.getItem('jwt') // Estado inicial basado en el token
-    }
-  },
-  computed: {
-    usuario () {
-      const user = localStorage.getItem('user')
-      return user ? JSON.parse(user).usuario : ''
-    },
-    tipoUsuario () {
-      const user = localStorage.getItem('user')
-      return user ? JSON.parse(user).tipo : null
+      loggedIn: !!localStorage.getItem('jwt'), // Estado inicial basado en el token
+      usuarioActual: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).usuario : ''
     }
   },
   methods: {
@@ -39,6 +30,7 @@ export default {
       localStorage.removeItem('jwt')
       localStorage.removeItem('user')
       this.loggedIn = false
+      this.usuarioActual = ''
       window.dispatchEvent(new Event('logout'))
 
       // nos cargamos el error de la consola de duplicateNav
@@ -49,15 +41,20 @@ export default {
     // manejamos el inicio de sesión y cierre de sesión
     handleLogin () {
       this.loggedIn = true
+      const user = localStorage.getItem('user')
+      this.usuarioActual = user ? JSON.parse(user).usuario : ''
     },
     handleLogout () {
       this.loggedIn = false
+      this.usuarioActual = ''
     }
   },
   created () {
     window.addEventListener('login', this.handleLogin)
     window.addEventListener('logout', this.handleLogout)
     console.log('Usuario en localStorage:', localStorage.getItem('user'))
+    const user = localStorage.getItem('user')
+    this.usuarioActual = user ? JSON.parse(user).usuario : ''
   },
   beforeUnmount () {
     window.removeEventListener('login', this.handleLogin)
