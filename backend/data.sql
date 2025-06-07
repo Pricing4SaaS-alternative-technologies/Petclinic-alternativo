@@ -19,12 +19,14 @@ INSERT IGNORE INTO clinicas (id, nombre, direccion, telefono, plan, propietario_
 INSERT IGNORE INTO habitaciones_hotel (id, tamaño, tipo, clinica_id) VALUES
 (1, 20, 'PERRO', 1),
 (2, 30, 'GATO', 2),
-(3, 35, 'PAJARO', 3);
+(3, 35, 'PAJARO', 1),
+(4, 25, 'HAMSTER', 3);
 
 INSERT IGNORE INTO mascotas (id, nombre, cumpleaños, tipo, dueño_id) VALUES
 (1, 'Roco', '2020-01-01', 'PERRO', 1),
 (2, 'Misifú', '2019-05-15', 'GATO', 2),
-(3, 'Lorito', '2021-03-10', 'PAJARO', 3);
+(3, 'Lorito', '2021-03-10', 'PAJARO', 1),
+(4, 'Saturnino', '2023-03-10', 'HAMSTER', 3);
 
 INSERT IGNORE INTO props_clinicas (id) VALUES
 (4),
@@ -42,20 +44,21 @@ INSERT IGNORE INTO veterinarios (id, especialidades, ciudad, clinica_id) VALUES
 (9, '["DERMATOLOGIA", "REHABILITACION"]', 'Sevilla', 3);
 
 INSERT IGNORE INTO visitas (id, fecha, descripcion, veterinario_id, mascota_id) VALUES
-(1, '2023-10-01 10:00:00', 'Consulta general', 1, 1),
-(2, '2023-10-02 11:00:00', 'Chequeo de salud', 2, 2),
-(3, '2023-10-03 12:00:00', 'Vacunación', 3, 3);
+(1, '2023-10-01 10:00:00', 'Consulta general', 7, 1),
+(2, '2023-10-02 11:00:00', 'Chequeo de salud', 8, 2),
+(3, '2023-10-03 12:00:00', 'Vacunación', 9, 3);
 
 INSERT IGNORE INTO adopciones (id, descripcion, estado_adopcion, mascota_id, dueño_nuevo_id, dueño_anterior_id) VALUES
 (1, 'Adopción de Misifú', 'PENDIENTE', 2, null, 2),
 (2, 'Adopción de Lorito', 'APROBADA', 3, 1, 3);
 
-INSERT IGNORE INTO consultas (id, titulo, descripcion, comentario_clinica, estado_consulta, dueño_id, vet_id, mascota_id) VALUES
-(1, 'Consulta sobre la salud de Roco', 'Roco lleva varios días malo.' , TRUE, 'PENDIENTE', 1, null, 1),
-(2, 'Consulta sobre la adopción de Misifú', '¿Cómo va la adopción?' , TRUE, 'RESUELTA', 2, null, 2),
-(3, 'Consulta sobre la vacunación de Lorito', '¿Es monodosis o hay que poner la vacuna más veces?' , FALSE, 'CERRADA', 3, 3, 3);
+INSERT IGNORE INTO consultas (id, titulo, descripcion, comentario_clinica, estado_consulta, dueño_id, vet_id, mascota_id, clinica_id) VALUES
+(1, 'Consulta sobre la salud de Roco', 'Roco lleva varios días malo.' , TRUE, 'PENDIENTE', 1, null, 1, 1),
+(2, 'Consulta sobre la adopción de Misifú', '¿Cómo va la adopción?' , TRUE, 'RESUELTA', 2, null, 2, 2),
+(3, 'Consulta sobre la vacunación de Lorito', '¿Es monodosis o hay que poner la vacuna más veces?' , FALSE, 'CERRADA', 3, 9, 3, 3);  -- el dueño id es 3 porque es anterior a la adopción
 
 INSERT IGNORE INTO reservas (id, fecha_inicio, fecha_fin, habitacion_id, mascota_id) VALUES
 (1, '2023-10-01', '2023-10-05', 1, 1),
 (2, '2023-10-02', '2023-10-06', 2, 2),
-(3, '2023-10-03', '2023-10-07', 3, 3);
+(3, '2023-10-03', '2023-10-07', 3, 3),
+(4, '2023-10-04', '2023-10-08', 4, 4);
