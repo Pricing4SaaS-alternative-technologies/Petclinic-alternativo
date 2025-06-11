@@ -8,6 +8,7 @@ from flask_jwt_extended import JWTManager
 from .routes import auth as auth_blueprint
 from .routes.clinicas import clinicas_bp
 from .routes.mascotas import mascotas_bp
+from .routes.visitas import visitas_bp
 
 
 from .extensions import db
@@ -47,6 +48,7 @@ def create_app():
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(clinicas_bp)
     app.register_blueprint(mascotas_bp)
+    app.register_blueprint(visitas_bp)
 
 
     ## Para desarrollo: crear tablas si no existen
