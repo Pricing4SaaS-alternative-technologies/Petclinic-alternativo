@@ -16,9 +16,10 @@
 }
 
 .nav-link {
-  color: white;
+  color: #fff;
   text-decoration: none;
-  margin-left: 1rem;
+  margin: 0;                /* eliminamos márgenes laterales */
+  padding: 0 1rem;          /* opcional: espacio interno para clic */
 }
 
 .nav-link:hover {

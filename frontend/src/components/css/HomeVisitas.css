@@ -1,0 +1,40 @@
+.visitas-container {
+  max-width: 600px; margin: 2rem auto; padding: 1.5rem;
+  background: #f9f9f9; border: 1px solid #ccc; border-radius: 12px;
+}
+
+.visitas-container h2 { text-align: center; color: #333; }
+
+.btn-crear {
+  display: block; margin: 1rem auto;
+  padding: 0.5rem 1.2rem; background: #4caf50; color: #fff;
+  border: none; border-radius: 8px; cursor: pointer;
+}
+.btn-crear:hover { background: #45a049; }
+
+.visita-lista { list-style: none; padding: 0; }
+.visita-card {
+  display: flex; justify-content: space-between;
+  padding: 0.5rem; border-bottom: 1px solid #ddd;
+}
+.visita-card .acciones button {
+  background: none; border: none; cursor: pointer; margin-left: .5rem;
+}
+.no-visitas { text-align: center; color: #666; margin-top: 1rem; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; top:0; left:0; width:100%; height:100%;
+  background: rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center;
+}
+.modal {
+  background:#fff; padding:1.5rem; border-radius:8px; width:90%; max-width:400px;
+}
+.modal label { display:block; margin-top:1rem; color:#333; }
+.modal input { width:100%; padding:.5rem; margin-top:.3rem; }
+.modal-buttons { display:flex; justify-content:flex-end; margin-top:1.2rem; }
+.modal-buttons button {
+  padding:.4rem .8rem; border:none; border-radius:6px; cursor:pointer; margin-left:.5rem;
+}
+.modal-buttons .cancelar { background:#aaa; color:#fff; }
+.modal-buttons .cancelar:hover { background:#888; }

@@ -4,6 +4,15 @@
       <router-link to="/" class="nav-logo-link">
         <img src="@/assets/logo.png" alt="Logo" class="nav-logo" style="height: 3rem; margin: 0 0.5rem;" />
       </router-link>
+
+      <!-- Mostrar “Visitas” solo para veterinarios -->
+      <router-link
+        v-if="loggedIn && userTipo === 'prop_clinica'"
+        to="/visitas"
+        class="nav-link"
+      >
+        Visitas
+      </router-link>
     </div>
     <div v-if="!loggedIn" class="nav-links-right" style="margin-right: 1rem;">
       <router-link to="/auth" class="nav-link">Login</router-link>
@@ -22,13 +31,21 @@ export default {
   data () {
     return {
       loggedIn: !!localStorage.getItem('jwt'), // Estado inicial basado en el token
-      usuarioActual: this.getUsuarioActual()
+      usuarioActual: this.getUsuarioActual(),
+      userTipo: this.getUserTipo()
     }
   },
   methods: {
     getUsuarioActual () {
       const user = localStorage.getItem('user')
       return user ? JSON.parse(user).usuario : ''
+    },
+    getUserTipo () {
+      const raw = localStorage.getItem('user')
+      if (!raw) return ''
+      const u = JSON.parse(raw)
+      const tipo = u.tipo
+      return tipo ? tipo.toLowerCase() : ''
     },
     logout () {
       localStorage.removeItem('jwt')
@@ -59,6 +76,7 @@ export default {
     console.log('Usuario en localStorage:', localStorage.getItem('user'))
     const user = localStorage.getItem('user')
     this.usuarioActual = user ? JSON.parse(user).usuario : ''
+    this.userTipo = this.getUserTipo()
   },
   beforeUnmount () {
     window.removeEventListener('login', this.handleLogin)

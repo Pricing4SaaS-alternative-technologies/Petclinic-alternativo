@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Home from '@/components/Home'
 import AuthPage from '@/components/AuthPage'
+import HomeVisitas from '@/components/HomeVisitas'
 
 Vue.use(Router)
 
@@ -16,6 +17,10 @@ export default new Router({
       path: '/auth',
       name: 'auth',
       component: AuthPage
+    },
+    { path: '/visitas',
+      name: 'visitas',
+      component: HomeVisitas
     }
   ],
   mode: 'history'
