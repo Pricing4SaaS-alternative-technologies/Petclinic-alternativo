@@ -4,7 +4,6 @@
       <router-link to="/" class="nav-logo-link">
         <img src="@/assets/logo.png" alt="Logo" class="nav-logo" style="height: 3rem; margin: 0 0.5rem;" />
       </router-link>
-
       <!-- Mostrar “Visitas” solo para veterinarios -->
       <router-link
         v-if="loggedIn && userTipo === 'prop_clinica'"

@@ -61,3 +61,22 @@ def eliminar_visita(clinica_id, usuario_id, mascota_id, visita_id):
     db.session.delete(v)
     db.session.commit()
     return jsonify({'msg': 'Eliminada'}), 200
+
+@visitas_bp.route('/props_mascotas', methods=['GET'])
+@jwt_required()
+def listar_propietarios(clinica_id, usuario_id, mascota_id=None):
+    Clinica.query.get_or_404(clinica_id)
+    return jsonify([
+        {'id': p.id, 'usuario': p.usuario}
+        for p in Prop_mascota.query.filter_by(clinica_id=clinica_id).all()
+    ]), 200
+
+# lista de mascotas de un propietario dentro de la clínica
+@visitas_bp.route('/props_mascotas/<int:prop_id>/mascotas', methods=['GET'])
+@jwt_required()
+def listar_mascotas_propietario(clinica_id, usuario_id, prop_id):
+    get_mascota(clinica_id, usuario_id, None)  # valida existencia de clínica y prop
+    return jsonify([
+        {'id': m.id, 'nombre': m.nombre}
+        for m in Mascota.query.filter_by(dueño_id=prop_id).all()
+    ]), 200

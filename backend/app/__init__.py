@@ -9,7 +9,7 @@ from .routes import auth as auth_blueprint
 from .routes.clinicas import clinicas_bp
 from .routes.mascotas import mascotas_bp
 from .routes.visitas import visitas_bp
-
+from .routes.prop_mascotas import props_bp
 
 from .extensions import db
 
@@ -49,6 +49,7 @@ def create_app():
     app.register_blueprint(clinicas_bp)
     app.register_blueprint(mascotas_bp)
     app.register_blueprint(visitas_bp)
+    app.register_blueprint(props_bp)
 
 
     ## Para desarrollo: crear tablas si no existen
