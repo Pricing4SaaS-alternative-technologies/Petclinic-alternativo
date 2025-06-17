@@ -17,6 +17,7 @@
     <div v-if="!loggedIn" class="nav-links-right" style="margin-right: 1rem;">
       <router-link to="/auth" class="nav-link">Login</router-link>
     </div>
+
     <!-- Muestra el nombre de usuario y el botón de logout si está logueado -->
     <div v-if="loggedIn" class="user-info">
       <span class="usuario">Hola, {{ usuarioActual }}</span>
@@ -64,10 +65,12 @@ export default {
       this.loggedIn = true
       const user = localStorage.getItem('user')
       this.usuarioActual = user ? JSON.parse(user).usuario : ''
+      this.userTipo = this.getUserTipo()
     },
     handleLogout () {
       this.loggedIn = false
       this.usuarioActual = ''
+      this.userTipo = ''
     }
   },
   created () {
