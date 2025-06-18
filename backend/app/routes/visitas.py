@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.extensions import db
 from app.models.visita import Visita
 from app.models.mascota import Mascota
@@ -33,11 +33,13 @@ def get_visitas(clinica_id, usuario_id, mascota_id):
 def crear_visita(clinica_id, usuario_id, mascota_id):
     get_mascota(clinica_id, usuario_id, mascota_id)
     json = request.get_json()
+    vet_id = get_jwt_identity()
     v = Visita(
-        date_time=json.get('date_time'),
-        description=json.get('description'),
-        mascota_id=mascota_id
+        json.get('date_time'),    # será el parámetro “fecha”
+        json.get('description'),  # será “descripcion”
+        mascota_id
     )
+    v.veterinario_id = vet_id
     db.session.add(v)
     db.session.commit()
     return jsonify({'id': v.id}), 201

@@ -4,18 +4,18 @@ from app.models.clinica import Clinica
 from app.models.prop_mascota import Prop_mascota
 from app.models.mascota import Mascota
 
-props_bp = Blueprint('props', __name__,
+prop_mascotas_bp = Blueprint('prop_mascotas', __name__,
     url_prefix='/api/clinicas/<int:clinica_id>/props_mascotas'
 )
 
-@props_bp.route('', methods=['GET'])
+@prop_mascotas_bp.route('', methods=['GET'])
 @jwt_required()
 def listar_propietarios(clinica_id):
     Clinica.query.get_or_404(clinica_id)
     props = Prop_mascota.query.filter_by(clinica_id=clinica_id).all()
     return jsonify([{'id': p.id, 'usuario': p.usuario} for p in props]), 200
 
-@props_bp.route('/<int:prop_id>/mascotas', methods=['GET'])
+@prop_mascotas_bp.route('/<int:prop_id>/mascotas', methods=['GET'])
 @jwt_required()
 def listar_mascotas_propietario(clinica_id, prop_id):
     Clinica.query.get_or_404(clinica_id)

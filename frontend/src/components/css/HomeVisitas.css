@@ -1,5 +1,5 @@
 .visitas-container {
-  max-width: 600px;
+  max-width: 1200px;
   margin: 2rem auto;
   padding: 1.5rem;
   background: #f9f9f9;
@@ -31,8 +31,9 @@
   padding: 0;
 }
 .visita-card {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 2fr 2fr 2fr 3fr auto;
+  gap: 0.5rem;
   padding: 0.5rem;
   border-bottom: 1px solid #ddd;
 }
@@ -41,6 +42,10 @@
   border: none;
   cursor: pointer;
   margin-left: .5rem;
+}
+.visita-card span {
+  white-space: normal;          /* permite envolver */
+  word-break: break-word;       /* rompe palabras si es necesario */
 }
 
 .no-visitas {
@@ -62,7 +67,7 @@
   padding:1.5rem;
   border-radius:8px;
   width:90%;
-  max-width:400px;
+  max-width:800px;
 }
 .modal label {
   display:block;
@@ -77,6 +82,12 @@
   margin-top:.3rem;
   border:1px solid #ccc;
   border-radius:6px;
+}
+.modal textarea {
+  width: 100%;
+  box-sizing: border-box;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 .modal-buttons {
   display:flex;
