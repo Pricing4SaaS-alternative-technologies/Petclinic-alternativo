@@ -65,6 +65,8 @@ export default {
       this.usuarioActual = this.getUsuarioActual()
       console.log('Usuario en localStorage:', localStorage.getItem('user'))
       const user = localStorage.getItem('user')
+      this.usuarioActual = user ? JSON.parse(user).usuario : ''
+      this.userTipo = this.getUserTipo()
       const tipo = user ? JSON.parse(user).tipo : ''
       console.log(tipo)
     },
@@ -77,7 +79,9 @@ export default {
   created () {
     window.addEventListener('login', this.handleLogin)
     window.addEventListener('logout', this.handleLogout)
-    this.usuarioActual = this.getUsuarioActual()
+    const user = localStorage.getItem('user')
+    this.usuarioActual = user ? JSON.parse(user).usuario : ''
+    this.userTipo = this.getUserTipo()
   },
   beforeUnmount () {
     window.removeEventListener('login', this.handleLogin)
