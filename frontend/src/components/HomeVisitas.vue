@@ -11,7 +11,7 @@
         <span>{{ v.description }}</span>
         <div class="acciones">
           <button @click="abrirEditar(v)">✏️</button>
-          <button @click="eliminarVisita(v.id)">🗑️</button>
+          <button @click="abrirEliminar(v)">🗑️</button>
         </div>
       </li>
     </ul>
@@ -74,8 +74,18 @@
         </div>
       </div>
     </div>
+    <!-- Modal Eliminar -->
+    <div class="modal-overlay" v-if="mostrarEliminar">
+      <div class="modal">
+        <h3>Eliminar Visita</h3>
+        <p>¿Seguro que quieres eliminar la visita del {{ formatearFecha(seleccionadaEliminar.date_time) }}?</p>
+        <div class="modal-buttons">
+          <button @click="confirmarEliminarVisita">Eliminar</button>
+          <button class="cancelar" @click="cerrarEliminar">Cancelar</button>
+        </div>
+      </div>
+    </div>
   </div>
-
   <div v-else class="no-auth">
     <p class="error">No estás autorizado. Por favor, inicia sesión como dueño de clínica.</p>
   </div>
@@ -97,6 +107,8 @@ export default {
       visitas: [],
       mostrarCrear: false,
       mostrarEditar: false,
+      mostrarEliminar: false,
+      seleccionadaEliminar: null,
       seleccionada: null,
       nueva: {
         clinica_id: '',
@@ -226,9 +238,9 @@ export default {
     async editarVisita () {
       try {
         await api.patch(
-          `/clinicas/${this.nueva.clinica_id}` +
-          `/props_mascotas/${this.nueva.dueno_id}` +
-          `/mascotas/${this.nueva.mascota_id}/visitas/${this.seleccionada.id}`,
+          `/clinicas/${this.seleccionada.clinica_id}` +
+          `/props_mascotas/${this.seleccionada.dueno_id}` +
+          `/mascotas/${this.seleccionada.mascota_id}/visitas/${this.seleccionada.id}`,
           {
             date_time: this.seleccionada.date_time,
             description: this.seleccionada.description
@@ -241,15 +253,15 @@ export default {
       }
     },
 
-    async eliminarVisita (id) {
-      if (!confirm('¿Eliminar esta visita?')) return
+    async confirmarEliminarVisita () {
       try {
         await api.delete(
-          `/clinicas/${this.nueva.clinica_id}` +
-          `/props_mascotas/${this.nueva.dueno_id}` +
-          `/mascotas/${this.nueva.mascota_id}/visitas/${id}`
+          `/clinicas/${this.seleccionadaEliminar.clinica_id}` +
+          `/props_mascotas/${this.seleccionadaEliminar.dueno_id}` +
+          `/mascotas/${this.seleccionadaEliminar.mascota_id}/visitas/${this.seleccionadaEliminar.id}`
         )
         await this.fetchMisVisitas()
+        this.cerrarEliminar()
       } catch (e) {
         console.error('Error al eliminar visita:', e)
       }
@@ -267,6 +279,16 @@ export default {
     cerrarEditar () {
       this.mostrarEditar = false
       this.seleccionada = null
+    },
+
+    abrirEliminar (v) {
+      this.seleccionadaEliminar = { ...v }
+      this.mostrarEliminar = true
+    },
+
+    cerrarEliminar (v) {
+      this.seleccionadaEliminar = null
+      this.mostrarEliminar = false
     },
 
     formatearFecha (iso) {
