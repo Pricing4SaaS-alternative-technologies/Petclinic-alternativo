@@ -36,7 +36,7 @@ export default {
     }
   },
   methods: {
-    getUsuarioActual () {
+    getUsuarioActual () { // Con esto sacas el username. Si pones en vez de .usuario y pones otro atributo, te lo devuelve
       const user = localStorage.getItem('user')
       return user ? JSON.parse(user).usuario : ''
     },
@@ -62,9 +62,11 @@ export default {
     // manejamos el inicio de sesión y cierre de sesión
     handleLogin () {
       this.loggedIn = true
+      this.usuarioActual = this.getUsuarioActual()
+      console.log('Usuario en localStorage:', localStorage.getItem('user'))
       const user = localStorage.getItem('user')
-      this.usuarioActual = user ? JSON.parse(user).usuario : ''
-      this.userTipo = this.getUserTipo()
+      const tipo = user ? JSON.parse(user).tipo : ''
+      console.log(tipo)
     },
     handleLogout () {
       this.loggedIn = false
@@ -75,10 +77,7 @@ export default {
   created () {
     window.addEventListener('login', this.handleLogin)
     window.addEventListener('logout', this.handleLogout)
-    console.log('Usuario en localStorage:', localStorage.getItem('user'))
-    const user = localStorage.getItem('user')
-    this.usuarioActual = user ? JSON.parse(user).usuario : ''
-    this.userTipo = this.getUserTipo()
+    this.usuarioActual = this.getUsuarioActual()
   },
   beforeUnmount () {
     window.removeEventListener('login', this.handleLogin)
