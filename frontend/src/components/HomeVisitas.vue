@@ -21,16 +21,8 @@
     <div class="modal-overlay" v-if="mostrarCrear">
       <div class="modal">
         <h3>Crear Visita</h3>
-        <label>Clínica</label>
-        <select v-model="nueva.clinica_id" @change="onChangeClinica" required>
-          <option disabled value="">Selecciona clínica</option>
-          <option v-for="c in clinicas" :key="c.id" :value="c.id">
-            {{ c.nombre }}
-          </option>
-        </select>
-
         <label>Propietario</label>
-        <select v-model="nueva.dueno_id" @change="onChangePropietario" required>
+        <select v-model="nueva.dueno_id" @change="cargarMascotasDelPropietario" required>
           <option disabled value="">Selecciona dueño</option>
           <option v-for="p in propietarios" :key="p.id" :value="p.id">
             {{ p.usuario }}
@@ -38,7 +30,7 @@
         </select>
 
         <label>Mascota</label>
-        <select v-model="nueva.mascota_id" @change="cargarVisitas" required>
+        <select v-model="nueva.mascota_id" required>
           <option disabled value="">Selecciona mascota</option>
           <option v-for="m in mascotasDelPropietario" :key="m.id" :value="m.id">
             {{ m.nombre }}
@@ -46,7 +38,7 @@
         </select>
 
         <label>Fecha y hora</label>
-        <input type="datetime-local" v-model="nueva.date_time" required />
+        <input type="date" v-model="nueva.date_time" required />
 
         <label>Descripción</label>
         <input v-model="nueva.description" required />
@@ -63,7 +55,7 @@
       <div class="modal">
         <h3>Editar Visita</h3>
         <label>Fecha y hora</label>
-        <input type="datetime-local" v-model="seleccionada.date_time" />
+        <input type="date" v-model="seleccionada.date_time" />
 
         <label>Descripción</label>
         <input v-model="seleccionada.description" />
@@ -87,7 +79,7 @@
     </div>
   </div>
   <div v-else class="no-auth">
-    <p class="error">No estás autorizado. Por favor, inicia sesión como dueño de clínica.</p>
+    <p class="error">No estás autorizado. Por favor, inicia sesión como veterinario.</p>
   </div>
 </template>
 
@@ -136,12 +128,13 @@ export default {
       }
       try {
         this.info_usuario = JSON.parse(rawUser)
-        if (this.info_usuario.tipo !== 'prop_clinica') {
+        if (this.info_usuario.tipo !== 'veterinario') {
           this.jwtValido = false
           return
         }
         this.jwtValido = true
         this.usuarioId = this.info_usuario.id
+        this.clinicaId = this.info_usuario.clinica_id
         this.fetchMisVisitas()
       } catch (e) {
         console.error('Error al parsear usuario:', e)
@@ -164,37 +157,26 @@ export default {
       this.nueva = { clinica_id: '', dueno_id: '', mascota_id: '', date_time: '', description: '' }
       this.propietarios = []
       this.mascotasDelPropietario = []
-      this.cargarClinicas()
+      this.cargarPropietariosMascotas()
     },
 
-    async cargarClinicas () {
-      try {
-        const { data } = await api.get(`/clinicas/listar/${this.usuarioId}`)
-        this.clinicas = data
-      } catch (e) {
-        console.error('Error al cargar clínicas:', e)
-      }
-    },
-
-    async onChangeClinica () {
-      this.nueva.dueno_id = ''
+    async cargarPropietariosMascotas () {
       this.nueva.mascota_id = ''
-      this.propietarios = []
       this.mascotasDelPropietario = []
       try {
-        const { data } = await api.get(`/clinicas/${this.nueva.clinica_id}/props_mascotas`)
+        const { data } = await api.get(`/clinicas/${this.clinicaId}/props_mascotas`)
         this.propietarios = data
       } catch (e) {
         console.error('Error al cargar propietarios:', e)
       }
     },
 
-    async onChangePropietario () {
+    async cargarMascotasDelPropietario () {
       this.nueva.mascota_id = ''
       this.mascotasDelPropietario = []
       try {
         const { data } = await api.get(
-          `/clinicas/${this.nueva.clinica_id}` +
+          `/clinicas/${this.clinicaId}` +
           `/props_mascotas/${this.nueva.dueno_id}/mascotas`
         )
         this.mascotasDelPropietario = data
@@ -207,7 +189,7 @@ export default {
       if (!this.nueva.mascota_id) return
       try {
         const { data } = await api.get(
-          `/clinicas/${this.nueva.clinica_id}` +
+          `/clinicas/${this.clinicaId}` +
           `/props_mascotas/${this.nueva.dueno_id}` +
           `/mascotas/${this.nueva.mascota_id}/visitas`
         )
@@ -220,7 +202,7 @@ export default {
     async crearVisita () {
       try {
         await api.post(
-          `/clinicas/${this.nueva.clinica_id}` +
+          `/clinicas/${this.clinicaId}` +
           `/props_mascotas/${this.nueva.dueno_id}` +
           `/mascotas/${this.nueva.mascota_id}/visitas`,
           {
@@ -238,7 +220,7 @@ export default {
     async editarVisita () {
       try {
         await api.patch(
-          `/clinicas/${this.seleccionada.clinica_id}` +
+          `/clinicas/${this.clinicaId}` +
           `/props_mascotas/${this.seleccionada.dueno_id}` +
           `/mascotas/${this.seleccionada.mascota_id}/visitas/${this.seleccionada.id}`,
           {
@@ -256,7 +238,7 @@ export default {
     async confirmarEliminarVisita () {
       try {
         await api.delete(
-          `/clinicas/${this.seleccionadaEliminar.clinica_id}` +
+          `/clinicas/${this.clinicaId}` +
           `/props_mascotas/${this.seleccionadaEliminar.dueno_id}` +
           `/mascotas/${this.seleccionadaEliminar.mascota_id}/visitas/${this.seleccionadaEliminar.id}`
         )

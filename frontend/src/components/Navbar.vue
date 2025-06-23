@@ -6,11 +6,18 @@
       </router-link>
       <!-- Mostrar “Visitas” solo para veterinarios -->
       <router-link
-        v-if="loggedIn && userTipo === 'prop_clinica'"
+        v-if="loggedIn && userTipo === 'veterinario'"
         to="/visitas"
         class="nav-link"
       >
         Visitas
+      </router-link>
+      <router-link
+        v-if="loggedIn && userTipo === 'prop_mascota'"
+        to="/mis-visitas"
+        class="nav-link"
+      >
+        Mis visitas
       </router-link>
     </div>
     <div v-if="!loggedIn" class="nav-links-right" style="margin-right: 1rem;">
