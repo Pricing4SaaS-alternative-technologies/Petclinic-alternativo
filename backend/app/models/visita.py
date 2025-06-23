@@ -57,3 +57,13 @@ class Visita(db.Model):
         """Devuelve el id de la clínica del dueño de la mascota."""
         # asumiendo que Cliente→Prop_mascota tiene clinica_id
         return getattr(self.mascota.dueño, 'clinica_id', None)
+    
+    def to_dict(self):
+        return {
+            'id':          self.id,
+            'date_time':   self.date_time.isoformat(),
+            'description': self.description,
+            'mascota':     self.mascota.nombre,
+            'dueno_id':    self.dueno_id,
+            'clinica_id':  self.clinica_id
+        }

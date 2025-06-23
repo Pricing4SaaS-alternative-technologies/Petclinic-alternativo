@@ -1,7 +1,7 @@
 <template>
-  <div v-if="jwtValido" class="visitas-container">
+  <div class="visitas-container" v-if="jwtValido">
     <h2>📋 Mis Visitas</h2>
-    <ul v-if="visitas.length" class="visita-lista">
+    <ul v-if="visitas.length" class="visita-lista propietario">
       <li v-for="v in visitas" :key="v.id" class="visita-card">
         <span>{{ formatearFecha(v.date_time) }}</span>
         <span>{{ v.mascota }}</span>
@@ -10,17 +10,21 @@
     </ul>
     <p v-else class="no-visitas">No tienes visitas registradas.</p>
   </div>
-  <p v-else class="error">No estás autorizado. Inicia sesión como propietario de mascota.</p>
+  <p v-else class="error">
+    No estás autorizado. Inicia sesión como dueño de mascota.
+  </p>
 </template>
 
 <script>
 import api from '@/api/axios'
 
 export default {
+  name: 'HomeVisitasPropietario',
   data () {
     return {
       jwtValido: false,
       info_usuario: null,
+      clinicaId: null,
       visitas: []
     }
   },
@@ -39,25 +43,24 @@ export default {
         this.jwtValido = false
         return
       }
-
       this.info_usuario = JSON.parse(raw)
       if (this.info_usuario.tipo !== 'prop_mascota') {
         this.jwtValido = false
         return
       }
-
       this.jwtValido = true
+      this.clinicaId = this.info_usuario.clinica_id
       this.fetchVisitas()
     },
     async fetchVisitas () {
       try {
         const { data } = await api.get(
-          `/clinicas/${this.info_usuario.clinica_id}` +
+          `/clinicas/${this.clinicaId}` +
           `/props_mascotas/mine/visitas`
         )
         this.visitas = data
       } catch (e) {
-        console.error('No se pudieron cargar visitas:', e)
+        console.error('Error al cargar visitas:', e)
       }
     },
     formatearFecha (iso) {

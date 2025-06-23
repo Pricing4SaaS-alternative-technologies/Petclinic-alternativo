@@ -27,17 +27,18 @@ def listar_mascotas_propietario(clinica_id, prop_id):
 @prop_mascotas_bp.route('/mine/visitas', methods=['GET'])
 @jwt_required()
 def listar_visitas_propietario(clinica_id):
-    # 1) obtenemos usuario y comprobamos rol
     user_id = get_jwt_identity()
     usuario = Usuario.query.get_or_404(user_id)
     if usuario.tipo_usuario != TipoUsuarioEnum.PROP_MASCOTA:
         return jsonify({'msg': 'No autorizado'}), 403
+
     visitas = (
-      Visita.query
+        Visita.query
             .join(Visita.mascota)
+            .join(Prop_mascota, Prop_mascota.id == Mascota.dueño_id)
             .filter(
-              Mascota.dueño_id == user_id,
-              Mascota.clinica_id == clinica_id
+                Prop_mascota.id == user_id,
+                Prop_mascota.clinica_id == clinica_id
             )
             .all()
     )

@@ -94,7 +94,7 @@ def login():
         'email': usuario.email,
         'tipo': usuario.tipo_usuario.value
     }
-    if usuario.tipo_usuario == TipoUsuarioEnum.VETERINARIO:
+    if usuario.tipo_usuario in (TipoUsuarioEnum.VETERINARIO, TipoUsuarioEnum.PROP_MASCOTA):
         usuario_payload['clinica_id'] = usuario.clinica_id
 
     return jsonify({

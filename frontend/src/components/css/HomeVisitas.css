@@ -108,3 +108,13 @@
 .modal-buttons .cancelar:hover {
   background:#888;
 }
+
+.visita-lista.propietario .visita-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.visita-lista.propietario .visita-card span {
+  flex: 1;
+  text-align: center;
+}
