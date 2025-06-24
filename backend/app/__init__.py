@@ -11,6 +11,7 @@ from .routes.mascotas import mascotas_bp
 from .routes.visitas import visitas_bp
 from .routes.prop_mascotas import prop_mascotas_bp
 from .routes.veterinario import veterinario_bp
+from .routes.adopciones import bp as adopciones_bp
 
 from .extensions import db
 
@@ -52,6 +53,7 @@ def create_app():
     app.register_blueprint(visitas_bp)
     app.register_blueprint(prop_mascotas_bp)
     app.register_blueprint(veterinario_bp)
+    app.register_blueprint(adopciones_bp)
 
 
     ## Para desarrollo: crear tablas si no existen

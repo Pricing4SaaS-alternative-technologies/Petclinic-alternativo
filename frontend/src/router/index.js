@@ -3,7 +3,8 @@ import Router from 'vue-router'
 import Home from '@/components/Home'
 import AuthPage from '@/components/AuthPage'
 import HomeVisitas from '@/components/HomeVisitas'
-import HomeVisitasPropietarios from '@/components/HomeVisitasPropietarios.vue'
+import HomeVisitasPropietarios from '@/components/HomeVisitasPropietarios'
+import HomeAdopciones from '@/components/HomeAdopciones'
 
 Vue.use(Router)
 
@@ -26,7 +27,12 @@ export default new Router({
     { path: '/mis-visitas',
       name: 'mis-visitas',
       component: HomeVisitasPropietarios
+    },
+    { path: '/adopciones',
+      name: 'adopciones',
+      component: HomeAdopciones
     }
+
   ],
   mode: 'history'
 })

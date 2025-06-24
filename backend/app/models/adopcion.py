@@ -1,5 +1,6 @@
 from app.extensions import db
 from .enums import EstadoAdopcion
+from datetime import datetime
 
 class Adopcion(db.Model):
     __tablename__ = 'adopciones'  # Nombre de la tabla en la base de datos
@@ -8,6 +9,7 @@ class Adopcion(db.Model):
     descripcion = db.Column(db.String(255), nullable=False)
     estado_adopcion = db.Column(db.Enum(EstadoAdopcion), nullable=False)
     
+    fecha_creacion   = db.Column(db.DateTime, default=datetime)
     #ForeignKey apuntando a mascotas.id
     mascota_id = db.Column( db.Integer, db.ForeignKey('mascotas.id',ondelete='CASCADE'), nullable=False)
     mascota = db.relationship('Mascota', passive_deletes=True)
@@ -33,3 +35,14 @@ class Adopcion(db.Model):
     def delete(self):
         db.session.delete(self)
         db.session.commit()
+
+    def to_dict(self):
+        return {
+          'id':             self.id,
+          'descripcion':    self.descripcion,
+          'estado':         self.estado_adopcion.value,
+          'fecha_creacion': self.fecha_creacion.isoformat(),
+          'mascota':        {'id': self.mascota.id, 'nombre': self.mascota.nombre},
+          'dueño_anterior': {'id': self.dueño_anterior.id, 'usuario': self.dueño_anterior.usuario},
+          'dueño_nuevo':    {'id': self.dueño_nuevo.id,    'usuario': self.dueño_nuevo.usuario}
+        }
