@@ -88,15 +88,19 @@ def login():
 
     # Incluir tipo en el token
     access_token = create_access_token(identity=str(usuario.id))
+    usuario_payload = {
+        'id': usuario.id,
+        'usuario': usuario.usuario,
+        'email': usuario.email,
+        'tipo': usuario.tipo_usuario.value
+    }
+    if usuario.tipo_usuario in (TipoUsuarioEnum.VETERINARIO, TipoUsuarioEnum.PROP_MASCOTA):
+        usuario_payload['clinica_id'] = usuario.clinica_id
+
     return jsonify({
         'message': 'Login exitoso',
         'access_token': access_token,
-        'usuario': {
-            'id': usuario.id,
-            'usuario': usuario.usuario,
-            'email': usuario.email,
-            'tipo': usuario.tipo_usuario.value
-        }
+        'usuario': usuario_payload
     }), 200
 
 

@@ -10,8 +10,6 @@ from datetime import datetime
 
 mascotas_bp = Blueprint('mascotas', __name__, url_prefix='/api/mascotas')
 
-from flask_jwt_extended import jwt_required, get_jwt_identity
-
 @mascotas_bp.route('/listar-tus-mascotas', methods=['GET'])
 @jwt_required()
 def get_mis_mascotas():
