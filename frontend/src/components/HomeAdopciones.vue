@@ -19,10 +19,14 @@
       <h3>Mis adopciones pendientes</h3>
       <ul class="adop-lista">
         <li v-for="a in pendientes" :key="a.id">
-          <span>{{ a.mascota.nombre }} (solicitante: {{ a.dueño_nuevo.usuario }})</span>
+          <span>
+            {{ a.mascota.nombre }}
+            (solicitante: {{ a.dueño_nuevo ? a.dueño_nuevo.usuario : '–' }})
+          </span>
           <button @click="aceptar(a.id)">Aceptar</button>
           <button @click="rechazar(a.id)">Rechazar</button>
         </li>
+        <li v-if="!pendientes.length" class="no-data">No tienes propuestas pendientes</li>
       </ul>
     </section>
 
@@ -131,9 +135,5 @@ export default {
 </script>
 
 <style scoped>
-@import './css/HomeVisitas.css';
-.adopciones-container { max-width:700px; margin:2rem auto; }
-.adop-lista { list-style:none; padding:0; }
-.adop-lista li { display:flex; justify-content:space-between; padding:.5rem; background:#fff; margin:.5rem 0; border-radius:8px; }
-.modal { max-width:400px; }
+@import './css/HomeAdopciones.css';
 </style>

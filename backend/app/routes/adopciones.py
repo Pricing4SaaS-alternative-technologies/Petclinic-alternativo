@@ -25,10 +25,12 @@ def listar_creadas():
 @jwt_required()
 def listar_pendientes():
     user = get_jwt_identity()
-    return jsonify([a.to_dict()
-      for a in Adopcion.query.filter_by(dueño_anterior_id=user,
-                                       estado_adopcion=EstadoAdopcion.PENDIENTE).all()
-    ]), 200
+    propuestas = Adopcion.query.filter(
+        Adopcion.dueño_anterior_id == user,
+        Adopcion.estado_adopcion == EstadoAdopcion.PENDIENTE,
+        Adopcion.dueño_nuevo_id.isnot(None)    # sólo propuestas reales
+    ).all()
+    return jsonify([a.to_dict() for a in propuestas]), 200
 
 @bp.route('', methods=['POST'])
 @jwt_required()

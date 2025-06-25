@@ -15,6 +15,7 @@ class EspecialidadEnum(enum.Enum):
     REHABILITACION = "rehabilitacion"
     
 class EstadoAdopcion(enum.Enum):
+    CREADA = "creada"
     PENDIENTE = "pendiente"
     APROBADA = "aprobada"
     RECHAZADA = "rechazada"
