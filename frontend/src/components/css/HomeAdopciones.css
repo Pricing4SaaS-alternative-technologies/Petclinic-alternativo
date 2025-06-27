@@ -1,19 +1,53 @@
 .adopciones-container {
-  max-width: 800px;
+  max-width: 900px;
   margin: 2rem auto;
   padding: 1.5rem;
   background: #f9f9f9;
   border: 1px solid #ccc;
   border-radius: 12px;
 }
-.adopciones-container h2,
-.adopciones-container h3 {
-  text-align: center;
-  color: #333;
+.adopciones-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
 }
+.adopciones-body {
+  display: flex;
+  gap: 1rem;
+}
+.panel {
+  flex: 1;
+  background: #fff;
+  padding: 1rem;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+}
+.panel h3 {
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+.card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  background: #f1f1f1;
+  border-radius: 6px;
+}
+.card button {
+  margin-left: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.panel.izquierda .card { background: #e8f5e9; }
+.panel.centro .card { background: #e3f2fd; }
+.panel.derecha .card { background: #fff3e0; }
 .btn-crear {
-  display: block;
-  margin: 1rem auto;
   padding: 0.5rem 1.2rem;
   background-color: #4caf50;
   color: #fff;
@@ -24,40 +58,10 @@
 .btn-crear:hover {
   background-color: #45a049;
 }
-.adop-lista {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-.adop-lista li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem;
-  background: #fff;
-  margin: 0.5rem 0;
-  border-radius: 8px;
-}
-.adop-lista li button {
-  margin-left: 0.5rem;
-  padding: 0.4rem 0.8rem;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-.adop-lista li button:first-of-type {
-  background-color: #4caf50;
-  color: #fff;
-}
-.adop-lista li button:first-of-type:hover {
-  background-color: #45a049;
-}
-.adop-lista li button:last-of-type {
-  background-color: #f44336;
-  color: #fff;
-}
-.adop-lista li button:last-of-type:hover {
-  background-color: #d32f2f;
+.no-data {
+  text-align: center;
+  color: #777;
+  margin-top: 1rem;
 }
 .modal-overlay {
   position: fixed;
@@ -67,7 +71,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 999;
+  z-index: 1000;
 }
 .modal {
   background: #fff;
@@ -103,9 +107,9 @@
   margin-left: 0.5rem;
 }
 .modal-buttons .cancelar {
-  background: #aaa;
+  background: #f44336;
   color: #fff;
 }
 .modal-buttons .cancelar:hover {
-  background: #888;
+  background: #d32f2f;
 }

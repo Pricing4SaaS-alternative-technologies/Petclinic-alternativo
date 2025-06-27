@@ -1,44 +1,76 @@
 <template>
   <div class="adopciones-container" v-if="jwtValido">
-    <h2>🐾 Adopciones</h2>
-    <button class="btn-crear" @click="openCrear">➕ Nueva Adopción</button>
+    <!-- Header -->
+    <div class="adopciones-header">
+      <h2>🐾 Adopciones</h2>
+      <button class="btn-crear" @click="openCrear">➕ Nueva Adopción</button>
+    </div>
 
-    <section>
-      <h3>Todas las adopciones</h3>
-      <ul class="adop-lista">
-        <li v-for="a in todas" :key="a.id">
-          <span>{{ formFecha(a.fecha_creacion) }}</span>
-          <span>{{ a.mascota.nombre }}</span>
-          <span>Dueño actual: {{ a.dueño_anterior.usuario }}</span>
-          <span>Estado: {{ a.estado }}</span>
-        </li>
-      </ul>
-    </section>
+    <!-- Tres columnas -->
+    <div class="adopciones-body">
+      <!-- Izquierda: Mis Adopciones -->
+      <section class="panel izquierda">
+        <h3>Mis Adopciones</h3>
+        <ul v-if="misAdopCreadas.length">
+          <li v-for="a in misAdopCreadas" :key="a.id" class="card">
+            <span class="mascota">{{ a.mascota.nombre }}</span>
+            <span class="desc">{{ a.descripcion }}</span>
 
-    <section>
-      <h3>Mis adopciones pendientes</h3>
-      <ul class="adop-lista">
-        <li v-for="a in pendientes" :key="a.id">
-          <span>
-            {{ a.mascota.nombre }}
-            (solicitante: {{ a.dueño_nuevo ? a.dueño_nuevo.usuario : '–' }})
-          </span>
-          <button @click="aceptar(a.id)">Aceptar</button>
-          <button @click="rechazar(a.id)">Rechazar</button>
-        </li>
-        <li v-if="!pendientes.length" class="no-data">No tienes propuestas pendientes</li>
-      </ul>
-    </section>
+            <!-- CREADA: editar / borrar -->
+            <template v-if="a.estado === 'creada'">
+              <button @click="abrirEditar(a)">✏️</button>
+              <button @click="borrar(a.id)">🗑️</button>
+            </template>
+            <!-- PENDIENTE: aceptar / rechazar -->
+            <template v-else-if="a.estado === 'pendiente'">
+              <span>Solicita: {{ a.dueño_nuevo.usuario }}</span>
+              <button @click="aceptar(a.id)">✅</button>
+              <button @click="rechazar(a.id)">❌</button>
+            </template>
+            <!-- APROBADA/RECHAZADA: solo lectura -->
+            <template v-else>
+              <span>Estado: {{ a.estado }}</span>
+            </template>
+          </li>
+        </ul>
+        <p v-else class="no-data">No tienes adopciones.</p>
+      </section>
+
+      <!-- Centro: Disponibles -->
+      <section class="panel centro">
+        <h3>Disponibles</h3>
+        <ul v-if="disponibles.length">
+          <li v-for="a in disponibles" :key="a.id" class="card">
+            <span>{{ a.mascota.nombre }}</span>
+            <span>{{ a.descripcion }}</span>
+            <button @click="solicitar(a.id)">Solicitar</button>
+          </li>
+        </ul>
+        <p v-else class="no-data">No hay adopciones disponibles.</p>
+      </section>
+
+      <!-- Derecha: Mis Solicitudes -->
+      <section class="panel derecha">
+        <h3>Mis Solicitudes</h3>
+        <ul v-if="misSolicitudes.length">
+          <li v-for="a in misSolicitudes" :key="a.id" class="card">
+            <span>{{ a.mascota.nombre }}</span>
+            <span>Dueño actual: {{ a.dueño_anterior.usuario }}</span>
+            <span>Estado: {{ a.estado }}</span>
+          </li>
+        </ul>
+        <p v-else class="no-data">No tienes solicitudes.</p>
+      </section>
+    </div>
 
     <!-- Modal Crear -->
     <div class="modal-overlay" v-if="mostrarCrear">
       <div class="modal">
         <h3>Proponer Adopción</h3>
-        <label>Selecciona mascota a adoptar</label>
+        <label>Selecciona mascota</label>
         <select v-model="nueva.mascota_id">
-          <option disabled value="">--elige--</option>
-          <option
-            v-for="m in misMascotas" :key="m.id" :value="m.id">
+          <option disabled value="">--Elige--</option>
+          <option v-for="m in misMascotas" :key="m.id" :value="m.id">
             {{ m.nombre }}
           </option>
         </select>
@@ -50,6 +82,30 @@
         </div>
       </div>
     </div>
+
+    <div class="modal-overlay" v-if="mostrarEditar">
+    <div class="modal">
+      <h3>Editar Descripción</h3>
+      <label>Nueva descripción</label>
+      <input v-model="editar.descripcion" />
+      <div class="modal-buttons">
+        <button @click="actualizarEditar">Guardar</button>
+        <button class="cancelar" @click="cerrarEditar">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Confirmar Eliminación -->
+  <div class="modal-overlay" v-if="mostrarConfirmEliminar">
+    <div class="modal">
+      <h3>¿Eliminar adopción?</h3>
+      <p>¿Estás seguro de que deseas eliminar esta adopción?</p>
+      <div class="modal-buttons">
+        <button @click="confirmarEliminar">Eliminar</button>
+        <button class="cancelar" @click="cerrarConfirmEliminar">Cancelar</button>
+      </div>
+    </div>
+  </div>
   </div>
   <p v-else class="error">Inicia sesión como dueño de mascota.</p>
 </template>
@@ -61,74 +117,124 @@ export default {
     return {
       jwtValido: false,
       info_usuario: null,
-      todas: [],
-      pendientes: [],
+      misAdopCreadas: [],
+      disponibles: [],
+      misSolicitudes: [],
       misMascotas: [],
       mostrarCrear: false,
-      nueva: { mascota_id: '', descripcion: '' }
+      nueva: { mascota_id: '', descripcion: '' },
+      mostrarEditar: false,
+      editar: { id: null, descripcion: '' },
+      mostrarConfirmEliminar: false,
+      eliminarId: null
     }
   },
-  created () {
-    this.checkAuth()
-    window.addEventListener('logout', this.checkAuth)
-  },
-  beforeUnmount () {
-    window.removeEventListener('logout', this.checkAuth)
+  async created () {
+    const token = localStorage.getItem('jwt')
+    const raw = localStorage.getItem('user')
+    if (token && raw) {
+      this.info_usuario = JSON.parse(raw)
+      if (this.info_usuario.tipo === 'prop_mascota') {
+        this.jwtValido = true
+        await Promise.all([
+          this.fetchMisCreadas(),
+          this.fetchDisponibles(),
+          this.fetchMisSolicitudes(),
+          this.fetchMisMascotas()
+        ])
+      }
+    }
   },
   methods: {
-    async checkAuth () {
-      const token = localStorage.getItem('jwt')
-      const raw = localStorage.getItem('user')
-      if (!token || !raw) {
-        this.jwtValido = false
-        return false
-      }
-      this.info_usuario = JSON.parse(raw)
-      if (this.info_usuario.tipo !== 'prop_mascota') {
-        this.jwtValido = false
-        return false
-      }
-      this.jwtValido = true
-      await Promise.all([
-        this.fetchTodas(),
-        this.fetchPendientes(),
-        this.fetchMisMascotas()
-      ])
+    fetchMisCreadas () {
+      return api.get('/adopciones/mine/creadas')
+        .then(r => (this.misAdopCreadas = r.data))
     },
-    async fetchTodas () {
-      const { data } = await api.get('/adopciones')
-      this.todas = data
+    fetchDisponibles () {
+      return api.get('/adopciones')
+        .then(r => {
+          this.disponibles = r.data.filter(a =>
+            a.estado === 'creada' &&
+            (!a.dueño_nuevo || a.dueño_nuevo.id !== this.info_usuario.id)
+          )
+        })
     },
-    async fetchPendientes () {
-      const { data } = await api.get('/adopciones/mine/pendientes')
-      this.pendientes = data
+    fetchMisSolicitudes () {
+      return api.get('/adopciones/mine/pendientes')
+        .then(r => (this.misSolicitudes = r.data))
     },
-    async fetchMisMascotas () {
-      const { data } = await api.get('/mascotas/listar-tus-mascotas')
-      this.misMascotas = data
-    },
-    formFecha (iso) {
-      const [y, m, d] = iso.split('T')[0].split('-')
-      return `${d}/${m}/${y}`
+    fetchMisMascotas () {
+      return api.get('/mascotas/listar-tus-mascotas')
+        .then(r => (this.misMascotas = r.data))
     },
     openCrear () { this.mostrarCrear = true },
     cerrarCrear () {
       this.mostrarCrear = false
       this.nueva = { mascota_id: '', descripcion: '' }
     },
-    async crear () {
-      await api.post('/adopciones', this.nueva)
-      this.cerrarCrear()
-      this.fetchTodas()
-      this.fetchPendientes()
+    crear () {
+      api.post('/adopciones', this.nueva)
+        .then(() => {
+          this.cerrarCrear()
+          this.fetchMisCreadas()
+          this.fetchDisponibles()
+        })
     },
-    async aceptar (id) {
-      await api.put(`/adopciones/${id}/aceptar`)
-      this.fetchTodas(); this.fetchPendientes()
+    abrirEditar (a) {
+      this.editar = { id: a.id, descripcion: a.descripcion }
+      this.mostrarEditar = true
     },
-    async rechazar (id) {
-      await api.put(`/adopciones/${id}/rechazar`)
-      this.fetchTodas(); this.fetchPendientes()
+    cerrarEditar () {
+      this.mostrarEditar = false
+      this.editar = { id: null, descripcion: '' }
+    },
+    actualizarEditar () {
+      api.patch(`/adopciones/${this.editar.id}`, { descripcion: this.editar.descripcion })
+        .then(() => {
+          this.cerrarEditar()
+          this.fetchMisCreadas()
+          this.fetchDisponibles()
+        })
+    },
+    // en vez de borrar() directo llamamos al modal
+    borrar (id) {
+      this.eliminarId = id
+      this.mostrarConfirmEliminar = true
+    },
+    cerrarConfirmEliminar () {
+      this.mostrarConfirmEliminar = false
+      this.eliminarId = null
+    },
+    confirmarEliminar () {
+      api.delete(`/adopciones/${this.eliminarId}`)
+        .then(() => {
+          this.cerrarConfirmEliminar()
+          this.fetchMisCreadas()
+          this.fetchDisponibles()
+        })
+    },
+    solicitar (id) {
+      if (confirm('¿Seguro que deseas solicitar esta adopción?')) {
+        api.put(`/adopciones/${id}/solicitar`)
+          .then(() => {
+            this.fetchMisCreadas()
+            this.fetchDisponibles()
+          })
+      }
+    },
+    aceptar (id) {
+      api.put(`/adopciones/${id}/aceptar`)
+        .then(() => {
+          this.fetchMisCreadas()
+          this.fetchMisSolicitudes()
+        })
+    },
+    rechazar (id) {
+      api.put(`/adopciones/${id}/rechazar`)
+        .then(() => {
+          this.fetchMisCreadas()
+          this.fetchMisSolicitudes()
+        })
     }
   }
 }
