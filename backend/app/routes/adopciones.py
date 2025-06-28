@@ -44,7 +44,7 @@ def crear_adopcion():
       descripcion=data.get('descripcion',''),
       mascota_id=m.id,
       dueño_anterior_id=m.dueño_id,
-      dueño_nuevo_id=user
+      dueño_nuevo_id=None
     )
     db.session.add(ad); db.session.commit()
     return jsonify(ad.to_dict()), 201
@@ -71,3 +71,36 @@ def rechazar(aid):
     ad.estado_adopcion = EstadoAdopcion.RECHAZADA
     db.session.commit()
     return jsonify(ad.to_dict()),200
+
+@bp.route('/<int:aid>/solicitar', methods=['PUT'])
+@jwt_required()
+def solicitar(aid):
+    user = get_jwt_identity()
+    ad = Adopcion.query.get_or_404(aid)
+
+    if ad.dueño_anterior_id == user:
+        return jsonify({'msg':'No puedes solicitar tu propia adopción'}), 403
+    if ad.estado_adopcion != EstadoAdopcion.CREADA:
+        return jsonify({'msg':'Sólo adopciones en estado CREADA se pueden solicitar'}), 400
+
+    ad.dueño_nuevo_id    = user
+    ad.estado_adopcion   = EstadoAdopcion.PENDIENTE
+    db.session.commit()
+    return jsonify(ad.to_dict()), 200
+
+@bp.route('/<int:aid>', methods=['DELETE'])
+@jwt_required()
+def eliminar_adopcion(aid):
+    user = get_jwt_identity()
+    try:
+        user = int(user)
+    except (TypeError, ValueError):
+        pass
+    
+    ad = Adopcion.query.get_or_404(aid)
+    if ad.dueño_anterior_id != user:
+        return jsonify({'msg':'No autorizado'}), 403
+
+    db.session.delete(ad)
+    db.session.commit()
+    return '', 204

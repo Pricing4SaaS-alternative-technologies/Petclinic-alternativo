@@ -19,7 +19,7 @@
             <!-- CREADA: editar / borrar -->
             <template v-if="a.estado === 'creada'">
               <button @click="abrirEditar(a)">✏️</button>
-              <button @click="borrar(a.id)">🗑️</button>
+              <button @click="abrirConfirmEliminar(a.id)">🗑️</button>
             </template>
             <!-- PENDIENTE: aceptar / rechazar -->
             <template v-else-if="a.estado === 'pendiente'">
@@ -117,6 +117,7 @@ export default {
     return {
       jwtValido: false,
       info_usuario: null,
+      todas: [],
       misAdopCreadas: [],
       disponibles: [],
       misSolicitudes: [],
@@ -132,20 +133,46 @@ export default {
   async created () {
     const token = localStorage.getItem('jwt')
     const raw = localStorage.getItem('user')
-    if (token && raw) {
-      this.info_usuario = JSON.parse(raw)
-      if (this.info_usuario.tipo === 'prop_mascota') {
-        this.jwtValido = true
-        await Promise.all([
-          this.fetchMisCreadas(),
-          this.fetchDisponibles(),
-          this.fetchMisSolicitudes(),
-          this.fetchMisMascotas()
-        ])
-      }
-    }
+    if (!token || !raw) return
+    this.info_usuario = JSON.parse(raw)
+    if (this.info_usuario.tipo !== 'prop_mascota') return
+    this.jwtValido = true
+
+    // carga todo de una vez
+    const { data } = await api.get('/adopciones')
+    this.todas = data
+    this.actualizarListas()
+    await this.fetchMisMascotas()
   },
+
   methods: {
+    async recargar () {
+      const { data } = await api.get('/adopciones')
+      this.todas = data
+      this.actualizarListas()
+      this.fetchMisMascotas()
+    },
+    actualizarListas () {
+      const u = this.info_usuario.id
+
+      // 1) “Mis adopciones” = tú eres dueño_anterior
+      this.misAdopCreadas = this.todas.filter(a =>
+        a.dueño_anterior && a.dueño_anterior.id === u
+      )
+
+      // 2) “Disponibles” = estado CREADA y ni dueño_anterior ni dueño_nuevo son tú
+      this.disponibles = this.todas.filter(a =>
+        a.estado === 'creada' &&
+        (!a.dueño_anterior || a.dueño_anterior.id !== u) &&
+        (!a.dueño_nuevo || a.dueño_nuevo.id !== u)
+      )
+
+      // 3) “Mis solicitudes” = estado PENDIENTE y tú eres dueño_nuevo
+      this.misSolicitudes = this.todas.filter(a =>
+        a.estado === 'pendiente' &&
+        a.dueño_nuevo && a.dueño_nuevo.id === u
+      )
+    },
     fetchMisCreadas () {
       return api.get('/adopciones/mine/creadas')
         .then(r => (this.misAdopCreadas = r.data))
@@ -167,7 +194,10 @@ export default {
       return api.get('/mascotas/listar-tus-mascotas')
         .then(r => (this.misMascotas = r.data))
     },
-    openCrear () { this.mostrarCrear = true },
+    openCrear () {
+      this.mostrarCrear = true
+      this.fetchMisMascotas()
+    },
     cerrarCrear () {
       this.mostrarCrear = false
       this.nueva = { mascota_id: '', descripcion: '' }
@@ -176,9 +206,9 @@ export default {
       api.post('/adopciones', this.nueva)
         .then(() => {
           this.cerrarCrear()
-          this.fetchMisCreadas()
-          this.fetchDisponibles()
+          this.recargar()
         })
+        .catch(err => console.error(err))
     },
     abrirEditar (a) {
       this.editar = { id: a.id, descripcion: a.descripcion }
@@ -188,53 +218,42 @@ export default {
       this.mostrarEditar = false
       this.editar = { id: null, descripcion: '' }
     },
-    actualizarEditar () {
-      api.patch(`/adopciones/${this.editar.id}`, { descripcion: this.editar.descripcion })
-        .then(() => {
-          this.cerrarEditar()
-          this.fetchMisCreadas()
-          this.fetchDisponibles()
-        })
-    },
-    // en vez de borrar() directo llamamos al modal
-    borrar (id) {
-      this.eliminarId = id
-      this.mostrarConfirmEliminar = true
-    },
     cerrarConfirmEliminar () {
       this.mostrarConfirmEliminar = false
       this.eliminarId = null
+    },
+    abrirConfirmEliminar (id) {
+      this.eliminarId = id
+      this.mostrarConfirmEliminar = true
     },
     confirmarEliminar () {
       api.delete(`/adopciones/${this.eliminarId}`)
         .then(() => {
           this.cerrarConfirmEliminar()
-          this.fetchMisCreadas()
-          this.fetchDisponibles()
+          this.recargar()
         })
+        .catch(err => console.error(err))
     },
     solicitar (id) {
-      if (confirm('¿Seguro que deseas solicitar esta adopción?')) {
-        api.put(`/adopciones/${id}/solicitar`)
-          .then(() => {
-            this.fetchMisCreadas()
-            this.fetchDisponibles()
-          })
-      }
+      if (!confirm('¿Confirmas solicitud?')) return
+      api.put(`/adopciones/${id}/solicitar`)
+        .then(() => this.recargar())
     },
     aceptar (id) {
       api.put(`/adopciones/${id}/aceptar`)
-        .then(() => {
-          this.fetchMisCreadas()
-          this.fetchMisSolicitudes()
-        })
+        .then(() => this.recargar())
     },
     rechazar (id) {
       api.put(`/adopciones/${id}/rechazar`)
-        .then(() => {
-          this.fetchMisCreadas()
-          this.fetchMisSolicitudes()
-        })
+        .then(() => this.recargar())
+    },
+    actualizarEditar () {
+      api.patch(`/adopciones/${this.editar.id}`, { descripcion: this.editar.descripcion })
+        .then(() => this.recargar())
+    },
+    borrar (id) {
+      api.delete(`/adopciones/${id}`)
+        .then(() => this.recargar())
     }
   }
 }
