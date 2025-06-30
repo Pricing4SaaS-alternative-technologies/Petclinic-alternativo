@@ -77,8 +77,15 @@ def rechazar(aid):
     if ad.dueño_anterior_id!=user or ad.estado_adopcion!=EstadoAdopcion.PENDIENTE:
         return jsonify({'msg':'No autorizado'}),403
     ad.estado_adopcion = EstadoAdopcion.RECHAZADA
+    nueva_ad = Adopcion(
+        descripcion       = ad.descripcion,
+        mascota_id        = ad.mascota_id,
+        dueño_anterior_id = ad.dueño_anterior_id,
+        dueño_nuevo_id    = None
+    )
+    db.session.add(nueva_ad)
     db.session.commit()
-    return jsonify(ad.to_dict()),200
+    return jsonify(nueva_ad.to_dict()), 200
 
 @bp.route('/<int:aid>/solicitar', methods=['PUT'])
 @jwt_required()

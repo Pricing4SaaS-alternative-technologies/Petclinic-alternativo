@@ -157,7 +157,7 @@ export default {
 
       // 1) “Mis adopciones” = tú eres dueño_anterior
       this.misAdopCreadas = this.todas.filter(a =>
-        a.dueño_anterior && a.dueño_anterior.id === u
+        a.dueño_anterior && a.dueño_anterior.id === u && a.estado !== 'rechazada'
       )
 
       // 2) “Disponibles” = estado CREADA y ni dueño_anterior ni dueño_nuevo son tú
