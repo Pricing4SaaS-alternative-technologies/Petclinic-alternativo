@@ -53,6 +53,10 @@ def crear_adopcion():
 @jwt_required()
 def aceptar(aid):
     user = get_jwt_identity()
+    try:
+        user = int(user)
+    except (TypeError, ValueError):
+        pass
     ad = Adopcion.query.get_or_404(aid)
     if ad.dueño_anterior_id!=user or ad.estado_adopcion!=EstadoAdopcion.PENDIENTE:
         return jsonify({'msg':'No autorizado'}),403
@@ -65,6 +69,10 @@ def aceptar(aid):
 @jwt_required()
 def rechazar(aid):
     user = get_jwt_identity()
+    try:
+        user = int(user)
+    except (TypeError, ValueError):
+        pass
     ad = Adopcion.query.get_or_404(aid)
     if ad.dueño_anterior_id!=user or ad.estado_adopcion!=EstadoAdopcion.PENDIENTE:
         return jsonify({'msg':'No autorizado'}),403
@@ -104,3 +112,25 @@ def eliminar_adopcion(aid):
     db.session.delete(ad)
     db.session.commit()
     return '', 204
+
+@bp.route('/<int:aid>', methods=['PATCH'])
+@jwt_required()
+def editar_adopcion(aid):
+    user = get_jwt_identity()
+    try:
+        user = int(user)
+    except (TypeError, ValueError):
+        pass
+
+    ad = Adopcion.query.get_or_404(aid)
+    if ad.dueño_anterior_id != user or ad.estado_adopcion != EstadoAdopcion.CREADA:
+        return jsonify({'msg':'No autorizado'}), 403
+
+    data = request.get_json() or {}
+    desc = data.get('descripcion')
+    if not desc:
+        return jsonify({'msg':'Descripción requerida'}), 400
+
+    ad.descripcion = desc.strip()
+    db.session.commit()
+    return jsonify(ad.to_dict()), 200

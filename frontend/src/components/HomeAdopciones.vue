@@ -38,7 +38,7 @@
 
       <!-- Centro: Disponibles -->
       <section class="panel centro">
-        <h3>Disponibles</h3>
+        <h3>Adopciones Disponibles</h3>
         <ul v-if="disponibles.length">
           <li v-for="a in disponibles" :key="a.id" class="card">
             <span>{{ a.mascota.nombre }}</span>
@@ -249,7 +249,10 @@ export default {
     },
     actualizarEditar () {
       api.patch(`/adopciones/${this.editar.id}`, { descripcion: this.editar.descripcion })
-        .then(() => this.recargar())
+        .then(() => {
+          this.cerrarEditar()
+          this.recargar()
+        })
     },
     borrar (id) {
       api.delete(`/adopciones/${id}`)
