@@ -82,6 +82,9 @@ def editar_nombre_mascota(mascota_id):
 
     if not nuevo_nombre:
         return jsonify({'error': 'Nombre requerido'}), 400
+    
+    if len(nuevo_nombre) > 50:
+        return jsonify({'error': 'El nombre no puede tener más de 50 caracteres'}), 400
 
     try:
         user_id = int(get_jwt_identity())

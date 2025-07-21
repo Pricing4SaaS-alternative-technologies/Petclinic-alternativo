@@ -55,6 +55,7 @@
         <form @submit.prevent="editarNombreMascota">
           <label>Nuevo nombre:</label>
           <input v-model="mascotaSeleccionada.nombre" required />
+          <p v-if="errorEdicion" class="mensaje-error">{{ errorEdicion }}</p>
           <div class="modal-buttons">
             <button type="submit">Guardar</button>
             <button type="button" class="cancelar" @click="cerrarEdicion">Cancelar</button>
@@ -76,6 +77,7 @@ export default {
       mostrarModal: false,
       mostrarModalEditar: false,
       errorCreacion: '',
+      errorEdicion: '',
       nuevaMascota: {
         nombre: '',
         cumpleaños: '',
@@ -105,6 +107,10 @@ export default {
       if (!user || !user.id) return
 
       try {
+        if (this.nuevaMascota.nombre.length > 50) {
+          this.errorCreacion = 'El nombre no puede tener más de 50 caracteres'
+          return
+        }
         this.errorCreacion = ''
         await axios.post('http://localhost:5000/api/mascotas/crear-mascota', {
           ...this.nuevaMascota,
@@ -126,6 +132,11 @@ export default {
       }
     },
     async editarNombreMascota () {
+      if (this.mascotaSeleccionada.nombre.length > 50) {
+        this.errorEdicion = 'El nombre no puede tener más de 50 caracteres'
+        return
+      }
+      this.errorEdicion = ''
       try {
         await axios.patch(`http://localhost:5000/api/mascotas/${this.mascotaSeleccionada.id}`, {
           nombre: this.mascotaSeleccionada.nombre
