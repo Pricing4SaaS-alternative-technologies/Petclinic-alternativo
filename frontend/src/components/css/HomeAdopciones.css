@@ -113,3 +113,9 @@
 .modal-buttons .cancelar:hover {
   background: #d32f2f;
 }
+.mensaje-error {
+  color: red;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+  text-align: center;
+}
