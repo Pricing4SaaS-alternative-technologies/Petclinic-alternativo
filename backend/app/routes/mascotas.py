@@ -51,7 +51,9 @@ def crear_mascota():
 
     if cumpleaños_dt > date.today():
         return jsonify({'error': 'La fecha de cumpleaños no puede ser futura'}), 400
-
+    
+    if cumpleaños_dt < date(1800, 1, 1):
+        return jsonify({'error': 'La fecha de cumpleaños no puede ser anterior al 1 de enero de 1800'}), 400
 
     user_id = get_jwt_identity()
     usuario = Usuario.query.filter_by(id=user_id).first()
