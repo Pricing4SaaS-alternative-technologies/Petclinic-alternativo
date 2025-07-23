@@ -1,7 +1,7 @@
 ---
 name: Change Request
 about: Suggest a modification or addition for this project
-title: "[CHANGE]"
+title: "[FIX]"
 labels: ''
 assignees: ''
 
