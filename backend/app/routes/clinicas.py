@@ -76,10 +76,15 @@ def create_clinica():
     telefono = data.get('telefono')
     
     if not all([nombre, direccion, telefono]):
-        return jsonify({'message': 'Faltan datos obligatorios'}), 400
-    
-    if telefono and len(telefono) != 9:
-        return jsonify({'message': 'El teléfono debe tener 9 dígitos'}), 400
+        return jsonify({'message':'Faltan datos obligatorios'}), 400
+
+    # validaciones de longitud y formato
+    if len(nombre) > 50:
+        return jsonify({'message':'El nombre no puede tener más de 50 caracteres'}), 400
+    if len(direccion) > 100:
+        return jsonify({'message':'La dirección no puede tener más de 100 caracteres'}), 400
+    if not telefono.isdigit() or len(telefono) != 9:
+        return jsonify({'message':'El teléfono debe tener 9 dígitos numéricos'}), 400
     
     nueva_clinica = Clinica(nombre=nombre, direccion=direccion, telefono=telefono, propietario_id=id_usuario)
     
@@ -110,15 +115,24 @@ def edit_clinica(clinica_id):
         direccion = data.get('direccion')
         telefono = data.get('telefono')
         
-        if nombre is not None and nombre.strip() != '':
-            clinica.nombre = nombre.strip()
+        if nombre is not None:
+            n = nombre.strip()
+            if len(n) > 50:
+                return jsonify({'message':'El nombre no puede tener más de 50 caracteres'}), 400
+            clinica.nombre = n
 
-        if direccion is not None and direccion.strip() != '':
-            clinica.direccion = direccion.strip()
+        if direccion is not None:
+            d = direccion.strip()
+            if len(d) > 100:
+                return jsonify({'message':'La dirección no puede tener más de 100 caracteres'}), 400
+            clinica.direccion = d
 
-        if telefono is not None and telefono.strip() != '':
-            clinica.telefono = telefono.strip()
-        
+        if telefono is not None:
+            t = telefono.strip()
+            if not t.isdigit() or len(t) != 9:
+                return jsonify({'message':'El teléfono debe tener 9 dígitos numéricos'}), 400
+            clinica.telefono = t
+
         try:
             clinica.save()
             return jsonify({'message': 'Clínica actualizada correctamente'}), 201
