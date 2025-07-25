@@ -118,3 +118,10 @@
   flex: 1;
   text-align: center;
 }
+.mensaje-error {
+  color: red;
+  font-size: 0.9rem;
+  font-weight: normal;
+  margin-top: 0.5rem;
+  text-align: center;
+}

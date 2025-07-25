@@ -38,11 +38,11 @@
         </select>
 
         <label>Fecha y hora</label>
-        <input type="date" v-model="nueva.date_time" required />
+        <input type="datetime-local" v-model="nueva.date_time" required />
 
         <label>Descripción</label>
         <input v-model="nueva.description" required />
-
+        <p v-if="errorCreacion" class="mensaje-error">{{ errorCreacion }}</p>
         <div class="modal-buttons">
           <button @click="crearVisita">Guardar</button>
           <button class="cancelar" @click="cerrarCrear">Cancelar</button>
@@ -55,11 +55,11 @@
       <div class="modal">
         <h3>Editar Visita</h3>
         <label>Fecha y hora</label>
-        <input type="date" v-model="seleccionada.date_time" />
+        <input type="datetime-local" v-model="seleccionada.date_time" required />
 
         <label>Descripción</label>
         <input v-model="seleccionada.description" />
-
+        <p v-if="errorEdicion" class="mensaje-error">{{ errorEdicion }}</p>
         <div class="modal-buttons">
           <button @click="editarVisita">Actualizar</button>
           <button class="cancelar" @click="cerrarEditar">Cancelar</button>
@@ -101,6 +101,8 @@ export default {
       mostrarEditar: false,
       mostrarEliminar: false,
       seleccionadaEliminar: null,
+      errorCreacion: '',
+      errorEdicion: '',
       seleccionada: null,
       nueva: {
         clinica_id: '',
@@ -157,6 +159,7 @@ export default {
       this.nueva = { clinica_id: '', dueno_id: '', mascota_id: '', date_time: '', description: '' }
       this.propietarios = []
       this.mascotasDelPropietario = []
+      this.errorCreacion = ''
       this.cargarPropietariosMascotas()
     },
 
@@ -200,6 +203,27 @@ export default {
     },
 
     async crearVisita () {
+      this.errorCreacion = ''
+      // validación fecha+hora
+      if (!this.nueva.date_time) {
+        this.errorCreacion = 'Fecha y hora requerida'
+        return
+      }
+      const sel = new Date(this.nueva.date_time)
+      if (sel < new Date()) {
+        this.errorCreacion = 'La fecha y hora no puede ser anterior al momento actual'
+        return
+      }
+      if (!this.nueva.description.trim()) {
+        this.errorCreacion = 'Descripción requerida'
+        return
+      }
+      if (this.nueva.description.length > 255) {
+        this.errorCreacion = 'La descripción no puede tener más de 255 caracteres'
+        return
+      }
+      this.errorCreacion = ''
+
       try {
         await api.post(
           `/clinicas/${this.clinicaId}` +
@@ -218,6 +242,28 @@ export default {
     },
 
     async editarVisita () {
+      this.errorEdicion = ''
+      // validación fecha+hora
+      if (!this.seleccionada.date_time) {
+        this.errorEdicion = 'Fecha y hora requerida'
+        return
+      }
+      const sel = new Date(this.seleccionada.date_time)
+      if (sel < new Date()) {
+        this.errorEdicion = 'La fecha y hora no puede ser anterior al momento actual'
+        return
+      }
+      // validación descripción
+      if (!this.seleccionada.description.trim()) {
+        this.errorEdicion = 'Descripción requerida'
+        return
+      }
+      if (this.seleccionada.description.length > 255) {
+        this.errorEdicion = 'La descripción no puede tener más de 255 caracteres'
+        return
+      }
+      this.errorEdicion = ''
+
       try {
         await api.patch(
           `/clinicas/${this.clinicaId}` +
@@ -232,6 +278,8 @@ export default {
         this.cerrarEditar()
       } catch (e) {
         console.error('Error al editar visita:', e)
+        // muestra el mensaje devuelto por el backend en rojo
+        this.errorEdicion = (e.response && e.response.data && e.response.data.msg) || 'Error al actualizar visita'
       }
     },
 
@@ -251,6 +299,7 @@ export default {
 
     abrirEditar (v) {
       this.seleccionada = { ...v }
+      this.errorEdicion = ''
       this.mostrarEditar = true
     },
 
@@ -261,6 +310,7 @@ export default {
     cerrarEditar () {
       this.mostrarEditar = false
       this.seleccionada = null
+      this.errorEdicion = ''
     },
 
     abrirEliminar (v) {
