@@ -37,6 +37,13 @@ def listar_pendientes():
 def crear_adopcion():
     user = get_jwt_identity()
     data = request.get_json()
+
+    desc = data.get('descripcion', '').strip()
+    if not desc:
+        return jsonify({'msg':'Descripción requerida'}), 400
+    if len(desc) > 255:
+        return jsonify({'msg':'La descripción no puede tener más de 255 caracteres'}), 400
+
     m = Mascota.query.get_or_404(data['mascota_id'])
     if m.dueño_id == user:
         return jsonify({'msg':'No puedes proponer adopción de tu propia mascota'}),400
@@ -46,7 +53,8 @@ def crear_adopcion():
       dueño_anterior_id=m.dueño_id,
       dueño_nuevo_id=None
     )
-    db.session.add(ad); db.session.commit()
+    db.session.add(ad)
+    db.session.commit()
     return jsonify(ad.to_dict()), 201
 
 @bp.route('/<int:aid>/aceptar', methods=['PUT'])
@@ -134,10 +142,13 @@ def editar_adopcion(aid):
         return jsonify({'msg':'No autorizado'}), 403
 
     data = request.get_json() or {}
-    desc = data.get('descripcion')
+    desc = data.get('descripcion', '').strip()
     if not desc:
         return jsonify({'msg':'Descripción requerida'}), 400
+    if len(desc) > 255:
+        return jsonify({'msg':'La descripción no puede tener más de 255 caracteres'}), 400
 
-    ad.descripcion = desc.strip()
+
+    ad.descripcion = desc
     db.session.commit()
     return jsonify(ad.to_dict()), 200
