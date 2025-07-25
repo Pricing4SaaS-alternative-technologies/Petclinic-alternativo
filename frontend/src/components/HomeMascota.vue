@@ -112,6 +112,11 @@ export default {
           return
         }
         this.errorCreacion = ''
+        if (this.nuevaMascota.cumpleaños < '1800-01-01') {
+          this.errorCreacion = 'La fecha de cumpleaños no puede ser anterior al 1 de enero de 1800'
+          return
+        }
+        this.errorCreacion = ''
         await axios.post('http://localhost:5000/api/mascotas/crear-mascota', {
           ...this.nuevaMascota,
           dueño_id: user.id

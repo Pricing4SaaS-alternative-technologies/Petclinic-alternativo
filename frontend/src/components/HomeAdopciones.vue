@@ -76,6 +76,7 @@
         </select>
         <label>Descripción</label>
         <input v-model="nueva.descripcion" />
+        <p v-if="errorCreacion" class="mensaje-error">{{ errorCreacion }}</p>
         <div class="modal-buttons">
           <button @click="crear">Enviar</button>
           <button class="cancelar" @click="cerrarCrear">Cancelar</button>
@@ -88,6 +89,7 @@
       <h3>Editar Descripción</h3>
       <label>Nueva descripción</label>
       <input v-model="editar.descripcion" />
+      <p v-if="errorEdicion" class="mensaje-error">{{ errorEdicion }}</p>
       <div class="modal-buttons">
         <button @click="actualizarEditar">Guardar</button>
         <button class="cancelar" @click="cerrarEditar">Cancelar</button>
@@ -127,7 +129,9 @@ export default {
       mostrarEditar: false,
       editar: { id: null, descripcion: '' },
       mostrarConfirmEliminar: false,
-      eliminarId: null
+      eliminarId: null,
+      errorEdicion: '',
+      errorCreacion: ''
     }
   },
   async created () {
@@ -197,26 +201,44 @@ export default {
     openCrear () {
       this.mostrarCrear = true
       this.fetchMisMascotas()
+      this.errorCreacion = ''
     },
     cerrarCrear () {
       this.mostrarCrear = false
       this.nueva = { mascota_id: '', descripcion: '' }
+      this.errorCreacion = ''
     },
     crear () {
-      api.post('/adopciones', this.nueva)
+      const desc = this.nueva.descripcion.trim()
+      if (!desc) {
+        this.errorCreacion = 'Descripción requerida'
+        return
+      }
+      if (desc.length > 255) {
+        this.errorCreacion = 'La descripción no puede tener más de 255 caracteres'
+        return
+      }
+      this.errorCreacion = ''
+
+      api.post('/adopciones', { mascota_id: this.nueva.mascota_id, descripcion: desc })
         .then(() => {
           this.cerrarCrear()
           this.recargar()
         })
-        .catch(err => console.error(err))
+        .catch(err => {
+          console.error(err)
+          this.errorCreacion = (err.response && err.response.data && err.response.data.msg) || 'Error al crear adopción'
+        })
     },
     abrirEditar (a) {
       this.editar = { id: a.id, descripcion: a.descripcion }
+      this.errorEdicion = ''
       this.mostrarEditar = true
     },
     cerrarEditar () {
       this.mostrarEditar = false
       this.editar = { id: null, descripcion: '' }
+      this.errorEdicion = ''
     },
     cerrarConfirmEliminar () {
       this.mostrarConfirmEliminar = false
@@ -248,10 +270,19 @@ export default {
         .then(() => this.recargar())
     },
     actualizarEditar () {
+      if (this.editar.descripcion.length > 255) {
+        this.errorEdicion = 'La descripción no puede tener más de 255 caracteres'
+        return
+      }
+      this.errorEdicion = ''
       api.patch(`/adopciones/${this.editar.id}`, { descripcion: this.editar.descripcion })
         .then(() => {
           this.cerrarEditar()
           this.recargar()
+        })
+        .catch(err => {
+          console.error(err)
+          this.errorEdicion = (err.response && err.response.data && err.response.data.msg) || 'Error al actualizar'
         })
     },
     borrar (id) {
