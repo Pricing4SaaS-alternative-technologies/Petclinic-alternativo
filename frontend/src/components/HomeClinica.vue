@@ -40,6 +40,7 @@ import { useRouter } from 'vue-router'
           <label>Teléfono:</label>
           <input type="text" v-model="clinicaForm.telefono" required />
 
+          <p v-if="errorCreacion" class="mensaje-error">{{ errorCreacion }}</p>
           <div class="modal-buttons">
             <button type="submit">Guardar</button>
             <button type="button" class="cancelar" @click="modalCreacion = false">Cancelar</button>
@@ -63,6 +64,7 @@ import { useRouter } from 'vue-router'
           <label>Teléfono:</label>
           <input type="text" v-model="clinicaForm.telefono" required />
 
+          <p v-if="errorEdicion" class="mensaje-error">{{ errorEdicion }}</p>
           <div class="modal-buttons">
             <button type="submit">Guardar</button>
             <button type="button" class="cancelar" @click="modalEdicion = false">Cancelar</button>
@@ -89,7 +91,9 @@ export default {
         nombre: '',
         direccion: '',
         telefono: ''
-      }
+      },
+      errorCreacion: '',
+      errorEdicion: ''
     }
   },
   created () {
@@ -132,6 +136,22 @@ export default {
     },
 
     async crearClinica () {
+      this.errorCreacion = ''
+
+      // Validaciones
+      if (this.clinicaForm.nombre.length > 50) {
+        this.errorCreacion = 'El nombre no puede tener más de 50 caracteres.'
+        return
+      }
+      if (this.clinicaForm.direccion.length > 100) {
+        this.errorCreacion = 'La dirección no puede tener más de 100 caracteres.'
+        return
+      }
+      if (!/^\d{9}$/.test(this.clinicaForm.telefono)) {
+        this.errorCreacion = 'El teléfono debe tener exactamente 9 dígitos numéricos.'
+        return
+      }
+
       if (this.jwtValido) {
         const payload = { ...this.clinicaForm }
         try {
@@ -140,6 +160,7 @@ export default {
           this.clinicaForm = { nombre: '', direccion: '', telefono: '' }
           await this.fetchClinicasPropias()
         } catch (error) {
+          this.errorCreacion = 'Error al crear clínica.'
           console.error('Error al crear clínica:', error.message, error)
         }
       } else {
@@ -170,14 +191,31 @@ export default {
       }
     },
     async editarClinica () {
+      this.errorEdicion = ''
+
+      // Validaciones
+      if (this.clinicaForm.nombre.length > 50) {
+        this.errorEdicion = 'El nombre no puede tener más de 50 caracteres.'
+        return
+      }
+      if (this.clinicaForm.direccion.length > 100) {
+        this.errorEdicion = 'La dirección no puede tener más de 100 caracteres.'
+        return
+      }
+      if (!/^\d{9}$/.test(this.clinicaForm.telefono)) {
+        this.errorEdicion = 'El teléfono debe tener exactamente 9 dígitos numéricos.'
+        return
+      }
+
       if (this.jwtValido) {
         try {
-          const payload = {...this.clinicaForm}
+          const payload = { ...this.clinicaForm }
           await api.put(`http://localhost:5000/api/clinicas/editar/${this.clinicaSeleccionada.id}`, payload)
           this.modalEdicion = false
           this.clinicaForm = { nombre: '', direccion: '', telefono: '' }
           await this.fetchClinicasPropias()
         } catch (error) {
+          this.errorEdicion = 'Error al editar clínica.'
           console.error('Error al editar clínica:', error.message, error)
         }
       } else {
