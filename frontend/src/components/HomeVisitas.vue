@@ -324,8 +324,10 @@ export default {
     },
 
     formatearFecha (iso) {
-      const [year, month, day] = iso.split('T')[0].split('-')
-      return `${day}/${month}/${year}`
+      const [datePart, timePart] = iso.split('T')
+      const [year, month, day] = datePart.split('-')
+      const [hour, minute] = timePart.split(':')
+      return `${day}/${month}/${year} ${hour}:${minute}`
     }
   }
 }
