@@ -9,7 +9,7 @@ class Adopcion(db.Model):
     descripcion = db.Column(db.String(255), nullable=False)
     estado_adopcion = db.Column(db.Enum(EstadoAdopcion), nullable=False)
     
-    fecha_creacion   = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    fecha_creacion   = db.Column(db.DateTime, nullable=False, default=datetime.now())
     #ForeignKey apuntando a mascotas.id
     mascota_id = db.Column( db.Integer, db.ForeignKey('mascotas.id',ondelete='CASCADE'), nullable=False)
     mascota = db.relationship('Mascota', passive_deletes=True)
@@ -32,7 +32,7 @@ class Adopcion(db.Model):
        self.dueño_anterior_id = dueño_anterior_id
        self.dueño_nuevo_id    = dueño_nuevo_id
        self.estado_adopcion   = estado_adopcion
-       self.fecha_creacion    = datetime.utcnow()
+       self.fecha_creacion    = datetime.now()
 
     def __repr__(self):
         return f"<Adopcion(descripcion='{self.descripcion}', estado='{self.estado_adopcion}')>"
