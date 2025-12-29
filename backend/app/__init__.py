@@ -4,6 +4,9 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+import asyncio
+from app_SpacePyCl.routes.config import SpaceClient
+import atexit
 
 from .routes import auth as auth_blueprint
 from .routes.clinicas import clinicas_bp
@@ -62,6 +65,34 @@ def create_app():
         from .models import Usuario
         print("Subclases de Usuario registradas:", Usuario.__subclasses__())
         db.create_all()
+    
+    
+    ## EVENT LOOP + CLIENTE GLOBAL POR APP
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    app.async_loop = loop
+
+    # Crea el cliente y servicios que lo usan
+    app.space_client = SpaceClient(url="http://localhost:5403", api_key="57ab59b541bafc971b7588a192661ed01e3e354a9f1464f868e28a4b66931b01")
+
+    # helper para usar funciones async desde las rutas sync
+    def run_async(coro):
+        return app.async_loop.run_until_complete(coro)
+
+    app.run_async = run_async
+    
+        # Función de cierre
+    def shutdown_space_client():
+        print("Cerrando SpaceClient...")
+        try:
+            app.run_async(app.space_client.close())
+        finally:
+            app.async_loop.close()
+
+    app.shutdown_space_client = shutdown_space_client
+
+    # Se llamará automáticamente cuando el proceso termine
+    atexit.register(shutdown_space_client)
 
     return app
 
