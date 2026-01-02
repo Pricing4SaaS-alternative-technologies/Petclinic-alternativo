@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from datetime import date, datetime
 from app.extensions import db
 from app.models.visita import Visita
 from app.models.mascota import Mascota
@@ -31,15 +32,28 @@ def get_visitas(clinica_id, usuario_id, mascota_id):
 @visitas_bp.route('', methods=['POST'])
 @jwt_required()
 def crear_visita(clinica_id, usuario_id, mascota_id):
-    get_mascota(clinica_id, usuario_id, mascota_id)
-    json = request.get_json()
-    vet_id = get_jwt_identity()
-    v = Visita(
-        json.get('date_time'),    # será el parámetro “fecha”
-        json.get('description'),  # será “descripcion”
-        mascota_id
-    )
-    v.veterinario_id = vet_id
+    data       = request.get_json() or {}
+    fecha_str  = data.get('date_time')
+    descripcion= data.get('description','').strip()
+
+    # validación fecha+hora
+    if not fecha_str:
+        return jsonify({'msg':'Fecha y hora requerida'}), 400
+    try:
+        fecha_dt = datetime.fromisoformat(fecha_str)
+    except ValueError:
+        return jsonify({'msg':'Formato de fecha y hora inválido (YYYY-MM-DDThh:mm)'}), 400
+    if fecha_dt < datetime.now():
+        return jsonify({'msg':'La fecha y hora no puede ser anterior al momento actual'}), 400
+
+    # validación descripción...
+    if not descripcion:
+        return jsonify({'msg':'Descripción requerida'}), 400
+    if len(descripcion) > 255:
+        return jsonify({'msg':'La descripción no puede tener más de 255 caracteres'}), 400
+
+    v = Visita(fecha_dt, descripcion, mascota_id)
+    v.veterinario_id = get_jwt_identity()
     db.session.add(v)
     db.session.commit()
     return jsonify({'id': v.id}), 201
@@ -48,12 +62,33 @@ def crear_visita(clinica_id, usuario_id, mascota_id):
 @jwt_required()
 def actualizar_visita(clinica_id, usuario_id, mascota_id, visita_id):
     get_mascota(clinica_id, usuario_id, mascota_id)
-    v = Visita.query.filter_by(id=visita_id, mascota_id=mascota_id).first_or_404()
-    json = request.get_json()
-    if 'date_time' in json:    v.date_time = json['date_time']
-    if 'description' in json:   v.description = json['description']
+    v    = Visita.query.filter_by(id=visita_id, mascota_id=mascota_id).first_or_404()
+    data = request.get_json() or {}
+
+    # fecha+hora
+    if 'date_time' in data:
+        fecha_str = data.get('date_time')
+        if not fecha_str:
+            return jsonify({'msg':'Fecha y hora requerida'}), 400
+        try:
+            fecha_dt = datetime.fromisoformat(fecha_str)
+        except ValueError:
+            return jsonify({'msg':'Formato de fecha y hora inválido (YYYY-MM-DDThh:mm)'}), 400
+        if fecha_dt < datetime.now():
+            return jsonify({'msg':'La fecha y hora no puede ser anterior al momento actual'}), 400
+        v.date_time = fecha_dt
+
+    # descripción…
+    if 'description' in data:
+        desc = data.get('description','').strip()
+        if not desc:
+            return jsonify({'msg':'Descripción requerida'}), 400
+        if len(desc) > 255:
+            return jsonify({'msg':'La descripción no puede tener más de 255 caracteres'}), 400
+        v.description = desc
+
     db.session.commit()
-    return jsonify({'msg': 'Actualizada'}), 200
+    return jsonify({'msg':'Actualizada'}), 200
 
 @visitas_bp.route('/<int:visita_id>', methods=['DELETE'])
 @jwt_required()
