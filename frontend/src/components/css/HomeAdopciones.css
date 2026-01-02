@@ -1,0 +1,122 @@
+.adopciones-container {
+  max-width: 1800px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: #f9f9f9;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+}
+.adopciones-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+.adopciones-body {
+  display: flex;
+  gap: 1rem;
+}
+.panel {
+  flex: 1;
+  background: #fff;
+  padding: 1rem;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+}
+.panel h3 {
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+.card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  background: #f1f1f1;
+  border-radius: 6px;
+  border: 1px solid #000;
+}
+.card button {
+  margin-left: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #000;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.panel.izquierda .card { background: #e8f5e9; }
+.panel.centro .card { background: #e3f2fd; }
+.panel.derecha .card { background: #fff3e0; }
+.btn-crear {
+  padding: 0.5rem 1.2rem;
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.btn-crear:hover {
+  background-color: #45a049;
+}
+.no-data {
+  text-align: center;
+  color: #777;
+  margin-top: 1rem;
+}
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 400px;
+}
+.modal label {
+  display: block;
+  margin-top: 1rem;
+  font-weight: bold;
+  color: #333;
+}
+.modal select,
+.modal input {
+  width: 100%;
+  padding: 0.5rem;
+  margin-top: 0.3rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.2rem;
+}
+.modal-buttons button {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-left: 0.5rem;
+}
+.modal-buttons .cancelar {
+  background: #f44336;
+  color: #fff;
+}
+.modal-buttons .cancelar:hover {
+  background: #d32f2f;
+}
+.mensaje-error {
+  color: red;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+  text-align: center;
+}

@@ -1,0 +1,119 @@
+from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from datetime import date, datetime
+from app.extensions import db
+from app.models.visita import Visita
+from app.models.mascota import Mascota
+from app.models.prop_mascota import Prop_mascota
+from app.models.clinica import Clinica
+
+visitas_bp = Blueprint('visitas', __name__,
+    url_prefix='/api/clinicas/<int:clinica_id>/props_mascotas/<int:usuario_id>/mascotas/<int:mascota_id>/visitas'
+)
+
+def get_mascota(clinica_id, usuario_id, mascota_id):
+    # 1) Comprueba que la clínica existe
+    Clinica.query.get_or_404(clinica_id)
+    # 2) Comprueba que el propietario de mascota está en esa clínica
+    Prop_mascota.query.filter_by(id=usuario_id, clinica_id=clinica_id).first_or_404()
+    # 3) Recupera la mascota sólo si pertenece a ese dueño
+    return Mascota.query.filter_by(id=mascota_id, dueño_id=usuario_id).first_or_404()
+
+@visitas_bp.route('', methods=['GET'])
+@jwt_required()
+def get_visitas(clinica_id, usuario_id, mascota_id):
+    mascota = get_mascota(clinica_id, usuario_id, mascota_id)
+    data = [
+        {'id': v.id, 'date_time': v.date_time.isoformat(), 'description': v.description}
+        for v in Visita.query.filter_by(mascota_id=mascota.id)
+    ]
+    return jsonify(data), 200
+
+@visitas_bp.route('', methods=['POST'])
+@jwt_required()
+def crear_visita(clinica_id, usuario_id, mascota_id):
+    data       = request.get_json() or {}
+    fecha_str  = data.get('date_time')
+    descripcion= data.get('description','').strip()
+
+    # validación fecha+hora
+    if not fecha_str:
+        return jsonify({'msg':'Fecha y hora requerida'}), 400
+    try:
+        fecha_dt = datetime.fromisoformat(fecha_str)
+    except ValueError:
+        return jsonify({'msg':'Formato de fecha y hora inválido (YYYY-MM-DDThh:mm)'}), 400
+    if fecha_dt < datetime.now():
+        return jsonify({'msg':'La fecha y hora no puede ser anterior al momento actual'}), 400
+
+    # validación descripción...
+    if not descripcion:
+        return jsonify({'msg':'Descripción requerida'}), 400
+    if len(descripcion) > 255:
+        return jsonify({'msg':'La descripción no puede tener más de 255 caracteres'}), 400
+
+    v = Visita(fecha_dt, descripcion, mascota_id)
+    v.veterinario_id = get_jwt_identity()
+    db.session.add(v)
+    db.session.commit()
+    return jsonify({'id': v.id}), 201
+
+@visitas_bp.route('/<int:visita_id>', methods=['PATCH'])
+@jwt_required()
+def actualizar_visita(clinica_id, usuario_id, mascota_id, visita_id):
+    get_mascota(clinica_id, usuario_id, mascota_id)
+    v    = Visita.query.filter_by(id=visita_id, mascota_id=mascota_id).first_or_404()
+    data = request.get_json() or {}
+
+    # fecha+hora
+    if 'date_time' in data:
+        fecha_str = data.get('date_time')
+        if not fecha_str:
+            return jsonify({'msg':'Fecha y hora requerida'}), 400
+        try:
+            fecha_dt = datetime.fromisoformat(fecha_str)
+        except ValueError:
+            return jsonify({'msg':'Formato de fecha y hora inválido (YYYY-MM-DDThh:mm)'}), 400
+        if fecha_dt < datetime.now():
+            return jsonify({'msg':'La fecha y hora no puede ser anterior al momento actual'}), 400
+        v.date_time = fecha_dt
+
+    # descripción…
+    if 'description' in data:
+        desc = data.get('description','').strip()
+        if not desc:
+            return jsonify({'msg':'Descripción requerida'}), 400
+        if len(desc) > 255:
+            return jsonify({'msg':'La descripción no puede tener más de 255 caracteres'}), 400
+        v.description = desc
+
+    db.session.commit()
+    return jsonify({'msg':'Actualizada'}), 200
+
+@visitas_bp.route('/<int:visita_id>', methods=['DELETE'])
+@jwt_required()
+def eliminar_visita(clinica_id, usuario_id, mascota_id, visita_id):
+    get_mascota(clinica_id, usuario_id, mascota_id)
+    v = Visita.query.filter_by(id=visita_id, mascota_id=mascota_id).first_or_404()
+    db.session.delete(v)
+    db.session.commit()
+    return jsonify({'msg': 'Eliminada'}), 200
+
+@visitas_bp.route('/props_mascotas', methods=['GET'])
+@jwt_required()
+def listar_propietarios(clinica_id, usuario_id, mascota_id=None):
+    Clinica.query.get_or_404(clinica_id)
+    return jsonify([
+        {'id': p.id, 'usuario': p.usuario}
+        for p in Prop_mascota.query.filter_by(clinica_id=clinica_id).all()
+    ]), 200
+
+# lista de mascotas de un propietario dentro de la clínica
+@visitas_bp.route('/props_mascotas/<int:prop_id>/mascotas', methods=['GET'])
+@jwt_required()
+def listar_mascotas_propietario(clinica_id, usuario_id, prop_id):
+    get_mascota(clinica_id, usuario_id, None)  # valida existencia de clínica y prop
+    return jsonify([
+        {'id': m.id, 'nombre': m.nombre}
+        for m in Mascota.query.filter_by(dueño_id=prop_id).all()
+    ]), 200
