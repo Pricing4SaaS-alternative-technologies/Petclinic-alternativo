@@ -19,11 +19,6 @@ class EstadoAdopcion(enum.Enum):
     PENDIENTE = "pendiente"
     APROBADA = "aprobada"
     RECHAZADA = "rechazada"
-    
-class Plan(enum.Enum):
-    BASIC = "basic"
-    GOLD = "gold"
-    PREMIUM = "premium"
 
 class EstadoConsulta(enum.Enum):
     PENDIENTE = "pendiente"

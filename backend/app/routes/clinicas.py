@@ -3,7 +3,7 @@ from app.models.clinica import Clinica
 from app.models.usuario import Usuario
 from app.models.veterinario import Veterinario
 from app.models.prop_mascota import Prop_mascota
-from app.models.enums import TipoUsuarioEnum, Plan
+from app.models.enums import TipoUsuarioEnum
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 clinicas_bp = Blueprint('clinicas', __name__, url_prefix='/api/clinicas')
@@ -31,7 +31,6 @@ def get_clinicas():
                 'nombre': c.nombre,
                 'direccion': c.direccion,
                 'telefono': c.telefono,
-                'plan': c.plan.value,
                 'propietario': c.propietario
             }
             for c in clinicas
@@ -55,7 +54,6 @@ def get_clinicas_by_propietario(propietario_id):
             'nombre': c.nombre,
             'direccion': c.direccion,
             'telefono': c.telefono,
-            'plan': c.plan.value
         }
         for c in clinicas
     ]), 200
@@ -139,7 +137,7 @@ def edit_clinica(clinica_id):
         except Exception as e:
             return jsonify({'message': str(e)}), 500      
 
-
+'''
 @clinicas_bp.route('/cambiar-plan/<int:clinica_id>', methods=['POST'])
 @jwt_required()
 def cambiar_plan(clinica_id):
@@ -166,7 +164,7 @@ def cambiar_plan(clinica_id):
             return jsonify({'message': 'Plan de la clinica actualizado'}), 200
         except Exception as e:
             return jsonify({'message': str(e)}), 500  
-
+'''
 
 @clinicas_bp.route('/eliminar/<int:clinica_id>', methods=['DELETE'])
 @jwt_required()

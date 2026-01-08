@@ -11,7 +11,7 @@ import { useRouter } from 'vue-router'
           <h3>{{ clinica.nombre }}</h3>
           <p><strong>Dirección:</strong> {{ clinica.direccion }}</p>
           <p><strong>Teléfono:</strong> {{ clinica.telefono }}</p>
-          <p><strong>Plan:</strong> {{ clinica.plan }}</p>
+          <p><strong>Plan:</strong> {{plan.subscriptionPlans}}</p>
           <button class="boton-grande" @click="iniciaEdicion(clinica)">Editar clinica</button>
           <button class="boton-grande" @click="eliminarClinica(clinica)">Borrar clinica</button>
         </div>
@@ -93,7 +93,9 @@ export default {
         telefono: ''
       },
       errorCreacion: '',
-      errorEdicion: ''
+      errorEdicion: '',
+      plan: ''
+
     }
   },
   created () {
@@ -120,6 +122,7 @@ export default {
         }
         this.jwtValido = true
         this.fetchClinicasPropias()
+        this.obtenerPlan()
       } catch (e) {
         console.error('Error al parsear el usuario:', e)
         this.jwtValido = false
@@ -220,6 +223,18 @@ export default {
         }
       } else {
         alert('No tienes permiso para editar clínicas.')
+      }
+    },
+    async obtenerPlan () {
+      if (this.jwtValido) {
+        try {
+          const plan = await api.get(`http://localhost:5000/api/contratos/getContract/${this.info_usuario.id}`)
+          console.log(plan.data.subscriptionPlans)
+          this.plan = plan.data
+        } catch (error) {
+          this.errorEdicion = 'Error al mostrar plan'
+          console.error('Error al mostrar plan', error.message, error)
+        }
       }
     }
   }
