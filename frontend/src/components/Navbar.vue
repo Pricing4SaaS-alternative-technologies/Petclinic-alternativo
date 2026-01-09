@@ -62,6 +62,7 @@ export default {
       return tipo ? tipo.toLowerCase() : ''
     },
     logout () {
+      // eliminamos tokens(el token de precios deberá ser eliminado tambien si esta)
       localStorage.removeItem('jwt')
       localStorage.removeItem('user')
       this.loggedIn = false

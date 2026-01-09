@@ -3,7 +3,7 @@ import { useRouter } from 'vue-router'
   <div class="clinicas-container">
     <h2>Consulta aquí tus clínicas</h2>
 
-    <div v-if="jwtValido">
+    <div v-if="jwtValido && has_plan">
       <button class="boton-grande" @click="modalCreacion = true">Añadir Clínica</button>
       <div v-if="clinicas.length > 0" class="clinica-list">
 
@@ -16,12 +16,13 @@ import { useRouter } from 'vue-router'
           <button class="boton-grande" @click="eliminarClinica(clinica)">Borrar clinica</button>
         </div>
       </div>
-
       <div v-else class="sin-clinicas">
-        <p>No tienes clínicas registradas.</p>
+        <p>No tienes clinicas asociadas.</p>
       </div>
     </div>
-
+    <div v-else-if="!has_plan">
+        <p>NO TIENES UN PLAN JAJAJAJAJAJ TONTO TONTO TITNTNTO</p>
+    </div>
     <div v-else class="no-auth">
       <p class="error">No estás autorizado para ver esta información.</p>
     </div>
@@ -94,7 +95,8 @@ export default {
       },
       errorCreacion: '',
       errorEdicion: '',
-      plan: ''
+      plan: '',
+      has_plan: false
 
     }
   },
@@ -229,8 +231,11 @@ export default {
       if (this.jwtValido) {
         try {
           const plan = await api.get(`http://localhost:5000/api/contratos/getContract/${this.info_usuario.id}`)
-          console.log(plan.data.subscriptionPlans)
-          this.plan = plan.data
+          console.log('PLAN', plan.data)
+          if (plan.data !== '') {
+            this.has_plan = true
+            this.plan = plan.data
+          }
         } catch (error) {
           this.errorEdicion = 'Error al mostrar plan'
           console.error('Error al mostrar plan', error.message, error)
