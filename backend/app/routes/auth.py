@@ -1,4 +1,6 @@
 # backend/app/routes/auth.py
+from .clinicas import get_propietario_clinica
+from .contratos import getContratoUsuario
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
@@ -77,7 +79,7 @@ def login():
     data = request.get_json()
     user_o_mail = data.get('usuario_o_email')
     contraseña = data.get('contraseña')
-
+    contrato = None
     if not user_o_mail or not contraseña:
         return jsonify({'message': 'Faltan datos'}), 400
 
@@ -94,13 +96,21 @@ def login():
         'email': usuario.email,
         'tipo': usuario.tipo_usuario.value
     }
-    if usuario.tipo_usuario in (TipoUsuarioEnum.VETERINARIO, TipoUsuarioEnum.PROP_MASCOTA):
+    if(usuario.tipo_usuario == TipoUsuarioEnum.PROP_CLINICA):
+        contrato = getContratoUsuario(usuario.id)
+    elif usuario.tipo_usuario in (TipoUsuarioEnum.VETERINARIO, TipoUsuarioEnum.PROP_MASCOTA):
+        
+        prop_clinica = get_propietario_clinica(usuario.clinica_id)
+        contrato = getContratoUsuario(prop_clinica.id)
+        
         usuario_payload['clinica_id'] = usuario.clinica_id
+        usuario_payload['prop_clinica_id'] = prop_clinica.id
 
     return jsonify({
         'message': 'Login exitoso',
         'access_token': access_token,
-        'usuario': usuario_payload
+        'usuario': usuario_payload,
+        'contrato': contrato
     }), 200
 
 

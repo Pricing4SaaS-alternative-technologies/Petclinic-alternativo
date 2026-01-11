@@ -46,7 +46,6 @@
 </template>
 
 <script>
-import api from '../api/axios'
 
 export default {
   name: 'Navbar',
@@ -54,16 +53,30 @@ export default {
     // no llamar a getPlan aquí porque es async
     return {
       loggedIn: !!localStorage.getItem('jwt'), // Estado inicial basado en el token
-      usuarioActual: this.getUsuarioActual(),
-      userTipo: this.getUserTipo(),
-      plan: '',
+      usuarioActual: '',
+      userTipo: '',
+      plan: null,
       has_plan: false
     }
   },
   methods: {
-    getUsuarioActual () { // Sacamos el usuario completo, podemos explotarlo con todos sus atributos
-      const user = localStorage.getItem('user')
-      return user ? JSON.parse(user) : ''
+
+    checkAuth () {
+      const token = localStorage.getItem('jwt')
+      const rawUser = localStorage.getItem('user')
+      const rawContrato = localStorage.getItem('contrato')
+      const parsedContrato = rawContrato ? JSON.parse(rawContrato) : null
+      if (!token || !rawUser) {
+        this.loggedIn = false
+        return
+      }
+      this.usuarioActual = JSON.parse(rawUser)
+      this.userTipo = this.getUserTipo()
+      if (parsedContrato !== null && parsedContrato !== '') {
+        this.plan = parsedContrato
+        this.has_plan = true
+      }
+      this.loggedIn = true
     },
     getUserTipo () {
       const raw = localStorage.getItem('user')
@@ -72,30 +85,13 @@ export default {
       const tipo = u.tipo
       return tipo ? tipo.toLowerCase() : ''
     },
-    async getPlan () {
-      try {
-        let plan = this.plan
-        if (this.userTipo === 'prop_clinica') {
-          plan = await api.get(`http://localhost:5000/api/contratos/getContract/${this.usuarioActual.id}`)
-          console.log('Navbar - plan obtenido:', plan.data)
-        } else {
-          const clinica = ''// no implementado aun en backend
-          plan = await api.get(`http://localhost:5000/api/contratos/getContract/${clinica.data.propietario_id}`) // obtenemos el plan de la clinica a la que pertenece el veterinario
-        }
-        if (plan.data !== '') {
-          this.plan = plan.data.nombre_plan
-          this.has_plan = true
-        }
-      } catch (err) {
-        console.error('Error al obtener el plan:', err)
-      }
-    },
     logout () {
       // eliminamos tokens(el token de precios deberá ser eliminado tambien si esta)
       localStorage.removeItem('jwt')
       localStorage.removeItem('user')
-      this.loggedIn = false
-      this.usuarioActual = ''
+      localStorage.removeItem('contrato')
+      // this.loggedIn = false
+      // this.usuarioActual = ''
       window.dispatchEvent(new Event('logout'))
 
       // nos cargamos el error de la consola de duplicateNav
@@ -104,32 +100,21 @@ export default {
       }
     },
     // manejamos el inicio de sesión y cierre de sesión
-    handleLogin () {
-      this.loggedIn = true
-      this.usuarioActual = this.getUsuarioActual()
-      console.log('Usuario en localStorage:', localStorage.getItem('user'))
-      this.userTipo = this.getUserTipo()
-      this.getPlan() // generamos la información del plan
-      console.log(this.userTipo)
-    },
     handleLogout () {
       this.loggedIn = false
       this.usuarioActual = ''
       this.userTipo = ''
       this.has_plan = false
-      this.plan = ''
+      this.plan = null
     }
   },
   created () {
-    window.addEventListener('login', this.handleLogin)
+    this.checkAuth()
+    window.addEventListener('login', this.checkAuth)
     window.addEventListener('logout', this.handleLogout)
-    const user = localStorage.getItem('user')
-    this.usuarioActual = user ? JSON.parse(user) : ''
-    this.userTipo = this.getUserTipo()
-    this.getPlan()// generamos la información del plan
   },
   beforeUnmount () {
-    window.removeEventListener('login', this.handleLogin)
+    window.removeEventListener('login', this.checkAuth)
     window.removeEventListener('logout', this.handleLogout)
   }
 }

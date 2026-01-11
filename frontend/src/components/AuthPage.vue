@@ -172,9 +172,10 @@ export default {
       this.loginError = ''
       try {
         const response = await api.post('http://localhost:5000/api/auth/login', this.loginForm)
+        console.log('Login successful', response.data.contrato)
         localStorage.setItem('jwt', response.data.access_token)
         localStorage.setItem('user', JSON.stringify(response.data.usuario))
-        // introducir en el localstorage información sobre el plan actual que tiene el usuario
+        localStorage.setItem('contrato', JSON.stringify(response.data.contrato))
         window.dispatchEvent(new Event('login'))
         this.$router.push('/')
       } catch (error) {

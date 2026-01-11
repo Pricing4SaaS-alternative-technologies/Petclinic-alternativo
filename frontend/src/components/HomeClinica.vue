@@ -21,7 +21,7 @@ import { useRouter } from 'vue-router'
       </div>
     </div>
     <div v-else-if="!has_plan">
-        <p>NO TIENES UN PLAN JAJAJAJAJAJ TONTO TONTO TITNTNTO</p>
+        <p>No tienes un contrato activo, contrata un plan para acceder a las funciones</p>
     </div>
     <div v-else class="no-auth">
       <p class="error">No estás autorizado para ver esta información.</p>
@@ -95,7 +95,7 @@ export default {
       },
       errorCreacion: '',
       errorEdicion: '',
-      plan: '',
+      plan: null,
       has_plan: false
 
     }
@@ -111,6 +111,9 @@ export default {
     checkAuth () {
       const token = localStorage.getItem('jwt')
       const rawUser = localStorage.getItem('user')
+      const rawContrato = localStorage.getItem('contrato')
+      const parsedContrato = rawContrato ? JSON.parse(rawContrato) : null
+
       if (!token || !rawUser) {
         this.jwtValido = false
         return
@@ -124,7 +127,10 @@ export default {
         }
         this.jwtValido = true
         this.fetchClinicasPropias()
-        this.obtenerPlan()
+        if (parsedContrato !== null && parsedContrato !== '') {
+          this.plan = parsedContrato
+          this.has_plan = true
+        }
       } catch (e) {
         console.error('Error al parsear el usuario:', e)
         this.jwtValido = false
@@ -157,7 +163,7 @@ export default {
         return
       }
 
-      if (this.jwtValido) {
+      if (this.jwtValido && this.has_plan) {
         const payload = { ...this.clinicaForm }
         try {
           await api.post('http://localhost:5000/api/clinicas/crear', payload)
@@ -173,7 +179,7 @@ export default {
       }
     },
     async eliminarClinica (clinica) {
-      if (this.jwtValido) {
+      if (this.jwtValido && this.has_plan) {
         if (confirm(`¿Estás seguro de que quieres eliminar la clínica ${clinica.nombre}?`)) {
           try {
             await api.delete(`http://localhost:5000/api/clinicas/eliminar/${clinica.id}`)
@@ -187,7 +193,7 @@ export default {
       }
     },
     iniciaEdicion (clinica) {
-      if (this.jwtValido) {
+      if (this.jwtValido && this.has_plan) {
         this.clinicaSeleccionada = clinica
         this.clinicaForm = { ...clinica }
         this.modalEdicion = true
@@ -212,7 +218,7 @@ export default {
         return
       }
 
-      if (this.jwtValido) {
+      if (this.jwtValido && this.has_plan) {
         try {
           const payload = { ...this.clinicaForm }
           await api.put(`http://localhost:5000/api/clinicas/editar/${this.clinicaSeleccionada.id}`, payload)
@@ -225,21 +231,6 @@ export default {
         }
       } else {
         alert('No tienes permiso para editar clínicas.')
-      }
-    },
-    async obtenerPlan () {
-      if (this.jwtValido) {
-        try {
-          const plan = await api.get(`http://localhost:5000/api/contratos/getContract/${this.info_usuario.id}`)
-          console.log('PLAN', plan.data)
-          if (plan.data !== '') {
-            this.has_plan = true
-            this.plan = plan.data
-          }
-        } catch (error) {
-          this.errorEdicion = 'Error al mostrar plan'
-          console.error('Error al mostrar plan', error.message, error)
-        }
       }
     }
   }

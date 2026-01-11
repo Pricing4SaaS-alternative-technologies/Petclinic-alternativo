@@ -7,7 +7,6 @@ from app.models.enums import TipoUsuarioEnum
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 clinicas_bp = Blueprint('clinicas', __name__, url_prefix='/api/clinicas')
-#generar  ruta para clinica por id
 
 @clinicas_bp.route('/listar-todas', methods=['GET'])
 @jwt_required(optional=True)
@@ -36,6 +35,15 @@ def get_clinicas():
             }
             for c in clinicas
         ])
+# Metodo auxiliar para obtención de propietario de una clinica en base a un clinic_id
+def get_propietario_clinica(clinica_id):
+    clinica = Clinica.query.filter_by(id=clinica_id).first()
+    if not clinica:
+        raise ValueError("La clínica no existe") 
+    propietario = Usuario.query.filter_by(id=clinica.propietario_id).first()
+    if not propietario:
+        return ValueError("El propietario de la clínica no existe")
+    return propietario
 
 @clinicas_bp.route('/listar/<int:propietario_id>', methods=['GET'])
 @jwt_required()

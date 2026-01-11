@@ -14,10 +14,9 @@ def getContratoUsuario(user_id):
         contract = current_app.run_async(space_client.contracts.get_user_id_contract(user_id))
     except Exception as e:
         if(e.status == 404):
-            contract = ''
+            contract = None
         else:
             raise
-    #manejar casos en los que no se encuentra contrato(devuelve 404, pero el run async tira 500)
     return contract
 
 @contratos.route('/createContract', methods=['POST'])
