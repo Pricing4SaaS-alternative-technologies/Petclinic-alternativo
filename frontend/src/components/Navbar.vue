@@ -1,42 +1,48 @@
 <template>
-  <nav class="navbar">
-    <div class="nav-links">
-      <router-link to="/" class="nav-logo-link">
-        <img src="@/assets/logo.png" alt="Logo" class="nav-logo" style="height: 3rem; margin: 0 0.5rem;" />
-      </router-link>
-      <!-- Mostrar “Visitas” solo para veterinarios -->
+  <div class="navbar-container">
+    <!-- Barra superior oscura -->
+    <nav class="navbar-top">
+      <div class="navbar-logo">
+        <router-link to="/" class="nav-logo-link">
+          <img src="@/assets/logo.png" alt="Logo" class="nav-logo" />
+        </router-link>
+      </div>
+      <div v-if="!loggedIn" class="nav-links-right">
+        <router-link to="/auth" class="nav-link">Login</router-link>
+      </div>
+      <!-- Muestra el nombre de usuario y el botón de logout si está logueado -->
+      <div v-if="loggedIn" class="user-info">
+        <span class="usuario">Hola, {{ usuarioActual }}</span>
+        <button class="logout" @click="logout">Cerrar sesión</button>
+      </div>
+    </nav>
+
+    <!-- Columna lateral gris -->
+    <div v-if="loggedIn" class="sidebar">
+      <!-- Mostrar "Visitas" solo para veterinarios -->
       <router-link
-        v-if="loggedIn && userTipo === 'veterinario'"
+        v-if="userTipo === 'veterinario'"
         to="/visitas"
-        class="nav-link"
+        class="sidebar-link"
       >
         Visitas
       </router-link>
       <router-link
-        v-if="loggedIn && userTipo === 'prop_mascota'"
+        v-if="userTipo === 'prop_mascota'"
         to="/mis-visitas"
-        class="nav-link"
+        class="sidebar-link"
       >
-        Mis visitas
+        Vet visits
       </router-link>
       <router-link
-        v-if="loggedIn && userTipo==='prop_mascota'"
+        v-if="userTipo==='prop_mascota'"
         to="/adopciones"
-        class="nav-link"
+        class="sidebar-link"
       >
-        Adopciones
+        Adoptions
       </router-link>
     </div>
-    <div v-if="!loggedIn" class="nav-links-right" style="margin-right: 1rem;">
-      <router-link to="/auth" class="nav-link">Login</router-link>
-    </div>
-
-    <!-- Muestra el nombre de usuario y el botón de logout si está logueado -->
-    <div v-if="loggedIn" class="user-info">
-      <span class="usuario">Hola, {{ usuarioActual }}</span>
-      <button class="logout" @click="logout">Cerrar sesión</button>
-    </div>
-  </nav>
+  </div>
 </template>
 
 <script>

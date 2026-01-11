@@ -1,25 +1,53 @@
-.navbar {
+.navbar-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.navbar-top {
   background-color: #333;
   height: 5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0;
+  padding: 0 1rem;
   margin: 0;
   width: 100%;
   box-sizing: border-box;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
 }
 
-.nav-links {
+.navbar-logo {
   display: flex;
-  gap: 0.5rem;
+  align-items: center;
+}
+
+.nav-logo-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.nav-logo {
+  height: 3rem;
+  margin: 0;
+}
+
+.nav-links-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-right: 1rem;
 }
 
 .nav-link {
   color: #fff;
   text-decoration: none;
-  margin: 0;                /* eliminamos márgenes laterales */
-  padding: 0 1rem;          /* opcional: espacio interno para clic */
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
 }
 
 .nav-link:hover {
@@ -29,11 +57,11 @@
 .user-info {
   display: flex;
   align-items: center;
+  gap: 1rem;
 }
 
 .usuario {
   color: white;
-  margin-right: 1rem;
   font-size: 1rem;
 }
 
@@ -43,9 +71,45 @@
   border: none;
   font-size: 1rem;
   cursor: pointer;
-  margin-right: 1rem;
+  padding: 0;
 }
 
 .logout:hover {
   text-decoration: underline;
 }
+
+.sidebar {
+  background-color: #c0c0c0;
+  width: 190px;
+  min-height: calc(100vh - 5rem);
+  display: flex;
+  flex-direction: column;
+  padding-top: 0;
+  position: fixed;
+  left: 0;
+  top: 5rem;
+  box-sizing: border-box;
+  z-index: 99;
+}
+
+.sidebar-link {
+  color: #333;
+  text-decoration: none;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #aaa;
+  font-size: 1rem;
+  display: block;
+  transition: background-color 0.2s;
+}
+
+.sidebar-link:hover {
+  background-color: #a9a9a9;
+  text-decoration: none;
+}
+
+.sidebar-link.router-link-active {
+  background-color: #888;
+  color: white;
+  font-weight: bold;
+}
+
