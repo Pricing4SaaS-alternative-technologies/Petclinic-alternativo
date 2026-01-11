@@ -172,9 +172,9 @@ export default {
       this.loginError = ''
       try {
         const response = await api.post('http://localhost:5000/api/auth/login', this.loginForm)
-        // Actualizar para generar el token de precios una vez que iniciemos sesión si somos prop_clinica(vigilar que el propietario loggeado tenga suscripción)
         localStorage.setItem('jwt', response.data.access_token)
         localStorage.setItem('user', JSON.stringify(response.data.usuario))
+        // introducir en el localstorage información sobre el plan actual que tiene el usuario
         window.dispatchEvent(new Event('login'))
         this.$router.push('/')
       } catch (error) {

@@ -71,7 +71,7 @@ def register():
     user.save()
     return jsonify({'message': f'{tipo_enum.value.capitalize()} registrado con éxito'}), 201
 
-
+# meter el plan de precios que tiene contratado en ese momento como respuesta
 @auth.route('/login', methods=['POST'])
 def login():
     data = request.get_json()

@@ -7,6 +7,7 @@ from app.models.enums import TipoUsuarioEnum
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 clinicas_bp = Blueprint('clinicas', __name__, url_prefix='/api/clinicas')
+#generar  ruta para clinica por id
 
 @clinicas_bp.route('/listar-todas', methods=['GET'])
 @jwt_required(optional=True)
