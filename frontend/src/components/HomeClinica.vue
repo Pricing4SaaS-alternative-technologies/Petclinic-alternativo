@@ -11,7 +11,7 @@ import { useRouter } from 'vue-router'
           <h3>{{ clinica.nombre }}</h3>
           <p><strong>Dirección:</strong> {{ clinica.direccion }}</p>
           <p><strong>Teléfono:</strong> {{ clinica.telefono }}</p>
-          <p><strong>Plan:</strong> {{plan.subscriptionPlans}}</p>
+          <p><strong>Plan:</strong> {{plan.subscriptionPlans["petclinic"]}}</p>
           <button class="boton-grande" @click="iniciaEdicion(clinica)">Editar clinica</button>
           <button class="boton-grande" @click="eliminarClinica(clinica)">Borrar clinica</button>
         </div>

@@ -34,10 +34,10 @@
     <!-- Muestra el nombre de usuario y el botón de logout si está logueado -->
     <div v-if="loggedIn" class="user-info">
       <span class="usuario">Hola, {{ usuarioActual.usuario }}</span>
-      <span v-if="userTipo === 'prop_clinica' && has_plan" class="user-info">
-        Plan: {{ plan }}
+      <span v-if="userTipo === 'prop_clinica' && has_plan" class="usuario">
+        Plan: {{ plan.subscriptionPlans["petclinic"]}}
       </span>
-      <span v-else-if="userTipo === 'prop_clinica' && !has_plan" class="user-info">
+      <span v-else-if="userTipo === 'prop_clinica' && !has_plan" class="usuario">
         Sin plan activo
       </span>
       <button class="logout" @click="logout">Cerrar sesión</button>
