@@ -8,6 +8,7 @@ contratos = Blueprint('contratos', __name__, url_prefix='/api/contratos')
 
 @contratos.route('/getContract/<int:user_id>', methods=['GET'])
 @jwt_required(optional=True)
+# TODO revisar jwtRequired para esta ruta, se usa en el login y no tenemos info ahora mismo en esa variable
 def getContratoUsuario(user_id):
     space_client = current_app.space_client
     try:
@@ -21,6 +22,7 @@ def getContratoUsuario(user_id):
 
 @contratos.route('/createContract', methods=['POST'])
 @jwt_required()
+# TODO Revisar posible incorporación del createContract en el auth_service eliminando la ruta y el jwt_required (conversion a auxiliar)
 def createContrato(data):
     id_usuario = get_jwt_identity()
     usuario = Usuario.query.filter_by(id=id_usuario).first()
@@ -30,7 +32,7 @@ def createContrato(data):
     
     data = request.get_json()
     space_client = current_app.space_client
-    contract = current_app.run_async(space_client.contracts.create_contract(data))
+    contract = current_app.run_async(space_client.contracts.add_contract(data))
     #Una vez con el contrato, le generamos el token de los pricings
     #current_app.run_async(space_client.featureEvaluators.generate_user_pricing_token(id_usuario))
     return contract
