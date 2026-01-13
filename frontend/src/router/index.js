@@ -5,6 +5,7 @@ import AuthPage from '@/components/AuthPage'
 import HomeVisitas from '@/components/HomeVisitas'
 import HomeVisitasPropietarios from '@/components/HomeVisitasPropietarios'
 import HomeAdopciones from '@/components/HomeAdopciones'
+import PricingPlans from '@/components/PricingPlans.vue'
 
 Vue.use(Router)
 
@@ -31,6 +32,10 @@ export default new Router({
     { path: '/adopciones',
       name: 'adopciones',
       component: HomeAdopciones
+    },
+    { path: '/pricing-plans',
+      name: 'pricing-plans',
+      component: PricingPlans
     }
 
   ],

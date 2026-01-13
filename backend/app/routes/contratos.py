@@ -34,3 +34,17 @@ def createContrato(data):
     #Una vez con el contrato, le generamos el token de los pricings
     #current_app.run_async(space_client.featureEvaluators.generate_user_pricing_token(id_usuario))
     return contract
+
+
+@contratos.route('services/<name>/pricing/<version>', methods=['GET'])
+@jwt_required()
+def getPlans(name, version):
+    space_client = current_app.space_client
+    try:
+        plans = current_app.run_async(space_client.service_context.get_pricing(name, version))
+    except Exception as e:
+        if(e.status == 404):
+            contract = ''
+        else:
+            raise
+    return plans
