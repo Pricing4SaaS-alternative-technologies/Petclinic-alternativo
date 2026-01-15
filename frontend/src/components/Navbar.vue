@@ -31,11 +31,10 @@
       <router-link to="/auth" class="nav-link">Login</router-link>
     </div>
 
-    <!-- Muestra el nombre de usuario y el botón de logout si está logueado -->
     <div v-if="loggedIn" class="user-info">
       <span class="usuario">Hola, {{ usuarioActual.usuario }}</span>
       <span v-if="userTipo === 'prop_clinica' && has_plan" class="usuario">
-        Plan: {{ plan.subscriptionPlans["petclinic"]}}
+        Plan: {{ contract_info.subscriptionPlans["petclinic"]}}
       </span>
       <span v-else-if="userTipo === 'prop_clinica' && !has_plan" class="usuario">
         Sin plan activo
@@ -50,12 +49,11 @@
 export default {
   name: 'Navbar',
   data () {
-    // no llamar a getPlan aquí porque es async
     return {
       loggedIn: !!localStorage.getItem('jwt'), // Estado inicial basado en el token
       usuarioActual: '',
       userTipo: '',
-      plan: null,
+      contract_info: null,
       has_plan: false
     }
   },
@@ -73,15 +71,15 @@ export default {
       this.usuarioActual = JSON.parse(rawUser)
       this.userTipo = this.getUserTipo()
       if (parsedContrato !== null && parsedContrato !== '') {
-        this.plan = parsedContrato
+        this.contract_info = parsedContrato
         this.has_plan = true
       }
       this.loggedIn = true
     },
     getUserTipo () {
-      const raw = localStorage.getItem('user')
-      if (!raw) return ''
-      const u = JSON.parse(raw)
+      const rawUser = localStorage.getItem('user')
+      if (!rawUser) return ''
+      const u = JSON.parse(rawUser)
       const tipo = u.tipo
       return tipo ? tipo.toLowerCase() : ''
     },
@@ -90,8 +88,6 @@ export default {
       localStorage.removeItem('jwt')
       localStorage.removeItem('user')
       localStorage.removeItem('contrato')
-      // this.loggedIn = false
-      // this.usuarioActual = ''
       window.dispatchEvent(new Event('logout'))
 
       // nos cargamos el error de la consola de duplicateNav
@@ -99,13 +95,12 @@ export default {
         this.$router.push('/')
       }
     },
-    // manejamos el inicio de sesión y cierre de sesión
     handleLogout () {
       this.loggedIn = false
       this.usuarioActual = ''
       this.userTipo = ''
       this.has_plan = false
-      this.plan = null
+      this.contract_info = null
     }
   },
   created () {

@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
     <h2>Consulta aquí tus clínicas</h2>
 
     <div v-if="jwtValido && has_plan">
+      <h3><strong>Plan:</strong> {{contract_info.subscriptionPlans["petclinic"]}}</h3>
       <button class="boton-grande" @click="modalCreacion = true">Añadir Clínica</button>
       <div v-if="clinicas.length > 0" class="clinica-list">
 
@@ -11,7 +12,6 @@ import { useRouter } from 'vue-router'
           <h3>{{ clinica.nombre }}</h3>
           <p><strong>Dirección:</strong> {{ clinica.direccion }}</p>
           <p><strong>Teléfono:</strong> {{ clinica.telefono }}</p>
-          <p><strong>Plan:</strong> {{plan.subscriptionPlans["petclinic"]}}</p>
           <button class="boton-grande" @click="iniciaEdicion(clinica)">Editar clinica</button>
           <button class="boton-grande" @click="eliminarClinica(clinica)">Borrar clinica</button>
         </div>
@@ -21,7 +21,7 @@ import { useRouter } from 'vue-router'
       </div>
     </div>
     <div v-else-if="!has_plan">
-        <p>No tienes un contrato activo, contrata un plan para acceder a las funciones</p>
+        <h3>No perteneces a ningun plan! Contrata uno para acceder a las funciones</h3>
     </div>
     <div v-else class="no-auth">
       <p class="error">No estás autorizado para ver esta información.</p>
@@ -95,7 +95,7 @@ export default {
       },
       errorCreacion: '',
       errorEdicion: '',
-      plan: null,
+      contract_info: null,
       has_plan: false
 
     }
@@ -128,7 +128,7 @@ export default {
         this.jwtValido = true
         this.fetchClinicasPropias()
         if (parsedContrato !== null && parsedContrato !== '') {
-          this.plan = parsedContrato
+          this.contract_info = parsedContrato
           this.has_plan = true
         }
       } catch (e) {

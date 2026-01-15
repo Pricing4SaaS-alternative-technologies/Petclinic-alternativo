@@ -85,8 +85,8 @@ export default {
     return {
       info_usuario: null,
       jwtValido: false,
-      pricingData: null,
-      currentUserPlan: null, // Esto deberías obtenerlo del backend según el usuario
+      datosPricing: null,
+      planUserActual: null, // Esto deberías obtenerlo del backend según el usuario
       errorEdicion: '',
       loading: false
     }
@@ -95,22 +95,22 @@ export default {
   computed: {
     // Computed property para los planes principales
     pricingPlans () {
-      if (!this.pricingData || !this.pricingData.plans) return {}
-      return this.pricingData.plans
+      if (!this.datosPricing || !this.datosPricing.plans) return {}
+      return this.datosPricing.plans
     },
 
     // Computed property para los add-ons
     addOns () {
-      if (!this.pricingData || !this.pricingData.addOns) return {}
-      return this.pricingData.addOns
+      if (!this.datosPricing || !this.datosPricing.addOns) return {}
+      return this.datosPricing.addOns
     },
 
     // Computed property para las descripciones de features
     featureDescriptions () {
-      if (!this.pricingData || !this.pricingData.features) return {}
+      if (!this.datosPricing || !this.datosPricing.features) return {}
       const descriptions = {}
-      Object.keys(this.pricingData.features).forEach(key => {
-        descriptions[key] = this.pricingData.features[key].description
+      Object.keys(this.datosPricing.features).forEach(key => {
+        descriptions[key] = this.datosPricing.features[key].description
       })
       return descriptions
     }
@@ -129,6 +129,8 @@ export default {
     checkAuth () {
       const token = localStorage.getItem('jwt')
       const rawUser = localStorage.getItem('user')
+      const rawContrato = localStorage.getItem('contrato')
+      const parsedContrato = rawContrato ? JSON.parse(rawContrato) : null
 
       if (!token || !rawUser) {
         this.jwtValido = false
@@ -139,8 +141,9 @@ export default {
         this.info_usuario = JSON.parse(rawUser)
         this.jwtValido = true
         this.obtenerPlanes()
-        // Aquí podrías llamar a otra función para obtener el plan actual del usuario
-        // this.obtenerPlanUsuario()
+        if (parsedContrato !== null && parsedContrato !== '') {
+          this.planUserActual = parsedContrato.subscriptionPlans['petclinic'] || null
+        }
       } catch (e) {
         console.error('Error al parsear el usuario:', e)
         this.jwtValido = false
@@ -162,7 +165,7 @@ export default {
         console.log('Datos de pricing:', response.data)
 
         if (response.data) {
-          this.pricingData = response.data
+          this.datosPricing = response.data
         } else {
           this.errorEdicion = 'No se recibieron datos de pricing'
         }
@@ -199,9 +202,7 @@ export default {
 
     // Verificar si este es el plan actual del usuario
     isCurrentPlan (planName) {
-      // Aquí deberías comparar con el plan actual del usuario
-      // Por ahora, lo dejamos como falso o puedes implementar la lógica
-      return this.currentUserPlan === planName
+      return this.planUserActual === planName
     },
 
     // Función para cambiar de plan
@@ -218,7 +219,7 @@ export default {
         console.log(`Cambiando al plan ${planName}`)
 
         // Actualizar el plan actual del usuario
-        this.currentUserPlan = planName
+        this.planUserActual = planName
 
         // Mostrar mensaje de éxito
         alert(`Plan cambiado a ${planName} exitosamente`)
