@@ -1,7 +1,7 @@
 # backend/app/routes/auth.py
 from .clinicas import get_propietario_clinica
 from .contratos import getContratoUsuario
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
 from app.models import Usuario, Prop_mascota, Veterinario, Prop_clinica
@@ -13,7 +13,7 @@ auth = Blueprint('auth', __name__, url_prefix='/api/auth')
 @auth.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
-    # print(data)
+    print("info recopilada", data)
     # datos del usuario basico
     tipo_str = data.get('tipo_usuario')
     nombre = data.get('nombre')
@@ -71,6 +71,43 @@ def register():
         return jsonify({'message': 'Error al crear el usuario'}), 500
 
     user.save()
+    
+    if tipo_enum == TipoUsuarioEnum.PROP_CLINICA:
+        try:
+            contract_data = {
+                "userContact": {
+                    "userId": str(user.id),
+                    "fistName": user.nombre,
+                    "lastName": user.apellidos,
+                    "email": user.email,
+                    "username": user.usuario
+                },
+                "billingPeriod": {
+                    "autoRenew": True,
+                    "renewalDays": 30
+                },
+                "contractedServices": {
+                    "PetClinic": "1.0.0"
+                },
+                "subscriptionPlans": {
+                    "PetClinic": "SILVER"
+                },
+                "subscriptionAddOns": {}
+            }
+            
+            print("Datos del contrato:", contract_data)
+            
+            space_client = current_app.space_client
+            resultado = current_app.run_async(space_client.contracts.add_contract(contract_data))
+            print(f"Contrato creado exitosamente: {resultado}")
+            
+        except Exception as e:
+            print(f"Error al crear contrato: {e}")
+            return jsonify({
+                'message': f'{tipo_enum.value.capitalize()} registrado, pero falló la creación del contrato',
+                'error': str(e)
+            }), 201
+        
     return jsonify({'message': f'{tipo_enum.value.capitalize()} registrado con éxito'}), 201
 
 # meter el plan de precios que tiene contratado en ese momento como respuesta
