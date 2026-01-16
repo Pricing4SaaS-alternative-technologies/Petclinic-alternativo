@@ -4,7 +4,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models.mascota import Mascota
 from app.models.usuario import Usuario
 from app.models.enums import TipoMascota
-from app.models.enums import TipoUsuarioEnum, Plan
+from app.models.enums import TipoUsuarioEnum
 from app.extensions import db
 from datetime import datetime
 

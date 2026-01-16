@@ -31,41 +31,63 @@
       <router-link to="/auth" class="nav-link">Login</router-link>
     </div>
 
-    <!-- Muestra el nombre de usuario y el botón de logout si está logueado -->
     <div v-if="loggedIn" class="user-info">
-      <span class="usuario">Hola, {{ usuarioActual }}</span>
+      <span class="usuario">Hola, {{ usuarioActual.usuario }}</span>
+      <span v-if="userTipo === 'prop_clinica' && has_plan" class="usuario">
+        Plan: {{ contract_info.subscriptionPlans["petclinic"]}}
+      </span>
+      <span v-else-if="userTipo === 'prop_clinica' && !has_plan" class="usuario">
+        Sin plan activo
+      </span>
       <button class="logout" @click="logout">Cerrar sesión</button>
     </div>
   </nav>
 </template>
 
 <script>
+
 export default {
   name: 'Navbar',
   data () {
     return {
       loggedIn: !!localStorage.getItem('jwt'), // Estado inicial basado en el token
-      usuarioActual: this.getUsuarioActual(),
-      userTipo: this.getUserTipo()
+      usuarioActual: '',
+      userTipo: '',
+      contract_info: null,
+      has_plan: false
     }
   },
   methods: {
-    getUsuarioActual () { // Con esto sacas el username. Si pones en vez de .usuario y pones otro atributo, te lo devuelve
-      const user = localStorage.getItem('user')
-      return user ? JSON.parse(user).usuario : ''
+
+    checkAuth () {
+      const token = localStorage.getItem('jwt')
+      const rawUser = localStorage.getItem('user')
+      const rawContrato = localStorage.getItem('contrato')
+      const parsedContrato = rawContrato ? JSON.parse(rawContrato) : null
+      if (!token || !rawUser) {
+        this.loggedIn = false
+        return
+      }
+      this.usuarioActual = JSON.parse(rawUser)
+      this.userTipo = this.getUserTipo()
+      if (parsedContrato !== null && parsedContrato !== '') {
+        this.contract_info = parsedContrato
+        this.has_plan = true
+      }
+      this.loggedIn = true
     },
     getUserTipo () {
-      const raw = localStorage.getItem('user')
-      if (!raw) return ''
-      const u = JSON.parse(raw)
+      const rawUser = localStorage.getItem('user')
+      if (!rawUser) return ''
+      const u = JSON.parse(rawUser)
       const tipo = u.tipo
       return tipo ? tipo.toLowerCase() : ''
     },
     logout () {
+      // eliminamos tokens(el token de precios deberá ser eliminado tambien si esta)
       localStorage.removeItem('jwt')
       localStorage.removeItem('user')
-      this.loggedIn = false
-      this.usuarioActual = ''
+      localStorage.removeItem('contrato')
       window.dispatchEvent(new Event('logout'))
 
       // nos cargamos el error de la consola de duplicateNav
@@ -73,32 +95,21 @@ export default {
         this.$router.push('/')
       }
     },
-    // manejamos el inicio de sesión y cierre de sesión
-    handleLogin () {
-      this.loggedIn = true
-      this.usuarioActual = this.getUsuarioActual()
-      console.log('Usuario en localStorage:', localStorage.getItem('user'))
-      const user = localStorage.getItem('user')
-      this.usuarioActual = user ? JSON.parse(user).usuario : ''
-      this.userTipo = this.getUserTipo()
-      const tipo = user ? JSON.parse(user).tipo : ''
-      console.log(tipo)
-    },
     handleLogout () {
       this.loggedIn = false
       this.usuarioActual = ''
       this.userTipo = ''
+      this.has_plan = false
+      this.contract_info = null
     }
   },
   created () {
-    window.addEventListener('login', this.handleLogin)
+    this.checkAuth()
+    window.addEventListener('login', this.checkAuth)
     window.addEventListener('logout', this.handleLogout)
-    const user = localStorage.getItem('user')
-    this.usuarioActual = user ? JSON.parse(user).usuario : ''
-    this.userTipo = this.getUserTipo()
   },
   beforeUnmount () {
-    window.removeEventListener('login', this.handleLogin)
+    window.removeEventListener('login', this.checkAuth)
     window.removeEventListener('logout', this.handleLogout)
   }
 }

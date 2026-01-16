@@ -11,10 +11,10 @@ INSERT IGNORE INTO usuarios (id, nombre, apellidos, usuario, email, contraseña,
 (9, 'Hector', 'Noguera','hecnoggon', 'hecnorgon@example.com', 'scrypt:32768:8:1$uh1IGF90LTfiEraD$58161931e2e2f229cd8b59b2d63820a2c50000b35faf63a0b54aa3225c6d5f74e3dbd89495fd0d011f5aa3a2cf7e89b4a22e24f923a6bd45074cefe125e2fb33', 'VETERINARIO'),
 (10, 'Admin', 'admin','admin', 'admin@example.com', 'scrypt:32768:8:1$uh1IGF90LTfiEraD$58161931e2e2f229cd8b59b2d63820a2c50000b35faf63a0b54aa3225c6d5f74e3dbd89495fd0d011f5aa3a2cf7e89b4a22e24f923a6bd45074cefe125e2fb33', 'ADMIN');
 
-INSERT IGNORE INTO clinicas (id, nombre, direccion, telefono, plan, propietario_id) VALUES
-(1, 'Clínica 1', 'Calle Veterinario 1', '954123456', 'BASIC', 4),
-(2, 'Clínica 2', 'Calle Veterinario 2', '915123456', 'GOLD', 5),
-(3, 'Clínica 3', 'Calle Veterinario 3', '934123456', 'PREMIUM', 6);
+INSERT IGNORE INTO clinicas (id, nombre, direccion, telefono, propietario_id) VALUES
+(1, 'Clínica 1', 'Calle Veterinario 1', '954123456', 4),
+(2, 'Clínica 2', 'Calle Veterinario 2', '915123456', 5),
+(3, 'Clínica 3', 'Calle Veterinario 3', '934123456', 6);
 
 INSERT IGNORE INTO habitaciones_hotel (id, tamaño, tipo, clinica_id) VALUES
 (1, 20, 'PERRO', 1),
