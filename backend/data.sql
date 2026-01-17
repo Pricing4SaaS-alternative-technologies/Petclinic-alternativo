@@ -28,10 +28,10 @@ INSERT IGNORE INTO mascotas (id, nombre, cumpleaños, tipo, dueño_id) VALUES
 (3, 'Lorito', '2021-03-10', 'PAJARO', 1),
 (4, 'Saturnino', '2023-03-10', 'HAMSTER', 3);
 
-INSERT IGNORE INTO props_clinicas (id) VALUES
-(4),
-(5),
-(6);
+INSERT IGNORE INTO props_clinicas (id, telefono) VALUES
+(4, '954123457'),
+(5, '915123458'),
+(6, '934123459');
 
 INSERT IGNORE INTO props_mascotas (id, direccion, telefono, clinica_id) VALUES
 (1, 'Calle Falsa 123', '123456789', 1),
