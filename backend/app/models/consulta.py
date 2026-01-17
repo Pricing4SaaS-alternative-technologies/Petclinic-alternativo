@@ -1,6 +1,7 @@
 from enum import Enum as PyEnum
 from app.extensions import db
 from .enums import EstadoConsulta
+from datetime import datetime
 
 class Consulta(db.Model):
     __tablename__ = 'consultas'  ## Nombre de la tabla en la BD
@@ -10,6 +11,7 @@ class Consulta(db.Model):
     descripcion = db.Column(db.String(500), nullable=False)
     comentario_clinica = db.Column(db.Boolean, nullable=False, default=False)
     estado_consulta = db.Column(db.Enum(EstadoConsulta), nullable=False, default=EstadoConsulta.PENDIENTE)
+    fecha_creacion   = db.Column(db.DateTime, nullable=False, default=datetime.now())
     
     # ref a dueño de la mascota
     dueño_id = db.Column(db.Integer, db.ForeignKey('usuarios.id', ondelete='CASCADE'), nullable=False)
@@ -32,8 +34,8 @@ class Consulta(db.Model):
         self.titulo = titulo
         self.comentario_clinica = coment_clinica
         self.estado_consulta = estado
+        self.fecha_creacion    = datetime.now()
         
-    
     def save(self):
         db.session.add(self)
         db.session.commit()
