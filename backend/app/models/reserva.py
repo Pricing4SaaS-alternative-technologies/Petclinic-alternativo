@@ -15,9 +15,11 @@ class Reserva(db.Model):
     mascota_id = db.Column(db.Integer, db.ForeignKey('mascotas.id', ondelete='CASCADE'), nullable=False)
     mascota = db.relationship('Mascota', passive_deletes=True)
 
-    def __init__(self, fecha_inicio, fecha_fin):
+    def __init__(self, fecha_inicio, fecha_fin, habitacion_id, mascota_id):
         self.fecha_inicio = fecha_inicio
         self.fecha_fin = fecha_fin
+        self.habitacion_id = habitacion_id
+        self.mascota_id = mascota_id
 
     def __repr__(self):
         return f"<Reserva(fecha_inicio='{self.fecha_inicio}', fecha_fin='{self.fecha_fin}')>"

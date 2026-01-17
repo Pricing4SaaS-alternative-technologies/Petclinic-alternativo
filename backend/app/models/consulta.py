@@ -27,11 +27,15 @@ class Consulta(db.Model):
     clinica_id = db.Column(db.Integer, db.ForeignKey('clinicas.id', ondelete='SET NULL'), nullable=True)
     clinica = db.relationship('Clinica', foreign_keys=[clinica_id])
 
-    
-    def __init__(self, titulo, coment_clinica, estado=EstadoConsulta.PENDIENTE):
+
+    def __init__(self, titulo, descripcion, coment_clinica, dueño_id, mascota_id, estado=EstadoConsulta.PENDIENTE):
         self.titulo = titulo
+        self.descripcion = descripcion
         self.comentario_clinica = coment_clinica
+        self.dueño_id = dueño_id
+        self.mascota_id = mascota_id
         self.estado_consulta = estado
+        
         
     
     def save(self):

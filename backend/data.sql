@@ -16,11 +16,11 @@ INSERT IGNORE INTO clinicas (id, nombre, direccion, telefono, propietario_id) VA
 (2, 'Clínica 2', 'Calle Veterinario 2', '915123456', 5),
 (3, 'Clínica 3', 'Calle Veterinario 3', '934123456', 6);
 
-INSERT IGNORE INTO habitaciones_hotel (id, tamaño, tipo, clinica_id) VALUES
-(1, 20, 'PERRO', 1),
-(2, 30, 'GATO', 2),
-(3, 35, 'PAJARO', 1),
-(4, 25, 'HAMSTER', 3);
+INSERT IGNORE INTO habitaciones_hotel (id, nombre, descripcion, reservable, url_imagen, tamaño, tipo, clinica_id) VALUES
+(1, 'Habitación 1', 'White Savannah', TRUE, "https://static.wikia.nocookie.net/jojo/images/e/ee/Iggy-original-anime.png/revision/latest?cb=20161001212416&path-prefix=es", 'MEDIANO', 'PERRO', 1),
+(2, 'Habitación 2', 'Hello Kitty', TRUE, null, 'ACOGEDOR', 'GATO', 2),
+(3, 'Habitación 3', 'Blue sky', TRUE, null, 'KING_SIZE', 'PAJARO', 1),
+(4, 'Habitación 4', 'Hamtaros house', TRUE, null, 'MEDIANO', 'HAMSTER', 3);
 
 INSERT IGNORE INTO mascotas (id, nombre, cumpleaños, tipo, dueño_id) VALUES
 (1, 'Roco', '2020-01-01', 'PERRO', 1),
