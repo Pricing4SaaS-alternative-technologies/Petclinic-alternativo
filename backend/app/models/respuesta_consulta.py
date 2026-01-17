@@ -8,6 +8,7 @@ class Respuesta_consulta(db.Model):
     descripcion = db.Column(db.String(100), unique=True, nullable=False)
     fecha_creacion   = db.Column(db.DateTime, nullable=False)
 
+    # Si se eliminan las consultas, se eliminan en cascada las respuestas asociadas
     consulta_id = db.Column(db.Integer, db.ForeignKey('consultas.id'), nullable=False, unique=True)
     consulta = db.relationship('Consulta', foreign_keys=[consulta_id])
 

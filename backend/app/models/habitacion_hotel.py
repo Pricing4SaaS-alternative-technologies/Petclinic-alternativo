@@ -14,9 +14,8 @@ class Habitacion_hotel(db.Model):
     tamaño = db.Column(db.Enum(TamañoHabitacion), nullable=False, default=TamañoHabitacion.MEDIANO)
     tipo = db.Column(db.Enum(TipoMascota), nullable=False) # NO SE SI AL SER NULLABLE FALSE HAY QUE PONER DEFAULT
     
-    # Foreign key a clinicas.id
+    # Si se borran las clinicas, se borran las habitaciones
     clinica_id = db.Column(db.Integer, db.ForeignKey('clinicas.id', ondelete='CASCADE'), nullable=False)
-    # Relación hacia Clinica
     clinica = db.relationship('Clinica',passive_deletes=True)
 
     

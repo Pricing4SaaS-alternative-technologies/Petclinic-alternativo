@@ -14,8 +14,7 @@ class EspecialidadEnum(enum.Enum):
     MEDICINA_INTERNA = "medicina_interna"
     REHABILITACION = "rehabilitacion"
     
-class EstadoAdopcion(enum.Enum):
-    CREADA = "creada"
+class EstadoPeticion(enum.Enum):
     PENDIENTE = "pendiente"
     APROBADA = "aprobada"
     RECHAZADA = "rechazada"

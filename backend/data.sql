@@ -50,9 +50,13 @@ INSERT IGNORE INTO visitas (id, fecha, descripcion, veterinario_id, mascota_id) 
 (2, '2023-10-02 11:00:00', 'Chequeo de salud', 8, 2),
 (3, '2023-10-03 12:00:00', 'Vacunación', 9, 3);
 
-INSERT IGNORE INTO adopciones (id, descripcion, estado_adopcion, fecha_creacion, mascota_id, dueño_nuevo_id, dueño_anterior_id) VALUES
-(1, 'Adopción de Misifú', 'CREADA', '2023-10-05 10:00:00', 2, null, 2),
-(2, 'Adopción de Lorito', 'APROBADA', '2023-10-06 10:00:00', 3, 1, 3);
+INSERT IGNORE INTO adopciones (id, descripcion, adopcion_cerrada, fecha_creacion, mascota_id, dueño_nuevo_id, dueño_anterior_id) VALUES
+(1, 'Adopción de Misifú', false, '2023-10-05 10:00:00', 2, null, 2),
+(2, 'Adopción de Lorito', true, '2023-10-06 10:00:00', 3, 1, 3);
+
+INSERT IGNORE INTO peticiones_adopcion (id, razon_adopcion, fecha_solicitud, solicitante_id, adopcion_id, estado_peticion) VALUES
+(1, 'Me gustaria mucho cuidar del pequeñajo', '2023-11-05 12:00:00', 3, 1, 'PENDIENTE'),
+(2, 'Ofrecemos una casa con espacios abiertos para que Lorito pueda volar sin angustias', '2023-10-06 14:00:00', 1, 2, 'APROBADA');
 
 INSERT IGNORE INTO consultas (id, titulo, descripcion, comentario_clinica, estado_consulta, fecha_creacion, dueño_id, vet_id, mascota_id, clinica_id) VALUES
 (1, 'Consulta sobre la salud de Roco', 'Roco lleva varios días malo.' , TRUE, 'PENDIENTE', '2023-10-05 10:00:00', 1, null, 1, 1),

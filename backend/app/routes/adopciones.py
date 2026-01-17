@@ -4,7 +4,7 @@ from app.extensions import db
 from app.models.adopcion import Adopcion
 from app.models.mascota import Mascota
 from app.models.prop_mascota import Prop_mascota
-from app.models.enums import EstadoAdopcion
+from app.models.enums import EstadoPeticion
 
 bp = Blueprint('adopciones', __name__, url_prefix='/api/adopciones')
 
@@ -27,7 +27,7 @@ def listar_pendientes():
     user = get_jwt_identity()
     propuestas = Adopcion.query.filter(
         Adopcion.dueño_anterior_id == user,
-        Adopcion.estado_adopcion == EstadoAdopcion.PENDIENTE,
+        Adopcion.estado_adopcion == EstadoPeticion.PENDIENTE,
         Adopcion.dueño_nuevo_id.isnot(None)    # sólo propuestas reales
     ).all()
     return jsonify([a.to_dict() for a in propuestas]), 200
@@ -66,9 +66,9 @@ def aceptar(aid):
     except (TypeError, ValueError):
         pass
     ad = Adopcion.query.get_or_404(aid)
-    if ad.dueño_anterior_id!=user or ad.estado_adopcion!=EstadoAdopcion.PENDIENTE:
+    if ad.dueño_anterior_id!=user or ad.estado_adopcion!=EstadoPeticion.PENDIENTE:
         return jsonify({'msg':'No autorizado'}),403
-    ad.estado_adopcion = EstadoAdopcion.APROBADA
+    ad.estado_adopcion = EstadoPeticion.APROBADA
     ad.mascota.dueño_id = ad.dueño_nuevo_id
     db.session.commit()
     return jsonify(ad.to_dict()),200
@@ -82,9 +82,9 @@ def rechazar(aid):
     except (TypeError, ValueError):
         pass
     ad = Adopcion.query.get_or_404(aid)
-    if ad.dueño_anterior_id!=user or ad.estado_adopcion!=EstadoAdopcion.PENDIENTE:
+    if ad.dueño_anterior_id!=user or ad.estado_adopcion!=EstadoPeticion.PENDIENTE:
         return jsonify({'msg':'No autorizado'}),403
-    ad.estado_adopcion = EstadoAdopcion.RECHAZADA
+    ad.estado_adopcion = EstadoPeticion.RECHAZADA
     nueva_ad = Adopcion(
         descripcion       = ad.descripcion,
         mascota_id        = ad.mascota_id,
@@ -103,11 +103,11 @@ def solicitar(aid):
 
     if ad.dueño_anterior_id == user:
         return jsonify({'msg':'No puedes solicitar tu propia adopción'}), 403
-    if ad.estado_adopcion != EstadoAdopcion.CREADA:
+    if ad.estado_adopcion != EstadoPeticion.CREADA:
         return jsonify({'msg':'Sólo adopciones en estado CREADA se pueden solicitar'}), 400
 
     ad.dueño_nuevo_id    = user
-    ad.estado_adopcion   = EstadoAdopcion.PENDIENTE
+    ad.estado_adopcion   = EstadoPeticion.PENDIENTE
     db.session.commit()
     return jsonify(ad.to_dict()), 200
 
@@ -138,7 +138,7 @@ def editar_adopcion(aid):
         pass
 
     ad = Adopcion.query.get_or_404(aid)
-    if ad.dueño_anterior_id != user or ad.estado_adopcion != EstadoAdopcion.CREADA:
+    if ad.dueño_anterior_id != user or ad.estado_adopcion != EstadoPeticion.CREADA:
         return jsonify({'msg':'No autorizado'}), 403
 
     data = request.get_json() or {}

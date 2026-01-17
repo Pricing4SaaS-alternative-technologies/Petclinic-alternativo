@@ -7,11 +7,11 @@ class Reserva(db.Model):
     fecha_inicio = db.Column(db.Date, nullable=False)
     fecha_fin = db.Column(db.Date, nullable=False)
     
-    # Foreign key a la tabla de habitaciones
+    # Si se eliminan las habitaciones, se eliminan en cascada las reservas asociadas
     habitacion_id = db.Column( db.Integer, db.ForeignKey('habitaciones_hotel.id',ondelete='CASCADE'), nullable=False)
     habitacion = db.relationship('Habitacion_hotel', passive_deletes=True)
 
-    # Foreign key hacia Mascota
+    # Si se borran las mascotas, se eliminan en cascada las reservas asociadas
     mascota_id = db.Column(db.Integer, db.ForeignKey('mascotas.id', ondelete='CASCADE'), nullable=False)
     mascota = db.relationship('Mascota', passive_deletes=True)
 
