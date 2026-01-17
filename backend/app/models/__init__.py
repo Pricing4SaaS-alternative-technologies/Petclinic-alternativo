@@ -11,3 +11,4 @@ from .reserva import Reserva
 from .visita import Visita
 from .habitacion_hotel import Habitacion_hotel
 from .clinica import Clinica
+from .respuesta_consulta import Respuesta_consulta

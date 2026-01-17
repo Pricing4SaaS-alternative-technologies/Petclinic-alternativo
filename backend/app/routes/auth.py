@@ -65,7 +65,10 @@ def register():
         user = Veterinario(nombre, apellidos, usuario, email, contraseña, especialidades_enum, ciudad, clinica)
 
     elif tipo_enum == TipoUsuarioEnum.PROP_CLINICA:
-        user = Prop_clinica(nombre, apellidos, usuario, email, contraseña)
+        telefono = data.get('telefono')
+        if not telefono:
+            return jsonify({'message': 'No estan rellenos los campos obligatorios para dueño de mascota'}), 400
+        user = Prop_clinica(nombre, apellidos, usuario, email, contraseña, telefono)
 
     if user is None:
         return jsonify({'message': 'Error al crear el usuario'}), 500

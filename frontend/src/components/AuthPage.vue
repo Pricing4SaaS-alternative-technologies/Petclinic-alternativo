@@ -83,6 +83,14 @@
           </div>
         </div>
 
+        <!-- PROP_CLINICA -->
+        <div v-if="registerForm.tipo_usuario === 'PROP_CLINICA'">
+          <div>
+            <label for="telefono">Teléfono</label>
+            <input type="text" id="telefono" v-model="registerForm.telefono" required />
+          </div>
+        </div>
+
         <!-- VETERINARIO -->
         <div v-if="registerForm.tipo_usuario === 'VETERINARIO'">
           <div>
