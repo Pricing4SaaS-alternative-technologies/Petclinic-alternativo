@@ -32,3 +32,8 @@ class TipoMascota(enum.Enum):
     PAJARO = "pajaro"
     HAMSTER = "hamster"
     TORTUGA = "tortuga"
+
+class TamañoHabitacion(enum.Enum):
+    ACOGEDOR = "acogedor"   
+    MEDIANO = "mediano"
+    KING_SIZE = "king_size"
