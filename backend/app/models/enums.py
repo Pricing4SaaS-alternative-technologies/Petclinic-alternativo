@@ -14,8 +14,7 @@ class EspecialidadEnum(enum.Enum):
     MEDICINA_INTERNA = "medicina_interna"
     REHABILITACION = "rehabilitacion"
     
-class EstadoAdopcion(enum.Enum):
-    CREADA = "creada"
+class EstadoPeticion(enum.Enum):
     PENDIENTE = "pendiente"
     APROBADA = "aprobada"
     RECHAZADA = "rechazada"
@@ -32,3 +31,8 @@ class TipoMascota(enum.Enum):
     PAJARO = "pajaro"
     HAMSTER = "hamster"
     TORTUGA = "tortuga"
+
+class TamañoHabitacion(enum.Enum):
+    ACOGEDOR = "acogedor"   
+    MEDIANO = "mediano"
+    KING_SIZE = "king_size"
