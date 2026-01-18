@@ -136,8 +136,8 @@ def crear_visita():
 @jwt_required()
 def actualizar_visita(visita_id):
     
-    usuario_id = get_jwt_identity()
-    usuario = Usuario.query.filter_by(id=usuario_id).first().tipo_usuario
+    usuario_id = int(get_jwt_identity())
+    usuario = Usuario.query.filter_by(id=usuario_id).first()
     visita_editable= Visita.query.filter_by(id=visita_id).first_or_404()
     data = request.get_json() or {}
 
@@ -178,7 +178,7 @@ def actualizar_visita(visita_id):
 @jwt_required()
 def eliminar_visita(visita_id):
     
-    usuario_id = get_jwt_identity()
+    usuario_id = int(get_jwt_identity())
     usuario = Usuario.query.filter_by(id=usuario_id).first()
     visita_eliminable = Visita.query.filter_by(id=visita_id).first_or_404()
     

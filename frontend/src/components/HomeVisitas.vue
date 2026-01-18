@@ -44,10 +44,10 @@
         </select>
 
         <label>Fecha y hora</label>
-        <input type="datetime-local" v-model="nueva.date_time" required />
+        <input type="datetime-local" v-model="nueva.fecha" required />
 
         <label>Descripción</label>
-        <input v-model="nueva.description" required />
+        <input v-model="nueva.descripcion" required />
         <p v-if="errorCreacion" class="mensaje-error">{{ errorCreacion }}</p>
         <div class="modal-buttons">
           <button @click="crearVisita">Guardar</button>
@@ -59,12 +59,12 @@
     <!-- Modal Editar -->
     <div class="modal-overlay" v-if="mostrarEditar">
       <div class="modal">
-        <h3>Editar Visita</h3>
+        <h3>Editando visita para {{ seleccionada.mascota_nombre }}</h3>
         <label>Fecha y hora</label>
-        <input type="datetime-local" v-model="seleccionada.date_time" required />
+        <input type="datetime-local" v-model="seleccionada.fecha" required />
 
         <label>Descripción de la visita</label>
-        <input v-model="seleccionada.description" />
+        <input v-model="seleccionada.descripcion" />
         <p v-if="errorEdicion" class="mensaje-error">{{ errorEdicion }}</p>
         <div class="modal-buttons">
           <button @click="editarVisita">Actualizar</button>
@@ -76,7 +76,7 @@
     <div class="modal-overlay" v-if="mostrarEliminar">
       <div class="modal">
         <h3>Eliminar Visita</h3>
-        <p>¿Seguro que quieres eliminar la visita del {{ formatearFecha(seleccionadaEliminar.date_time) }}?</p>
+        <p>¿Seguro que quieres eliminar la visita del {{ formatearFecha(seleccionadaEliminar.fecha) }} para {{ seleccionadaEliminar.mascota_nombre }}?</p>
         <div class="modal-buttons">
           <button @click="confirmarEliminarVisita">Eliminar</button>
           <button class="cancelar" @click="cerrarEliminar">Cancelar</button>
@@ -114,8 +114,8 @@ export default {
         clinica_id: '',
         dueno_id: '',
         mascota_id: '',
-        date_time: '',
-        description: ''
+        fecha: '',
+        descripcion: ''
       }
     }
   },
@@ -152,7 +152,7 @@ export default {
 
     openCrear () {
       this.mostrarCrear = true
-      this.nueva = { clinica_id: '', dueno_id: '', mascota_id: '', date_time: '', description: '' }
+      this.nueva = { clinica_id: '', dueno_id: '', mascota_id: '', fecha: '', descripcion: '' }
       this.propietarios = []
       this.mascotasDelPropietario = []
       this.errorCreacion = ''
@@ -193,20 +193,20 @@ export default {
     async crearVisita () {
       this.errorCreacion = ''
       // validación fecha+hora
-      if (!this.nueva.date_time) {
+      if (!this.nueva.fecha) {
         this.errorCreacion = 'Fecha y hora requerida'
         return
       }
-      const sel = new Date(this.nueva.date_time)
+      const sel = new Date(this.nueva.fecha)
       if (sel < new Date()) {
         this.errorCreacion = 'La fecha y hora no puede ser anterior al momento actual'
         return
       }
-      if (!this.nueva.description.trim()) {
+      if (!this.nueva.descripcion.trim()) {
         this.errorCreacion = 'Descripción requerida'
         return
       }
-      if (this.nueva.description.length > 255) {
+      if (this.nueva.descripcion.length > 255) {
         this.errorCreacion = 'La descripción no puede tener más de 255 caracteres'
         return
       }
@@ -217,8 +217,8 @@ export default {
           `/visitas/crear`,
           {
             mascota_id: this.nueva.mascota_id,
-            fecha: this.nueva.date_time,
-            descripcion: this.nueva.description
+            fecha: this.nueva.fecha,
+            descripcion: this.nueva.descripcion
           }
         )
         await this.cargarVisitas()
@@ -231,21 +231,21 @@ export default {
     async editarVisita () {
       this.errorEdicion = ''
       // validación fecha+hora
-      if (!this.seleccionada.date_time) {
+      if (!this.seleccionada.fecha) {
         this.errorEdicion = 'Fecha y hora requerida'
         return
       }
-      const sel = new Date(this.seleccionada.date_time)
+      const sel = new Date(this.seleccionada.fecha)
       if (sel < new Date()) {
         this.errorEdicion = 'La fecha y hora no puede ser anterior al momento actual'
         return
       }
       // validación descripción
-      if (!this.seleccionada.description.trim()) {
+      if (!this.seleccionada.descripcion.trim()) {
         this.errorEdicion = 'Descripción requerida'
         return
       }
-      if (this.seleccionada.description.length > 255) {
+      if (this.seleccionada.descripcion.length > 255) {
         this.errorEdicion = 'La descripción no puede tener más de 255 caracteres'
         return
       }
@@ -254,8 +254,8 @@ export default {
       try {
         await api.patch(`/visitas/actualizar/${this.seleccionada.id}`,
           {
-            fecha: this.seleccionada.date_time,
-            descripcion: this.seleccionada.description
+            fecha: this.seleccionada.fecha,
+            descripcion: this.seleccionada.descripcion
           }
         )
         await this.cargarVisitas()
@@ -295,7 +295,8 @@ export default {
     },
 
     abrirEliminar (v) {
-      this.seleccionadaEliminar = { ...v }
+      console.log('Eliminar visita:', v)
+      this.seleccionadaEliminar = v
       this.mostrarEliminar = true
     },
 
