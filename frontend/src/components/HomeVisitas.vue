@@ -3,6 +3,7 @@
     <h2>🩺 Visitas</h2>
     <button class="btn-crear" @click="openCrear">➕ Nueva Visita</button>
 
+    <!-- Lista de visitas, TODO generar filtros por mascota -->
     <ul v-if="visitas.length" class="visita-lista">
       <li class="visita-card">
         <span><strong>Nombre Mascota</strong></span>
@@ -28,7 +29,7 @@
         <h3>Crear Visita</h3>
         <label>Propietario</label>
         <select v-model="nueva.dueno_id" @change="cargarMascotasDelPropietario" required>
-          <option disabled value="">Selecciona dueño</option>
+          <option disabled value="">Selecciona un dueño</option>
           <option v-for="p in propietarios" :key="p.id" :value="p.id">
             {{ p.usuario }}
           </option>
@@ -36,7 +37,7 @@
 
         <label>Mascota</label>
         <select v-model="nueva.mascota_id" required>
-          <option disabled value="">Selecciona mascota</option>
+          <option disabled value="">Selecciona una mascota</option>
           <option v-for="m in mascotasDelPropietario" :key="m.id" :value="m.id">
             {{ m.nombre }}
           </option>
@@ -62,7 +63,7 @@
         <label>Fecha y hora</label>
         <input type="datetime-local" v-model="seleccionada.date_time" required />
 
-        <label>Descripción</label>
+        <label>Descripción de la visita</label>
         <input v-model="seleccionada.description" />
         <p v-if="errorEdicion" class="mensaje-error">{{ errorEdicion }}</p>
         <div class="modal-buttons">

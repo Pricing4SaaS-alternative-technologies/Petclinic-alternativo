@@ -17,8 +17,8 @@ def listar_visitas():
     usuario_id = get_jwt_identity()
     rol_usuario = Usuario.query.filter_by(id=usuario_id).first().tipo_usuario
     
-    if rol_usuario != TipoUsuarioEnum.VETERINARIO and rol_usuario != TipoUsuarioEnum.ADMIN:
-        return jsonify({'message': 'No tienes permiso para ver las visitas'}), 403
+    if rol_usuario != rol_usuario != TipoUsuarioEnum.ADMIN:
+        return jsonify({'message': 'No tienes permiso para ver todas las visitas del sistema'}), 403
     
     visitas = Visita.query.all()
     return jsonify([
