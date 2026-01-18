@@ -4,11 +4,16 @@
     <button class="btn-crear" @click="openCrear">➕ Nueva Visita</button>
 
     <ul v-if="visitas.length" class="visita-lista">
+      <li class="visita-card">
+        <span><strong>Nombre Mascota</strong></span>
+        <span><strong>Descripción</strong></span>
+        <span><strong>Fecha y Hora</strong></span>
+        <span><strong>Acciones</strong></span>
+      </li>
       <li v-for="v in visitas" :key="v.id" class="visita-card">
-        <span>{{ formatearFecha(v.date_time) }}</span>
-        <span>{{ v.dueno }}</span>
-        <span>{{ v.mascota }}</span>
-        <span>{{ v.description }}</span>
+        <span>{{ v.mascota_nombre }}</span>
+        <span>{{ v.descripcion }}</span>
+        <span>{{ formatearFecha(v.fecha) }}</span>
         <div class="acciones">
           <button @click="abrirEditar(v)">✏️</button>
           <button @click="abrirEliminar(v)">🗑️</button>
@@ -137,20 +142,10 @@ export default {
         this.jwtValido = true
         this.usuarioId = this.info_usuario.id
         this.clinicaId = this.info_usuario.clinica_id
-        this.fetchMisVisitas()
+        this.cargarVisitas()
       } catch (e) {
         console.error('Error al parsear usuario:', e)
         this.jwtValido = false
-      }
-    },
-
-    // carga todas las visitas del dueño de clínica
-    async fetchMisVisitas () {
-      try {
-        const { data } = await api.get('/visitas/mine')
-        this.visitas = data
-      } catch (e) {
-        console.error('No se pudieron cargar tus visitas:', e)
       }
     },
 
@@ -178,10 +173,7 @@ export default {
       this.nueva.mascota_id = ''
       this.mascotasDelPropietario = []
       try {
-        const { data } = await api.get(
-          `/clinicas/${this.clinicaId}` +
-          `/props_mascotas/${this.nueva.dueno_id}/mascotas`
-        )
+        const { data } = await api.get(`/mascotas/dueno-mascota/${this.nueva.dueno_id}`)
         this.mascotasDelPropietario = data
       } catch (e) {
         console.error('Error al cargar mascotas:', e)
@@ -189,16 +181,11 @@ export default {
     },
 
     async cargarVisitas () {
-      if (!this.nueva.mascota_id) return
       try {
-        const { data } = await api.get(
-          `/clinicas/${this.clinicaId}` +
-          `/props_mascotas/${this.nueva.dueno_id}` +
-          `/mascotas/${this.nueva.mascota_id}/visitas`
-        )
+        const { data } = await api.get(`visitas/veterinario/${this.usuarioId}`)
         this.visitas = data
       } catch (e) {
-        console.error('Error al cargar visitas:', e)
+        console.error('Error al cargar visitas:', e.response)
       }
     },
 
@@ -226,15 +213,14 @@ export default {
 
       try {
         await api.post(
-          `/clinicas/${this.clinicaId}` +
-          `/props_mascotas/${this.nueva.dueno_id}` +
-          `/mascotas/${this.nueva.mascota_id}/visitas`,
+          `/visitas/crear`,
           {
-            date_time: this.nueva.date_time,
-            description: this.nueva.description
+            mascota_id: this.nueva.mascota_id,
+            fecha: this.nueva.date_time,
+            descripcion: this.nueva.description
           }
         )
-        await this.fetchMisVisitas()
+        await this.cargarVisitas()
         this.cerrarCrear()
       } catch (e) {
         console.error('Error al crear visita:', e)
@@ -265,16 +251,13 @@ export default {
       this.errorEdicion = ''
 
       try {
-        await api.patch(
-          `/clinicas/${this.clinicaId}` +
-          `/props_mascotas/${this.seleccionada.dueno_id}` +
-          `/mascotas/${this.seleccionada.mascota_id}/visitas/${this.seleccionada.id}`,
+        await api.patch(`/visitas/actualizar/${this.seleccionada.id}`,
           {
-            date_time: this.seleccionada.date_time,
-            description: this.seleccionada.description
+            fecha: this.seleccionada.date_time,
+            descripcion: this.seleccionada.description
           }
         )
-        await this.fetchMisVisitas()
+        await this.cargarVisitas()
         this.cerrarEditar()
       } catch (e) {
         console.error('Error al editar visita:', e)
@@ -286,11 +269,8 @@ export default {
     async confirmarEliminarVisita () {
       try {
         await api.delete(
-          `/clinicas/${this.clinicaId}` +
-          `/props_mascotas/${this.seleccionadaEliminar.dueno_id}` +
-          `/mascotas/${this.seleccionadaEliminar.mascota_id}/visitas/${this.seleccionadaEliminar.id}`
-        )
-        await this.fetchMisVisitas()
+          `/visitas/eliminar/${this.seleccionadaEliminar.id}`)
+        await this.cargarVisitas()
         this.cerrarEliminar()
       } catch (e) {
         console.error('Error al eliminar visita:', e)
