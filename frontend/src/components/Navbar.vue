@@ -34,7 +34,7 @@
     <div v-if="loggedIn" class="user-info">
       <span class="usuario">Hola, {{ usuarioActual.usuario }}</span>
       <span v-if="userTipo === 'prop_clinica' && has_plan" class="usuario">
-        Plan: {{ contract_info.subscriptionPlans["petclinic"]}}
+        Plan: {{ contract_info.subscriptionPlans["PetClinic"] || contract_info.subscriptionPlans["petclinic"]}}
       </span>
       <span v-else-if="userTipo === 'prop_clinica' && !has_plan" class="usuario">
         Sin plan activo

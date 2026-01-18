@@ -47,11 +47,11 @@
 }
 
 .plan-card.current-plan::before {
-  content: 'CURRENT PLAN';
+  content: 'CURRENT';
   position: absolute;
   top: 15px;
   right: -35px;
-  background: #3498db;
+  background: #ffcc00;
   color: white;
   padding: 5px 40px;
   transform: rotate(45deg);
@@ -209,7 +209,7 @@
 }
 
 .change-plan-btn:disabled {
-  background: #95a5a6;
+  background: #aaaaaa;
   cursor: not-allowed;
   opacity: 0.8;
 }

@@ -142,7 +142,7 @@ export default {
         this.jwtValido = true
         this.obtenerPlanes()
         if (parsedContrato !== null && parsedContrato !== '') {
-          this.planUserActual = parsedContrato.subscriptionPlans['petclinic'] || null
+          this.planUserActual = parsedContrato.subscriptionPlans['petclinic'] || parsedContrato.subscriptionPlans['PetClinic'] || null
         }
       } catch (e) {
         console.error('Error al parsear el usuario:', e)
@@ -210,19 +210,23 @@ export default {
       if (!this.jwtValido) return
 
       try {
-        // Aquí llamarías a tu API para cambiar el plan del usuario
-        // const response = await api.post('/api/contratos/changePlan', {
-        //   userId: this.info_usuario.id,
-        //   plan: planName
-        // })
+        const response = await api.put(`http://localhost:5000/api/contratos/update/${this.info_usuario.id}`, {
+          newPlan: planName
+        }, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`, // Asegurar el token
+            'Content-Type': 'application/json'
+          }
+        })
 
-        console.log(`Cambiando al plan ${planName}`)
+        console.log(`Cambiando al plan ${planName}`, response.data)
 
         // Actualizar el plan actual del usuario
-        this.planUserActual = planName
+        this.planUserActual = response.data.subscriptionPlans['petclinic']
 
         // Mostrar mensaje de éxito
         alert(`Plan cambiado a ${planName} exitosamente`)
+        await this.loadUserInfo()
       } catch (error) {
         console.error('Error al cambiar de plan:', error)
         this.errorEdicion = 'Error al cambiar de plan. Por favor, intenta nuevamente.'
