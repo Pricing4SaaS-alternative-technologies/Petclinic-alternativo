@@ -11,13 +11,13 @@ from app.models.usuario import Usuario
 visitas_bp = Blueprint('visitas', __name__,
     url_prefix='/api/visitas'
 )
-@visitas_bp.route('', methods=['GET'])
+@visitas_bp.route('/listar/admin', methods=['GET'])
 @jwt_required()
 def listar_visitas():
     usuario_id = get_jwt_identity()
     rol_usuario = Usuario.query.filter_by(id=usuario_id).first().tipo_usuario
     
-    if rol_usuario != rol_usuario != TipoUsuarioEnum.ADMIN:
+    if rol_usuario != TipoUsuarioEnum.ADMIN:
         return jsonify({'message': 'No tienes permiso para ver todas las visitas del sistema'}), 403
     
     visitas = Visita.query.all()
