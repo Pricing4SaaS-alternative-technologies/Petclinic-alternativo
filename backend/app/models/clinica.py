@@ -8,8 +8,9 @@ class Clinica(db.Model):
     direccion = db.Column(db.String(100), unique=True, nullable=False)
     telefono = db.Column(db.String(9), unique=True, nullable=False)
     
-    propietario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
-    propietario = db.relationship('Usuario', foreign_keys=[propietario_id])
+    # si se borran usuarios, se borra clinica, quitado foreign_keys=[propietario_id],
+    propietario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id', ondelete='CASCADE'), nullable=False)
+    propietario = db.relationship('Usuario', passive_deletes=True)
 
     
     def __init__(self, nombre, direccion, telefono, propietario_id):
