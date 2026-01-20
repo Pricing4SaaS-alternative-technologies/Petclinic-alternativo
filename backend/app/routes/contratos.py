@@ -50,3 +50,35 @@ def getPlans(name, version):
         else:
             raise
     return plans
+
+@contratos.route('/update/<int:id_usuario>', methods=['PUT'])
+@jwt_required()
+def updateContratoUsuario(id_usuario):
+    
+    # Obtener datos del cuerpo de la petición
+    data = request.get_json()
+    
+    # Obtener el nuevo plan del body
+    nombre_plan = data.get('newPlan')
+    
+    dato_contrato = {
+                "contractedServices": {
+                    "PetClinic": "1.0.0"
+                },
+                "subscriptionPlans": {
+                    "PetClinic": nombre_plan
+                },
+                "subscriptionAddOns": {}
+            }
+    print("Datos del contrato:", dato_contrato)
+    space_client = current_app.space_client
+    try:
+        contrato = current_app.run_async(space_client.contracts.update_contract_subscription(str(id_usuario), dato_contrato))
+        print(f"Contrato creado exitosamente: {contrato}")
+        return jsonify(contrato), 200
+        
+    except Exception as e:
+        print(f"Error al editar contrato: {e}")
+        if hasattr(e, 'status') and e.status == 404:
+            return jsonify({"error": "Contrato no encontrado"}), 404
+    return contrato

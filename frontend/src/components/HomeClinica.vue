@@ -6,6 +6,7 @@ import { useRouter } from 'vue-router'
     <div v-if="jwtValido && has_plan">
       <h3><strong>Plan:</strong> {{contract_info.subscriptionPlans["petclinic"]}}</h3>
       <button class="boton-grande" @click="modalCreacion = true">Añadir Clínica</button>
+      <button class="boton-grande" @click="$router.push('/pricing-plans')">Pricing plans</button>
       <div v-if="clinicas.length > 0" class="clinica-list">
 
         <div v-for="clinica in clinicas" :key="clinica.id" class="clinica-card">

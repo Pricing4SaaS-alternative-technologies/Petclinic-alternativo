@@ -18,10 +18,10 @@ INSERT IGNORE INTO clinicas (id, nombre, direccion, telefono, propietario_id) VA
 (3, 'Clínica 3', 'Calle Veterinario 3', '934123456', 6);
 
 INSERT IGNORE INTO habitaciones_hotel (id, nombre, descripcion, reservable, url_imagen, tamaño, tipo, clinica_id) VALUES
-(1, 'Habitación 1', 'White Savannah', TRUE, "https://static.wikia.nocookie.net/jojo/images/e/ee/Iggy-original-anime.png/revision/latest?cb=20161001212416&path-prefix=es", 'MEDIANO', 'PERRO', 1),
-(2, 'Habitación 2', 'Hello Kitty', TRUE, null, 'ACOGEDOR', 'GATO', 2),
-(3, 'Habitación 3', 'Blue sky', TRUE, null, 'KING_SIZE', 'PAJARO', 1),
-(4, 'Habitación 4', 'Hamtaros house', TRUE, null, 'MEDIANO', 'HAMSTER', 3);
+(1, 'Habitación 1', 'White Savannah', TRUE, "https://loveurdog.co.uk/wp-content/uploads/2024/11/Love-Ur-Dog-Hotel-Stays.jpg", 'MEDIANO', 'PERRO', 1),
+(2, 'Habitación 2', 'Hello Kitty', TRUE, "https://cooperspets.co.za/wp-content/uploads/2025/02/coopers-pet-hotel_cat-room_051-2048x1536.webp", 'ACOGEDOR', 'GATO', 2),
+(3, 'Habitación 3', 'Blue sky', TRUE, "https://www.tiendanimal.es/on/demandware.static/-/Sites-kiwoko-master-catalog/default/dw1a777718/images/large/c5f967be789a455494bfb96202fe1f41.jpg", 'KING_SIZE', 'PAJARO', 1),
+(4, 'Habitación 4', 'Hamtaros house', TRUE, "https://m.media-amazon.com/images/I/71YwKyZ-seL._AC_UF1000,1000_QL80_.jpg", 'MEDIANO', 'HAMSTER', 3);
 
 INSERT IGNORE INTO mascotas (id, nombre, cumpleaños, tipo, dueño_id) VALUES
 (1, 'Roco', '2020-01-01', 'PERRO', 1),
