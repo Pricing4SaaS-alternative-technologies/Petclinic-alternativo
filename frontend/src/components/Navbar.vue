@@ -12,7 +12,13 @@
       </div>
       <!-- Muestra el nombre de usuario y el botón de logout si está logueado -->
       <div v-if="loggedIn" class="user-info">
-        <span class="usuario">Hola, {{ usuarioActual }}</span>
+        <span class="usuario">Hola, {{ usuarioActual.usuario }}</span>
+        <span v-if="userTipo === 'prop_clinica' && has_plan" class="usuario">
+          Plan: {{ contract_info.subscriptionPlans["PetClinic"] || contract_info.subscriptionPlans["petclinic"]}}
+        </span>
+        <span v-else-if="userTipo === 'prop_clinica' && !has_plan" class="usuario">
+          Sin plan activo
+        </span>
         <button class="logout" @click="logout">Cerrar sesión</button>
       </div>
     </nav>
@@ -42,21 +48,7 @@
         Adoptions
       </router-link>
     </div>
-    <div v-if="!loggedIn" class="nav-links-right" style="margin-right: 1rem;">
-      <router-link to="/auth" class="nav-link">Login</router-link>
-    </div>
-
-    <div v-if="loggedIn" class="user-info">
-      <span class="usuario">Hola, {{ usuarioActual.usuario }}</span>
-      <span v-if="userTipo === 'prop_clinica' && has_plan" class="usuario">
-        Plan: {{ contract_info.subscriptionPlans["PetClinic"] || contract_info.subscriptionPlans["petclinic"]}}
-      </span>
-      <span v-else-if="userTipo === 'prop_clinica' && !has_plan" class="usuario">
-        Sin plan activo
-      </span>
-      <button class="logout" @click="logout">Cerrar sesión</button>
-    </div>
-  </nav>
+  </div>
 </template>
 
 <script>
@@ -66,7 +58,7 @@ export default {
   data () {
     return {
       loggedIn: !!localStorage.getItem('jwt'), // Estado inicial basado en el token
-      usuarioActual: '',
+      usuarioActual: {},
       userTipo: '',
       contract_info: null,
       has_plan: false
@@ -112,7 +104,7 @@ export default {
     },
     handleLogout () {
       this.loggedIn = false
-      this.usuarioActual = ''
+      this.usuarioActual = {}
       this.userTipo = ''
       this.has_plan = false
       this.contract_info = null
