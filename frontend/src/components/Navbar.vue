@@ -73,6 +73,7 @@ export default {
       const parsedContrato = rawContrato ? JSON.parse(rawContrato) : null
       if (!token || !rawUser) {
         this.loggedIn = false
+        this.updateBodyClass(false)
         return
       }
       this.usuarioActual = JSON.parse(rawUser)
@@ -82,6 +83,7 @@ export default {
         this.has_plan = true
       }
       this.loggedIn = true
+      this.updateBodyClass(true)
     },
     getUserTipo () {
       const rawUser = localStorage.getItem('user')
@@ -108,6 +110,14 @@ export default {
       this.userTipo = ''
       this.has_plan = false
       this.contract_info = null
+      this.updateBodyClass(false)
+    },
+    updateBodyClass (showSidebar) {
+      if (showSidebar) {
+        document.body.classList.add('with-sidebar')
+      } else {
+        document.body.classList.remove('with-sidebar')
+      }
     }
   },
   created () {
