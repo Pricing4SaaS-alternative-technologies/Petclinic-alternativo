@@ -14,16 +14,10 @@ class EspecialidadEnum(enum.Enum):
     MEDICINA_INTERNA = "medicina_interna"
     REHABILITACION = "rehabilitacion"
     
-class EstadoAdopcion(enum.Enum):
-    CREADA = "creada"
+class EstadoPeticion(enum.Enum):
     PENDIENTE = "pendiente"
     APROBADA = "aprobada"
     RECHAZADA = "rechazada"
-    
-class Plan(enum.Enum):
-    BASIC = "basic"
-    GOLD = "gold"
-    PREMIUM = "premium"
 
 class EstadoConsulta(enum.Enum):
     PENDIENTE = "pendiente"
@@ -37,3 +31,8 @@ class TipoMascota(enum.Enum):
     PAJARO = "pajaro"
     HAMSTER = "hamster"
     TORTUGA = "tortuga"
+
+class TamañoHabitacion(enum.Enum):
+    ACOGEDOR = "acogedor"   
+    MEDIANO = "mediano"
+    KING_SIZE = "king_size"

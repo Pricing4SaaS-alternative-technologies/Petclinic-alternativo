@@ -15,6 +15,7 @@ from .routes.visitas import visitas_bp
 from .routes.prop_mascotas import prop_mascotas_bp
 from .routes.veterinario import veterinario_bp
 from .routes.adopciones import bp as adopciones_bp
+from .routes.contratos import contratos as contratos_bp
 
 from .extensions import db
 
@@ -57,6 +58,7 @@ def create_app():
     app.register_blueprint(prop_mascotas_bp)
     app.register_blueprint(veterinario_bp)
     app.register_blueprint(adopciones_bp)
+    app.register_blueprint(contratos_bp)
 
 
     ## Para desarrollo: crear tablas si no existen
@@ -73,11 +75,17 @@ def create_app():
     app.async_loop = loop
 
     # Crea el cliente y servicios que lo usan
-    app.space_client = SpaceClient(url="http://localhost:5403", api_key="57ab59b541bafc971b7588a192661ed01e3e354a9f1464f868e28a4b66931b01")
-
+    app.space_client = SpaceClient(url="http://localhost:5403", api_key="f7e0316af74ea3602e16081a9c38b18e1b1a63f4f1ba66088d35a9c91b71f87f")
+    #meter prueba y señalar si esta correcto
+    
     # helper para usar funciones async desde las rutas sync
     def run_async(coro):
+        #try:
         return app.async_loop.run_until_complete(coro)
+        #except Exception as e:
+        #    print("error:",str(e))
+        #    return {'error': str(e)}, 500
+            
 
     app.run_async = run_async
     

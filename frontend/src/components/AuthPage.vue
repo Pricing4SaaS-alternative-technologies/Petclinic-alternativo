@@ -83,6 +83,14 @@
           </div>
         </div>
 
+        <!-- PROP_CLINICA -->
+        <div v-if="registerForm.tipo_usuario === 'PROP_CLINICA'">
+          <div>
+            <label for="telefono">Teléfono</label>
+            <input type="text" id="telefono" v-model="registerForm.telefono" required />
+          </div>
+        </div>
+
         <!-- VETERINARIO -->
         <div v-if="registerForm.tipo_usuario === 'VETERINARIO'">
           <div>
@@ -172,8 +180,10 @@ export default {
       this.loginError = ''
       try {
         const response = await api.post('http://localhost:5000/api/auth/login', this.loginForm)
+        console.log('Login successful', response.data.contrato)
         localStorage.setItem('jwt', response.data.access_token)
         localStorage.setItem('user', JSON.stringify(response.data.usuario))
+        localStorage.setItem('contrato', JSON.stringify(response.data.contrato))
         window.dispatchEvent(new Event('login'))
         this.$router.push('/')
       } catch (error) {

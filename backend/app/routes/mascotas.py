@@ -4,7 +4,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models.mascota import Mascota
 from app.models.usuario import Usuario
 from app.models.enums import TipoMascota
-from app.models.enums import TipoUsuarioEnum, Plan
+from app.models.enums import TipoUsuarioEnum
 from app.extensions import db
 from datetime import datetime
 
@@ -20,6 +20,30 @@ def get_mis_mascotas():
         return jsonify({'message': 'No tienes permiso para ver estas mascotas'}), 403
     
     mascotas = Mascota.query.filter_by(dueño_id=user_id).all()
+    if not mascotas:
+        return jsonify([]), 200
+
+    return jsonify([
+        {
+            'id': m.id,
+            'nombre': m.nombre,
+            'cumpleaños': m.cumpleaños.isoformat(),
+            'tipo': m.tipo.value
+        } for m in mascotas
+    ]), 200
+
+
+@mascotas_bp.route('/dueno-mascota/<int:dueno_id>', methods=['GET'])
+@jwt_required()
+def get_mascotas_by_dueño(dueno_id):
+    user_id = get_jwt_identity()
+    usuario = Usuario.query.filter_by(id=user_id).first()
+
+    dueño = Usuario.query.get_or_404(dueno_id)
+    if (usuario.tipo_usuario != TipoUsuarioEnum.VETERINARIO and dueño.clinica_id != usuario.clinica_id) and usuario.tipo_usuario != TipoUsuarioEnum.ADMIN:
+        return jsonify({'message': 'No tienes permiso para ver las mascotas de este dueño'}), 403
+
+    mascotas = Mascota.query.filter_by(dueño_id=dueno_id).all()
     if not mascotas:
         return jsonify([]), 200
 
