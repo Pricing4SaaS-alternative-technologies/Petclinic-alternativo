@@ -1,5 +1,5 @@
 <template>
-  <div class="navbar-container">
+  <div class="navbar">
     <!-- Barra superior oscura -->
     <nav class="navbar-top">
       <div class="navbar-logo">
