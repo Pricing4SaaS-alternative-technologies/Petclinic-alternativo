@@ -286,3 +286,21 @@
     font-size: 1rem;
   }
 }
+
+
+/* Reservas */
+.see-reservas-btn {
+  background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+  color: white;
+  border: none;
+  padding: 14px 30px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  width: 50%;
+  margin-top: auto;
+}
