@@ -42,6 +42,11 @@ def createContrato(data):
 @jwt_required()
 def getPlans(name, version):
     space_client = current_app.space_client
+    id_usuario = get_jwt_identity()
+    usuario = Usuario.query.filter_by(id=id_usuario).first()
+    if usuario.tipo_usuario != TipoUsuarioEnum.PROP_CLINICA and usuario.tipo_usuario != TipoUsuarioEnum.ADMIN:
+        return jsonify({'message': 'No tienes permiso para ver los planes'}), 403
+
     try:
         plans = current_app.run_async(space_client.service_context.get_pricing(name, version))
     except Exception as e:
