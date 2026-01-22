@@ -11,7 +11,7 @@ class Peticion_adopcion(db.Model):
     fecha_solicitud = db.Column(db.DateTime, nullable=False, default=datetime.now())
     estado_peticion = db.Column(db.Enum(EstadoPeticion), nullable=False)
 
-    # si se borra la acopción, sus peticiones deberian ser borradas
+    # si se borra la adopción, sus peticiones deberian ser borradas
     adopcion_id = db.Column(db.Integer, db.ForeignKey('adopciones.id', ondelete='CASCADE'), nullable=False)
     adopcion = db.relationship('Adopcion', passive_deletes=True)
     
