@@ -139,6 +139,7 @@ def crear_peticion():
     
     return jsonify({'id': nueva_peticion.id}), 201
 
+# TODO revisr si al modificar directamente debe ser put o patch
 @bp.route('aceptar/<ing:peticion_id>')
 @jwt_required()
 def aceptar_peticion(peticion_id):
