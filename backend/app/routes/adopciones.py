@@ -69,6 +69,7 @@ def listar_adopciones_usuario(user_id):
         for a in adopciones
         ]), 200
 
+# Orientado para que los solicitantes puedan ver las adopciones disponibles ne su clinica
 @bp.route('/clinica/<int:clinica_id>', methods=['GET'])
 @jwt_required()
 def listar_adopciones_clinica(clinica_id):

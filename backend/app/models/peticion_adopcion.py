@@ -19,9 +19,9 @@ class Peticion_adopcion(db.Model):
     solicitante_id = db.Column(db.Integer, db.ForeignKey('usuarios.id', ondelete='CASCADE'), nullable=False)
     solicitante = db.relationship('Usuario', foreign_keys=[solicitante_id], passive_deletes=True)
 
-    def __init__(self, razon_adopcion, fecha_solicitud, solicitante_id, adopcion_id, estado_petición=EstadoPeticion.PENDIENTE):
+    def __init__(self, razon_adopcion, solicitante_id, adopcion_id, estado_petición=EstadoPeticion.PENDIENTE):
         self.razon_adopcion = razon_adopcion
-        self.fecha_solicitud = fecha_solicitud
+        self.fecha_solicitud = datetime.now()
         self.solicitante_id = solicitante_id
         self.adopcion_id = adopcion_id
         self.estado_petición = estado_petición
