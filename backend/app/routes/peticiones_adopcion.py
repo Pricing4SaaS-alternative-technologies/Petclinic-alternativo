@@ -34,12 +34,12 @@ def listar_peticiones():
     ]), 200
 
 # orientado para que el dueño de mascota vea las peticiones realizadas a una adopcion suya
-@peticiones_bp.route('/adopcion/<int:adopcion_id>', methods=['GET'])
+@peticiones_bp.route('/adopcion/<int:adopcion_listar_id>', methods=['GET'])
 @jwt_required()
-def listar_peticiones_adopcion(adopcion_id):
+def listar_peticiones_adopcion(adopcion_listar_id):
     usuario_id = int(get_jwt_identity())
     usuario = Usuario.query.get_or_404(usuario_id)
-    adopcion_listar = Adopcion.query.get_or_404(adopcion_id)
+    adopcion_listar = Adopcion.query.get_or_404(adopcion_listar_id)
     
     if usuario.tipo_usuario != TipoUsuarioEnum.ADMIN and usuario.tipo_usuario != TipoUsuarioEnum.PROP_MASCOTA:
         return jsonify({'msg':'No estas autorizado para ver estas funciones'}), 403
@@ -51,7 +51,7 @@ def listar_peticiones_adopcion(adopcion_id):
     if usuario.tipo_usuario != TipoUsuarioEnum.ADMIN and adopcion_listar.dueño_anterior.id != usuario_id:
         return jsonify({'msg':'No puedes ver las peticiones relacionada a una adopción que no has generado tu'}), 403
     
-    peticiones = adopcion_listar.peticiones_adopcion  # Asumiendo que tienes una relación definida en el modelo Adopcion
+    peticiones = Peticion_adopcion.query.filter_by(adopcion_id=adopcion_listar_id)  # Asumiendo que tienes una relación definida en el modelo Adopcion
     return jsonify([
         {
             'id': p.id,
@@ -139,8 +139,8 @@ def crear_peticion():
     
     return jsonify({'id': nueva_peticion.id}), 201
 
-# TODO revisr si al modificar directamente debe ser put o patch
-@peticiones_bp.route('/aceptar/<int:peticion_id>')
+# TODO si durante la imposición del try salta algun error, se tiene que hacer rollback, hay que mirarlo
+@peticiones_bp.route('/aceptar/<int:peticion_id>',methods=['PUT'])
 @jwt_required()
 def aceptar_peticion(peticion_id):
     usuario_id = int(get_jwt_identity())
@@ -155,26 +155,34 @@ def aceptar_peticion(peticion_id):
     if peticion.solicitante.tipo_usuario != TipoUsuarioEnum.PROP_MASCOTA:
         return jsonify({'msg':'No puedes aceptar peticiones a un usuario que no es propietario de mascota'}), 403
     
-    # Actualizamos estado de adopción
-    adopcion_solicitada.dueño_nuevo_id = peticion.solicitante_id
-    adopcion_solicitada.adopcion_cerrada = True 
-    adopcion_solicitada.save()
+    try: 
+        # Actualizamos estado de adopción
+        adopcion_solicitada.dueño_nuevo_id = peticion.solicitante_id
+        adopcion_solicitada.adopcion_cerrada = True 
+        adopcion_solicitada.save()
+        
+        # Actualizamos la petición y el resto
+        peticion.estado_peticion = EstadoPeticion.APROBADA
+        peticion.save()
+        
+        # buscar peticiones diferentes y rechazarlas
+        Peticiones_restantes = Peticion_adopcion.query.filter()
+        for p in Peticiones_restantes:
+            if(p.id != peticion_id and p.adopcion_id == adopcion_solicitada.id ):
+                p.estado_peticion = EstadoPeticion.RECHAZADA
+                p.save()
+        
+        #Actualizamos por ultimo la mascota (aquie es donde se introduce la logica de la libreria)
+        mascota_adoptada = Mascota.query.get_or_404(adopcion_solicitada.mascota_id)
+        mascota_adoptada.dueño_id = peticion.solicitante_id
+        mascota_adoptada.save()
+        return jsonify({'id':peticion_id}), 200
     
-    # Actualizamos la petición y el resto
-    peticion.estado_peticion = EstadoPeticion.APROBADA
-    peticion.save()
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'message': str(e)}), 500
     
-    # buscar peticiones diferentes y rechazarlas
-    Peticiones_restantes = Peticion_adopcion.query.filter(adopcion_id = adopcion_solicitada.id)
-    for p in Peticiones_restantes:
-        if(p.id != peticion_id):
-            p.estado_peticion = EstadoPeticion.RECHAZADA
-            p.save()
-    
-    #Actualizamos por ultimo la mascota (aquie es donde se introduce la logica de la libreria)
-    mascota_adoptada = Mascota.query.get_or_404(adopcion_solicitada.mascota_id)
-    mascota_adoptada.dueño_id = peticion.solicitante_id
-    mascota_adoptada.save()
 
 @peticiones_bp.route('/rechazar/<int:peticion_id>')
 @jwt_required()
@@ -194,8 +202,9 @@ def rechazar_peticion(peticion_id):
     # Actualizamos la petición y el resto
     peticion.estado_peticion = EstadoPeticion.RECHAZADA
     peticion.save()
+    return jsonify({'id':peticion_id}), 200
 
-@peticiones_bp.route('/eliminar/<peticion_id>')
+@peticiones_bp.route('/eliminar/<peticion_id>', methods=['DELETE'])
 @jwt_required
 def eliminar_peticion(peticion_id):
     usuario_id = int(get_jwt_identity())

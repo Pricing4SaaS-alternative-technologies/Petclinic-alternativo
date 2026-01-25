@@ -28,3 +28,11 @@ class Peticion_adopcion(db.Model):
 
     def __repr__(self):
         return f"<Peticion_adopcion(fecha_solicitud='{self.fecha_solicitud}', estado='{self.estado_petición}')>"
+    
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+        
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()

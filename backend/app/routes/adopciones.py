@@ -82,7 +82,7 @@ def listar_adopciones_clinica(clinica_id):
     if usuario.tipo_usuario != TipoUsuarioEnum.PROP_MASCOTA and usuario.clinica_id != clinica_id:
         return jsonify({'msg':'No puedes listar las adopciones de una clinica a la que no perteneces'}), 403
 
-    adopciones = Adopcion.query.filter(Adopcion.dueño_anterior.clinica_id==clinica_id).all()
+    adopciones = Adopcion.query.filter().all()
     return jsonify([
         {
             'id': a.id,
@@ -96,7 +96,7 @@ def listar_adopciones_clinica(clinica_id):
             'dueño_nuevo_id': a.dueño_nuevo_id,
             'dueño_nuevo_nombre': a.dueño_nuevo.nombre+' '+a.dueño_nuevo.apellidos if a.dueño_nuevo else "No tiene dueño adoptivo"
         }
-        for a in adopciones
+        for a in adopciones if a.dueño_anterior.clinica_id==clinica_id
         ]), 200
 
 @adopciones_bp.route('/crear', methods=['POST'])
