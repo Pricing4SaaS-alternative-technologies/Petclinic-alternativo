@@ -8,6 +8,7 @@ import HomeAdopciones from '@/components/HomeAdopciones'
 import PricingPlans from '@/components/PricingPlans.vue'
 import PropHabitacionesHotel from '../components/PropHabitacionesHotel.vue'
 import PropDetallesHabitacionHotel from '../components/PropHabitacionesHotelDetalles.vue'
+import PropMisReservas from '../components/PropHabitacionesHotelReservas.vue'
 
 Vue.use(Router)
 
@@ -49,6 +50,11 @@ export default new Router({
       name: 'detalles-habitacion',
       component: PropDetallesHabitacionHotel,
       props: true
+    },
+    {
+      path: '/mis-reservas',
+      name: 'mis-reservas',
+      component: PropMisReservas
     }
 
   ],
