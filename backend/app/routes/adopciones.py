@@ -7,9 +7,9 @@ from app.models.mascota import Mascota
 from app.models.usuario import Usuario
 from app.models.enums import TipoUsuarioEnum
 
-bp = Blueprint('adopciones', __name__, url_prefix='/api/adopciones')
+adopciones_bp = Blueprint('adopciones', __name__, url_prefix='/api/adopciones')
 
-@bp.route('/admin/listar', methods=['GET'])
+@adopciones_bp.route('/admin/listar', methods=['GET'])
 @jwt_required()
 def listar_adopciones():
     usuario_id = get_jwt_identity()
@@ -36,7 +36,7 @@ def listar_adopciones():
         ]), 200
 
 # Este metodo actua como filtro para el admin o como el listar_todas para el prop_mascota
-@bp.route('/usuario/<int:user_id>', methods=['GET'])
+@adopciones_bp.route('/usuario/<int:user_id>', methods=['GET'])
 @jwt_required()
 def listar_adopciones_usuario(user_id):
     usuario_id = int(get_jwt_identity())
@@ -70,7 +70,7 @@ def listar_adopciones_usuario(user_id):
         ]), 200
 
 # Orientado para que los solicitantes puedan ver las adopciones disponibles ne su clinica
-@bp.route('/clinica/<int:clinica_id>', methods=['GET'])
+@adopciones_bp.route('/clinica/<int:clinica_id>', methods=['GET'])
 @jwt_required()
 def listar_adopciones_clinica(clinica_id):
     usuario_id = int(get_jwt_identity())
@@ -99,7 +99,7 @@ def listar_adopciones_clinica(clinica_id):
         for a in adopciones
         ]), 200
 
-@bp.route('/crear', methods=['POST'])
+@adopciones_bp.route('/crear', methods=['POST'])
 @jwt_required()
 def crear_adopcion():
     usuario_id = int(get_jwt_identity())
@@ -126,12 +126,11 @@ def crear_adopcion():
     )
     adopcion_crear.dueño_anterior_id = usuario_id
 
-    db.session.add(adopcion_crear)
-    db.session.commit()
+    adopcion_crear.save()
     return jsonify({"id": adopcion_crear.id}), 201
 
 
-@bp.route('/eliminar/<int:adopcion_id>', methods=['DELETE'])
+@adopciones_bp.route('/eliminar/<int:adopcion_id>', methods=['DELETE'])
 @jwt_required()
 def eliminar_adopcion(adopcion_id):
     usuario_id = int(get_jwt_identity())
@@ -144,6 +143,5 @@ def eliminar_adopcion(adopcion_id):
     if adopcion_borrar.dueño_anterior_id != usuario_id:
         return jsonify({'msg':'No puedes eliminar una adopcion de otro dueño!'}), 403
 
-    db.session.delete(adopcion_borrar)
-    db.session.commit()
+    adopcion_borrar.delete()
     return jsonify({'msg': 'Eliminada'}), 200

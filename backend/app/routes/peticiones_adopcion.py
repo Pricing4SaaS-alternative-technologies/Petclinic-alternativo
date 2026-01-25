@@ -7,9 +7,9 @@ from app.models.usuario import Usuario
 from app.models.peticion_adopcion import Peticion_adopcion
 from app.models.enums import TipoUsuarioEnum, EstadoPeticion
 
-bp = Blueprint('peticiones_adopcion', __name__, url_prefix='/api/peticiones_adopcion')
+peticiones_bp = Blueprint('peticiones_adopcion', __name__, url_prefix='/api/peticiones_adopcion')
 
-@bp.route('/admin/listar', methods=['GET'])
+@peticiones_bp.route('/admin/listar', methods=['GET'])
 @jwt_required()
 def listar_peticiones():
     usuario_id = int(get_jwt_identity())
@@ -34,7 +34,7 @@ def listar_peticiones():
     ]), 200
 
 # orientado para que el dueño de mascota vea las peticiones realizadas a una adopcion suya
-@bp.route('/adopcion/<int:adopcion_id>', methods=['GET'])
+@peticiones_bp.route('/adopcion/<int:adopcion_id>', methods=['GET'])
 @jwt_required()
 def listar_peticiones_adopcion(adopcion_id):
     usuario_id = int(get_jwt_identity())
@@ -67,7 +67,7 @@ def listar_peticiones_adopcion(adopcion_id):
     ]), 200
 
 # Orientado para que los solicitantes vean sus propias peticiones de adopcion
-@bp.route('/usuario/<int:user_id>', methods=['GET'])
+@peticiones_bp.route('/usuario/<int:user_id>', methods=['GET'])
 @jwt_required()
 def listar_peticiones_usuario(user_id):
     usuario_id = int(get_jwt_identity())
@@ -95,7 +95,7 @@ def listar_peticiones_usuario(user_id):
     ]), 200
     
     
-@bp.route('/crear', methods=['POST'])
+@peticiones_bp.route('/crear', methods=['POST'])
 @jwt_required()
 def crear_peticion():
     usuario_id = int(get_jwt_identity())
@@ -140,7 +140,7 @@ def crear_peticion():
     return jsonify({'id': nueva_peticion.id}), 201
 
 # TODO revisr si al modificar directamente debe ser put o patch
-@bp.route('aceptar/<ing:peticion_id>')
+@peticiones_bp.route('/aceptar/<int:peticion_id>')
 @jwt_required()
 def aceptar_peticion(peticion_id):
     usuario_id = int(get_jwt_identity())
@@ -175,5 +175,41 @@ def aceptar_peticion(peticion_id):
     mascota_adoptada = Mascota.query.get_or_404(adopcion_solicitada.mascota_id)
     mascota_adoptada.dueño_id = peticion.solicitante_id
     mascota_adoptada.save()
+
+@peticiones_bp.route('/rechazar/<int:peticion_id>')
+@jwt_required()
+def rechazar_peticion(peticion_id):
+    usuario_id = int(get_jwt_identity())
+    usuario = Usuario.query.get_or_404(usuario_id)
     
+    peticion = Peticion_adopcion.query.get_or_404(peticion_id)
+    adopcion_solicitada = Adopcion.query.get_or_404(peticion.adopcion_id)
+    
+    if usuario.tipo_usuario != TipoUsuarioEnum.PROP_MASCOTA and adopcion_solicitada.dueño_anterior_id != usuario_id:
+        return jsonify({'msg':'No puedes rechazar peticiones de una adopcion que no has generado tu'}), 403
+    
+    if peticion.solicitante.tipo_usuario != TipoUsuarioEnum.PROP_MASCOTA:
+        return jsonify({'msg':'No puedes rechazar peticiones a un usuario que no es propietario de mascota'}), 403
+    
+    # Actualizamos la petición y el resto
+    peticion.estado_peticion = EstadoPeticion.RECHAZADA
+    peticion.save()
+
+@peticiones_bp.route('/eliminar/<peticion_id>')
+@jwt_required
+def eliminar_peticion(peticion_id):
+    usuario_id = int(get_jwt_identity())
+    usuario = Usuario.query.get_or_404(usuario_id)
+    
+    peticion = Peticion_adopcion.query.get_or_404(peticion_id)
+    
+    if usuario.tipo_usuario != TipoUsuarioEnum.PROP_MASCOTA and peticion.solicitante_id != usuario_id:
+        return jsonify({'msg':'No puedes eliminar peticiones que no son tuyas'}), 403
+    
+    peticion.delete()
+    return jsonify({'msg': 'Eliminada'}), 200
+    
+    
+    
+        
     
