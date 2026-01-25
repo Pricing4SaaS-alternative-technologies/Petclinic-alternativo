@@ -8,7 +8,12 @@
     </div>
 
     <div v-if="jwtValido">
+      <div>
       <h2 class="rooms-title">Todas las habitaciones</h2>
+        <button class="see-reservas-btn" @click=verMisReservas>
+                <i class="fas fa-paw"></i> Mis reservas
+              </button>
+      </div>
 
       <div v-if="loading" class="loading-container">
         <div class="loading-spinner"></div>
@@ -25,7 +30,7 @@
           </div>
           <div class="room-content">
             <h3 class="room-name">{{ habitacion.nombre }}</h3>
-            <p class="room-perfect-for">Perfect for: {{ getPetType(habitacion.tipo.toUpperCase()) }}</p>
+            <p class="room-perfect-for">Perfecto para: {{ habitacion.tipo }}</p>
             <button class="see-details-btn" @click="$router.push(`/detalles-habitacion/${habitacion.id}`)">Ver detalles</button>
           </div>
         </div>
@@ -91,6 +96,16 @@ export default {
       }
     },
 
+    async verMisReservas () {
+      try {
+        // Redirigir a la vista de reservas
+        this.$router.push('/mis-reservas')
+      } catch (error) {
+        console.error('Error al navegar a reservas:', error)
+        alert('Error al cargar las reservas')
+      }
+    },
+
     async obtenerHabitaciones () {
       if (!this.jwtValido) return
 
@@ -118,21 +133,9 @@ export default {
       } finally {
         this.loading = false
       }
-    },
-
-    getPetType (roomType) {
-      const petTypeMap = {
-        'gato': 'Gatos',
-        'perro': 'Perros',
-        'reptil': 'Reptiles',
-        'pájaro': 'Pájaros',
-        'HAMSTER': 'Hamsters',
-        'tortuga': 'Tortugas'
-      }
-      return petTypeMap[roomType] || 'Cualquier tipo de mascota'
     }
   }
 }
 </script>
 
-<style scoped src="./css/HotelRooms.css"></style>
+<style scoped src="./css/PropHabitacionesHotel.css"></style>
