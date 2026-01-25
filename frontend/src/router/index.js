@@ -4,6 +4,7 @@ import Home from '@/components/Home'
 import AuthPage from '@/components/AuthPage'
 import HomeVisitas from '@/components/HomeVisitas'
 import HomeVisitasPropietarios from '@/components/HomeVisitasPropietarios'
+import CalendarioVisitas from '@/components/CalendarioVisitas'
 import HomeAdopciones from '@/components/HomeAdopciones'
 import PricingPlans from '@/components/PricingPlans.vue'
 
@@ -28,6 +29,10 @@ export default new Router({
     { path: '/mis-visitas',
       name: 'mis-visitas',
       component: HomeVisitasPropietarios
+    },
+    { path: '/calendario-visitas',
+      name: 'calendario-visitas',
+      component: CalendarioVisitas
     },
     { path: '/adopciones',
       name: 'adopciones',

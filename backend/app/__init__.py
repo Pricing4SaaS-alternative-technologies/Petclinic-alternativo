@@ -75,7 +75,7 @@ def create_app():
     app.async_loop = loop
 
     # Crea el cliente y servicios que lo usan
-    app.space_client = SpaceClient(url="http://localhost:5403", api_key="f7e0316af74ea3602e16081a9c38b18e1b1a63f4f1ba66088d35a9c91b71f87f")
+    app.space_client = SpaceClient(url="http://localhost:5403", api_key="0c38b63b15b7c8ed46d1b8ebe131dc76fd9a1d33f76d70165b114cec90e9405a")
     #meter prueba y señalar si esta correcto
     
     # helper para usar funciones async desde las rutas sync

@@ -20,6 +20,13 @@
         Mis visitas
       </router-link>
       <router-link
+        v-if="loggedIn && userTipo === 'prop_mascota'"
+        to="/calendario-visitas"
+        class="nav-link"
+      >
+        Calendario de visitas
+      </router-link>
+      <router-link
         v-if="loggedIn && userTipo==='prop_mascota'"
         to="/adopciones"
         class="nav-link"
