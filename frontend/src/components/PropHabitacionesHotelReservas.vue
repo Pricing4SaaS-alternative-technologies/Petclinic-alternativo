@@ -8,8 +8,7 @@
     </div>
 
     <div v-if="jwtValido">
-
-      <div v-if="loading" class="loading-container">
+      <div v-if="loading || cargandoReservas" class="loading-container">
         <div class="loading-spinner"></div>
         <p>Cargando reservas...</p>
       </div>
@@ -25,15 +24,35 @@
           </div>
           <div class="room-content">
             <h3 class="room-name">{{ habitacion.nombre }}</h3>
-            <p class="room-description">{{ habitacion.descripcion }}</p>
+
+            <!-- Sección de fechas de reserva -->
+            <div v-if="habitacion.reservas && habitacion.reservas.length > 0" class="reservas-dates">
+              <h4 class="reservas-subtitle">Fechas reservadas:</h4>
+              <div v-for="(reserva, index) in habitacion.reservas" :key="index" class="reserva-item">
+                <div class="reserva-date-range">
+                  <i class="fas fa-calendar-alt"></i>
+                  {{ formatearFecha(reserva.fecha_inicio) }} - {{ formatearFecha(reserva.fecha_fin) }}
+                </div>
+                <div class="reserva-status" :class="{
+                  'status-active': reserva.estado === 'activa',
+                  'status-pending': reserva.estado === 'pendiente',
+                  'status-completed': reserva.estado === 'completada'
+                }">
+                  {{ reserva.estado }}
+                </div>
+              </div>
+            </div>
+
+            <div v-else class="no-reservas-dates">
+              <p class="no-dates-text">No hay fechas de reserva disponibles</p>
+            </div>
+
             <div class="room-details">
               <span class="room-detail"><i class="fas fa-paw"></i> Tipo: {{ habitacion.tipo }}</span>
               <span class="room-detail"><i class="fas fa-expand-arrows-alt"></i> Tamaño: {{ habitacion.tamaño }}</span>
             </div>
             <div class="room-actions">
-              <button class="cancel-btn" @click="cancelarReserva(habitacion.id)" v-if="habitacion.reservable">
-                <i class="fas fa-times"></i> Cancelar
-              </button>
+              <!-- Aquí podrías agregar botones de acción si los necesitas -->
             </div>
           </div>
         </div>
@@ -80,9 +99,11 @@ export default {
       info_usuario: null,
       jwtValido: false,
       habitacionesReservadas: [],
-      mascotas: [],
+      reservas: [],
+      todasLasMascotas: [],
       mascotaSeleccionada: 'todas',
       loading: false,
+      cargandoReservas: false,
       error: ''
     }
   },
@@ -110,22 +131,22 @@ export default {
       try {
         this.info_usuario = JSON.parse(rawUser)
         this.jwtValido = true
-        this.obtenerMisReservas()
+        this.obtenerMiHabsReservadas()
         this.obtenerMascotas()
+        this.obtenerMisReservas()
       } catch (e) {
         console.error('Error al parsear el usuario:', e)
         this.jwtValido = false
       }
     },
 
-    async obtenerMisReservas () {
+    async obtenerMiHabsReservadas () {
       if (!this.jwtValido) return
 
       this.loading = true
       this.error = ''
 
       try {
-        // Configurar los parámetros de consulta
         const params = {}
         if (this.mascotaSeleccionada !== 'todas') {
           params.mascota_id = parseInt(this.mascotaSeleccionada)
@@ -133,17 +154,21 @@ export default {
 
         console.log('Enviando parámetros:', params)
 
-        const response = await api.get('http://localhost:5000/api/reservas/mis_reservas', {
+        const response = await api.get('http://localhost:5000/api/reservas/mis_habs_reservas', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('jwt')}`
           },
-          params: params // ESTO es lo importante: usa params, no data
+          params: params
         })
 
-        console.log('Datos de reservas:', response.data)
+        console.log('Datos de habitaciones reservadas:', response.data)
 
         if (response.data && Array.isArray(response.data)) {
           this.habitacionesReservadas = response.data
+          // Si ya tenemos las reservas, las organizamos
+          if (this.reservas.length > 0) {
+            this.organizarReservasPorHabitacion()
+          }
         } else {
           this.habitacionesReservadas = []
           console.warn('Formato de respuesta inválido')
@@ -178,8 +203,6 @@ export default {
         return
       }
 
-      this.cargandoMascotas = true
-
       try {
         const res = await axios.get('http://localhost:5000/api/mascotas/listar-tus-mascotas', {
           headers: {
@@ -188,13 +211,68 @@ export default {
         })
         this.todasLasMascotas = res.data || []
         console.log('Todas las mascotas cargadas:', this.todasLasMascotas)
-        console.log('Tipo de habitación:', this.habitacion.tipo)
       } catch (error) {
         console.error('Error al cargar mascotas:', error)
         this.todasLasMascotas = []
-      } finally {
-        this.cargandoMascotas = false
       }
+    },
+
+    async obtenerMisReservas () {
+      const user = JSON.parse(localStorage.getItem('user'))
+      if (!user || !user.id) {
+        this.reservas = []
+        return
+      }
+
+      this.cargandoReservas = true
+
+      try {
+        const res = await axios.get('http://localhost:5000/api/reservas/mis_reservas', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('jwt')}`
+          }
+        })
+
+        this.reservas = res.data || []
+        console.log('Datos de reservas:', this.reservas)
+
+        // Organizar reservas por habitación
+        this.organizarReservasPorHabitacion()
+      } catch (error) {
+        console.error('Error al cargar reservas:', error)
+        this.reservas = []
+      } finally {
+        this.cargandoReservas = false
+      }
+    },
+
+    organizarReservasPorHabitacion () {
+      // Crear un mapa para agrupar reservas por habitación
+      const reservasPorHabitacion = {}
+
+      this.reservas.forEach(reserva => {
+        if (!reservasPorHabitacion[reserva.habitacion_id]) {
+          reservasPorHabitacion[reserva.habitacion_id] = []
+        }
+        reservasPorHabitacion[reserva.habitacion_id].push(reserva)
+      })
+
+      // Asignar las reservas a cada habitación
+      this.habitacionesReservadas = this.habitacionesReservadas.map(habitacion => {
+        return {
+          ...habitacion,
+          reservas: reservasPorHabitacion[habitacion.id] || []
+        }
+      })
+    },
+
+    formatearFecha (fechaString) {
+      const fecha = new Date(fechaString)
+      return fecha.toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      })
     }
   }
 }
