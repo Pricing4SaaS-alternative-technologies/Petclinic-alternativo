@@ -10,14 +10,13 @@ from app.models.habitacion_hotel import Habitacion_hotel
 
 reservas = Blueprint('reservas', __name__, url_prefix='/api/reservas')
 
-@reservas.route('/mis_reservas', methods=['GET'])
+@reservas.route('/mis_habs_reservas', methods=['GET'])
 @jwt_required()
-def listar_mis_reservas():
+def listar_mis_habitaciones_reservas():
     id_usuario = int(get_jwt_identity())
     usuario = Usuario.query.get_or_404(id_usuario)
     rol_usuario = usuario.tipo_usuario
     
-    # Cambia esto a request.args para GET
     mascota_id = request.args.get('mascota_id', type=int)
 
     if rol_usuario != TipoUsuarioEnum.PROP_MASCOTA and rol_usuario != TipoUsuarioEnum.ADMIN:
@@ -43,9 +42,7 @@ def listar_mis_reservas():
         return jsonify([]), 200
     
     # Obtener las habitaciones a partir de las IDs de las reservas
-    habitaciones_reservadas = Habitacion_hotel.query.filter(
-        Habitacion_hotel.id.in_(habitacion_ids)
-    ).all()
+    habitaciones_reservadas = Habitacion_hotel.query.filter(Habitacion_hotel.id.in_(habitacion_ids)).all()
 
     return jsonify([
         {
@@ -60,6 +57,40 @@ def listar_mis_reservas():
         }
         for h in habitaciones_reservadas
     ]), 200
+    
+@reservas.route('/mis_reservas', methods=['GET'])
+@jwt_required()
+def listar_reservas():
+    id_usuario = int(get_jwt_identity())
+    usuario = Usuario.query.get_or_404(id_usuario)
+    rol_usuario = usuario.tipo_usuario
+    mascota_id = request.args.get('mascota_id', type=int)
+
+    if rol_usuario != TipoUsuarioEnum.PROP_MASCOTA and rol_usuario != TipoUsuarioEnum.ADMIN:
+        return jsonify({'message': 'No tienes permiso para ver tus reservas'}), 403
+    
+
+    mascotas = Mascota.query.filter_by(dueño_id=id_usuario).all()
+    mascota_ids = [mascota.id for mascota in mascotas]
+    
+    if not mascota_ids:
+        return jsonify([]), 200
+    
+    if mascota_id:
+        if mascota_id not in mascota_ids:
+            return jsonify({'message': 'Mascota no pertenece al usuario'}), 400
+        mascota_ids = [mascota_id]
+    
+    
+    reservas = Reserva.query.filter(Reserva.mascota.has(dueño_id=id_usuario)).all()
+    
+    return jsonify([{
+        'id': reserva.id,
+        'mascota_id': reserva.mascota_id,
+        'habitacion_id': reserva.habitacion_id,
+        'fecha_inicio': reserva.fecha_inicio.isoformat(),
+        'fecha_fin': reserva.fecha_fin.isoformat()
+    } for reserva in reservas]), 200
     
 @reservas.route('/crear', methods=['POST'])
 @jwt_required()
