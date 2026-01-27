@@ -1,4 +1,4 @@
-/* CalendarioVisitas.css */
+/* CalendarioVisitas.css - Calendario interactivo de visitas */
 
 .calendario-container {
   padding: 5px 10px;
@@ -7,7 +7,7 @@
   font-family: 'Arial', sans-serif;
 }
 
-/* Header Styles */
+/* ===================== HEADER ===================== */
 .calendario-header {
   text-align: center;
   margin-bottom: 25px;
@@ -58,23 +58,12 @@
 }
 
 .loading-container p {
-  font-size: 1.2rem;
+  font-size: 1rem;
   color: #7f8c8d;
-  margin-top: 15px;
+  margin: 15px 0 0 0;
 }
 
-/* No Mascotas State */
-.no-mascotas {
-  text-align: center;
-  padding: 80px 20px;
-  color: #7f8c8d;
-  font-size: 1.3rem;
-  background: #f8f9fa;
-  border-radius: 12px;
-  margin-top: 30px;
-}
-
-/* Calendario Content */
+/* ===================== MAIN CONTENT ===================== */
 .calendario-content {
   background: white;
   border-radius: 8px;
@@ -83,7 +72,6 @@
   margin-bottom: 10px;
 }
 
-/* Controls */
 .calendario-controls {
   display: flex;
   justify-content: center;
@@ -127,7 +115,7 @@
   text-align: center;
 }
 
-/* Calendario Wrapper */
+/* ===================== CALENDARIO ===================== */
 .calendario-wrapper {
   background: white;
   border-radius: 12px;
@@ -185,7 +173,6 @@
 
 .dia.hoy {
   background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-  border: 1px solid #ecf0f1;
 }
 
 .dia.tiene-visita {
@@ -214,6 +201,7 @@
   color: #bdc3c7;
 }
 
+/* ===================== VISITAS EN CELDA ===================== */
 .visitas-en-celda {
   width: 100%;
   font-size: 0.6rem;
@@ -241,12 +229,12 @@
 .visita-mini-hora {
   font-weight: 600;
   color: #27ae60;
-  font-size: 0.55rem;
+  font-size: 0.7rem;
 }
 
 .visita-mini-mascota {
   color: #2c3e50;
-  font-size: 0.55rem;
+  font-size: 0.7rem;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -254,25 +242,11 @@
 .visita-mini-mas {
   color: #7f8c8d;
   font-weight: 600;
-  font-size: 0.55rem;
+  font-size: 0.65rem;
   padding: 1px 3px;
 }
 
-.indicador-visita {
-  display: flex;
-  gap: 2px;
-  margin-top: 1px;
-}
-
-.punto-visita {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: #27ae60;
-  box-shadow: 0 0 3px rgba(39, 174, 96, 0.5);
-}
-
-/* Detalles Panel */
+/* ===================== PANEL DE DETALLES ===================== */
 .detalles-panel {
   background: #f8f9fa;
   border-radius: 8px;
@@ -285,8 +259,7 @@
 .dia-detalles h3 {
   color: #2c3e50;
   font-size: 0.95rem;
-  margin-bottom: 10px;
-  margin-top: 0;
+  margin: 0 0 10px 0;
   font-weight: 600;
   text-transform: capitalize;
 }
@@ -351,12 +324,7 @@
   font-size: 0.85rem;
 }
 
-.sin-seleccion {
-  color: #95a5a6;
-  font-style: italic;
-}
-
-/* Próximas Visitas */
+/* ===================== PRÓXIMAS VISITAS ===================== */
 .proximas-visitas {
   background: white;
   border-radius: 8px;
@@ -369,8 +337,7 @@
 .proximas-visitas h3 {
   font-size: 1rem;
   color: #2c3e50;
-  margin-bottom: 10px;
-  margin-top: 0;
+  margin: 0 0 10px 0;
   font-weight: 600;
   border-bottom: 2px solid #3498db;
   display: inline-block;
@@ -425,7 +392,7 @@
   font-size: 0.75rem;
 }
 
-/* Error Message */
+/* ===================== ERROR MESSAGE ===================== */
 .error-message {
   background: #ffebee;
   color: #c62828;
@@ -433,167 +400,63 @@
   border-radius: 12px;
   margin-top: 30px;
   text-align: center;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   border-left: 5px solid #c62828;
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .visita-item-content {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-}
-
+/* ===================== RESPONSIVE DESIGN ===================== */
 @media (max-width: 768px) {
   .calendario-container {
-    padding: 20px 15px;
+    padding: 10px 8px;
   }
 
-  .calendario-title {
-    font-size: 2.5rem;
-  }
-
-  .calendario-description {
-    font-size: 1.2rem;
-    padding: 0 10px;
-  }
-
-  .calendario-controls {
-    gap: 15px;
-    margin-bottom: 30px;
-  }
-
-  .mes-actual {
-    font-size: 1.5rem;
-    min-width: auto;
-  }
-
-  .nav-btn {
-    padding: 10px 15px;
-    font-size: 0.9rem;
-  }
-
-  .dia {
-    min-height: 80px;
-    padding: 8px;
-  }
-
-  .numero-dia {
-    font-size: 1rem;
-  }
-
-  .detalles-panel {
-    padding: 20px;
-  }
-
-  .dia-detalles h3 {
-    font-size: 1.5rem;
-  }
-
-  .visita-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .mascota-nombre {
-    font-size: 1.1rem;
-  }
-
-  .visita-item-content {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-
-  .proximas-visitas {
-    padding: 20px;
-  }
-
-  .proximas-visitas h3 {
-    font-size: 1.5rem;
-  }
-}
-
-@media (max-width: 480px) {
   .calendario-title {
     font-size: 2rem;
   }
 
   .calendario-description {
-    font-size: 1.1rem;
+    font-size: 0.9rem;
   }
 
+  .nav-btn {
+    padding: 6px 12px;
+    font-size: 0.7rem;
+  }
+
+  .mes-actual {
+    font-size: 0.9rem;
+  }
+
+  .dia {
+    height: 65px;
+  }
+
+  .visita-item-content {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+}
+
+@media (max-width: 480px) {
   .calendario-controls {
     gap: 10px;
   }
 
-  .mes-actual {
-    font-size: 1.2rem;
+  .nav-btn {
+    padding: 5px 10px;
+    font-size: 0.65rem;
   }
 
-  .nav-btn {
-    padding: 8px 12px;
-    font-size: 0.8rem;
+  .mes-actual {
+    min-width: 120px;
+    font-size: 0.85rem;
   }
 
   .dia-semana {
-    padding: 10px 5px;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
   }
 
   .dia {
-    min-height: 60px;
-    padding: 5px;
-  }
-
-  .numero-dia {
-    font-size: 0.9rem;
-  }
-
-  .detalles-panel {
-    padding: 15px;
-    margin-top: 20px;
-  }
-
-  .dia-detalles h3 {
-    font-size: 1.3rem;
-    margin-bottom: 15px;
-  }
-
-  .visita-detalle {
-    padding: 15px;
-  }
-
-  .mascota-nombre {
-    font-size: 1rem;
-  }
-
-  .hora {
-    padding: 4px 10px;
-    font-size: 0.85rem;
-  }
-
-  .visita-descripcion {
-    font-size: 0.9rem;
-  }
-
-  .proximas-visitas {
-    padding: 15px;
-  }
-
-  .proximas-visitas h3 {
-    font-size: 1.3rem;
-  }
-
-  .fecha-hora {
-    font-size: 0.85rem;
-  }
-
-  .mascota {
-    font-size: 1rem;
-  }
-
-  .descripcion {
-    font-size: 0.85rem;
+    height: 55px;
   }
 }
