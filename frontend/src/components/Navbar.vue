@@ -41,7 +41,7 @@
         Vet visits
       </router-link>
       <router-link
-        v-if="userTipo==='prop_mascota'"
+        v-if="userTipo === 'prop_mascota'"
         to="/adopciones"
         class="sidebar-link"
       >
