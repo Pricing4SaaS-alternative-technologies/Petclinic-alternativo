@@ -1,0 +1,462 @@
+/* CalendarioVisitas.css - Calendario interactivo de visitas */
+
+.calendario-container {
+  padding: 5px 10px;
+  max-width: 1400px;
+  margin: 0 auto;
+  font-family: 'Arial', sans-serif;
+}
+
+/* ===================== HEADER ===================== */
+.calendario-header {
+  text-align: center;
+  margin-bottom: 25px;
+  padding: 0 10px;
+}
+
+.calendario-title {
+  font-size: 2.5rem;
+  color: #2c3e50;
+  margin-bottom: 15px;
+  margin-top: 0;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.calendario-description {
+  font-size: 1rem;
+  color: #7f8c8d;
+  line-height: 1.2;
+  max-width: 800px;
+  margin: 0 auto;
+  font-weight: 700;
+}
+
+/* Loading State */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 20px;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 60px;
+  height: 60px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-container p {
+  font-size: 1rem;
+  color: #7f8c8d;
+  margin: 15px 0 0 0;
+}
+
+/* ===================== MAIN CONTENT ===================== */
+.calendario-content {
+  background: white;
+  border-radius: 8px;
+  padding: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 10px;
+}
+
+.calendario-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.nav-btn {
+  background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+  color: white;
+  border: none;
+  padding: 7px 14px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.nav-btn:hover {
+  background: linear-gradient(135deg, #2980b9 0%, #1a252f 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+}
+
+.nav-btn:active {
+  transform: translateY(0);
+}
+
+.mes-actual {
+  font-size: 1rem;
+  color: #2c3e50;
+  font-weight: 600;
+  margin: 0;
+  min-width: 140px;
+  text-align: center;
+}
+
+/* ===================== CALENDARIO ===================== */
+.calendario-wrapper {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 30px;
+  border: 2px solid #ecf0f1;
+}
+
+.dias-semana {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+  padding: 0;
+  margin: 0;
+}
+
+.dia-semana {
+  padding: 10px 2px;
+  text-align: center;
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.dias-calendario {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.dia {
+  aspect-ratio: auto;
+  border: 1px solid #ecf0f1;
+  padding: 1px 3px 3px 3px;
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  height: 75px;
+  background: white;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.dia.otro-mes {
+  background: #f8f9fa;
+  color: #bdc3c7;
+}
+
+.dia.hoy {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+}
+
+.dia.tiene-visita {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+}
+
+.dia.tiene-visita.hoy {
+  background: linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%);
+}
+
+.dia:hover:not(.otro-mes) {
+  background: #f0f8ff;
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+  transform: translateY(-2px);
+}
+
+.numero-dia {
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: #2c3e50;
+  width: 100%;
+  text-align: left;
+}
+
+.dia.otro-mes .numero-dia {
+  color: #bdc3c7;
+}
+
+/* ===================== VISITAS EN CELDA ===================== */
+.visitas-en-celda {
+  width: 100%;
+  font-size: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 2px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.visita-mini {
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+  background: rgba(39, 174, 96, 0.1);
+  padding: 2px 3px;
+  border-radius: 3px;
+  border-left: 2px solid #27ae60;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.visita-mini-hora {
+  font-weight: 600;
+  color: #27ae60;
+  font-size: 0.7rem;
+}
+
+.visita-mini-mascota {
+  color: #2c3e50;
+  font-size: 0.7rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.visita-mini-mas {
+  color: #7f8c8d;
+  font-weight: 600;
+  font-size: 0.65rem;
+  padding: 1px 3px;
+}
+
+/* ===================== PANEL DE DETALLES ===================== */
+.detalles-panel {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 10px;
+  margin-top: 10px;
+  border-left: 4px solid #3498db;
+  display: none;
+}
+
+.dia-detalles h3 {
+  color: #2c3e50;
+  font-size: 0.95rem;
+  margin: 0 0 10px 0;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.visitas-del-dia {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.visita-detalle {
+  background: white;
+  padding: 10px;
+  border-radius: 6px;
+  border-left: 4px solid #27ae60;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  font-size: 0.8rem;
+}
+
+.visita-detalle:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transform: translateX(3px);
+}
+
+.visita-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mascota-nombre {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.hora {
+  background: #ecf0f1;
+  padding: 3px 8px;
+  border-radius: 15px;
+  font-weight: 600;
+  color: #3498db;
+  font-size: 0.75rem;
+}
+
+.visita-descripcion {
+  color: #555;
+  line-height: 1.3;
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.sin-visitas,
+.sin-seleccion {
+  text-align: center;
+  color: #7f8c8d;
+  padding: 10px;
+  font-size: 0.85rem;
+}
+
+/* ===================== PRÓXIMAS VISITAS ===================== */
+.proximas-visitas {
+  background: white;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 10px;
+  display: none;
+}
+
+.proximas-visitas h3 {
+  font-size: 1rem;
+  color: #2c3e50;
+  margin: 0 0 10px 0;
+  font-weight: 600;
+  border-bottom: 2px solid #3498db;
+  display: inline-block;
+  padding-bottom: 5px;
+}
+
+.lista-proximas {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.visita-item {
+  background: #f8f9fa;
+  padding: 8px;
+  border-radius: 6px;
+  border-left: 3px solid #3498db;
+  transition: all 0.3s ease;
+  font-size: 0.8rem;
+}
+
+.visita-item:hover {
+  background: #ecf0f1;
+  box-shadow: 0 2px 6px rgba(52, 152, 219, 0.2);
+  transform: translateX(3px);
+}
+
+.visita-item-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr 2fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.fecha-hora {
+  font-weight: 600;
+  color: #3498db;
+  font-size: 0.75rem;
+}
+
+.mascota {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 0.8rem;
+}
+
+.descripcion {
+  color: #555;
+  font-size: 0.75rem;
+}
+
+/* ===================== ERROR MESSAGE ===================== */
+.error-message {
+  background: #ffebee;
+  color: #c62828;
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 30px;
+  text-align: center;
+  font-size: 0.95rem;
+  border-left: 5px solid #c62828;
+}
+
+/* ===================== RESPONSIVE DESIGN ===================== */
+@media (max-width: 768px) {
+  .calendario-container {
+    padding: 10px 8px;
+  }
+
+  .calendario-title {
+    font-size: 2rem;
+  }
+
+  .calendario-description {
+    font-size: 0.9rem;
+  }
+
+  .nav-btn {
+    padding: 6px 12px;
+    font-size: 0.7rem;
+  }
+
+  .mes-actual {
+    font-size: 0.9rem;
+  }
+
+  .dia {
+    height: 65px;
+  }
+
+  .visita-item-content {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .calendario-controls {
+    gap: 10px;
+  }
+
+  .nav-btn {
+    padding: 5px 10px;
+    font-size: 0.65rem;
+  }
+
+  .mes-actual {
+    min-width: 120px;
+    font-size: 0.85rem;
+  }
+
+  .dia-semana {
+    font-size: 0.9rem;
+  }
+
+  .dia {
+    height: 55px;
+  }
+}
