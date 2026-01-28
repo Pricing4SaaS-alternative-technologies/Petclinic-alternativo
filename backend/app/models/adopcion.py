@@ -15,7 +15,7 @@ class Adopcion(db.Model):
     mascota = db.relationship('Mascota', passive_deletes=True)
     
     # Los dueños nuevos pueden ser nulos en caso de no estar finalizadas, en caso de finalizarse, si se elimina el dueño, el cascade de mascotas elimianria la acopcion
-    dueño_nuevo_id = db.Column(db.Integer, db.ForeignKey('usuarios.id',ondelete='SET NULL'), nullable=True)
+    dueño_nuevo_id = db.Column(db.Integer, db.ForeignKey('usuarios.id',ondelete='SET NULL'), nullable=True, default=None)
     dueño_nuevo = db.relationship('Usuario', foreign_keys=[dueño_nuevo_id])
     
     #si se elimina el propietario anterior, la adopción se borrara debido al cascade en mascota
@@ -26,14 +26,10 @@ class Adopcion(db.Model):
     def __init__(self,
                 descripcion,
                 mascota_id,
-                dueño_anterior_id,
-                dueño_nuevo_id,
-                estado_adopcion=False):
+                adopcion_cerrada=False):
        self.descripcion       = descripcion
        self.mascota_id        = mascota_id
-       self.dueño_anterior_id = dueño_anterior_id
-       self.dueño_nuevo_id    = dueño_nuevo_id
-       self.estado_adopcion   = estado_adopcion
+       self.adopcion_cerrada  = adopcion_cerrada
        self.fecha_creacion    = datetime.now()
 
     def __repr__(self):
