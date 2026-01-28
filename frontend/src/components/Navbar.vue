@@ -47,6 +47,13 @@
       >
         Adoptions
       </router-link>
+      <router-link
+        v-if="loggedIn && userTipo==='prop_mascota'"
+        to="/habitaciones-hotel"
+        class="nav-link"
+      >
+        Habitaciones hotel
+      </router-link>
     </div>
   </div>
 </template>

@@ -17,6 +17,8 @@ from .routes.prop_mascotas import prop_mascotas_bp
 from .routes.veterinario import veterinario_bp
 from .routes.adopciones import adopciones_bp
 from .routes.contratos import contratos as contratos_bp
+from .routes.habitaciones_hotel import habitaciones_hotel as habitaciones_hotel
+from .routes.reservas import reservas as reservas
 from .routes.peticiones_adopcion import peticiones_bp
 
 from .extensions import db
@@ -61,6 +63,9 @@ def create_app():
     app.register_blueprint(veterinario_bp)
     app.register_blueprint(adopciones_bp)
     app.register_blueprint(contratos_bp)
+    app.register_blueprint(habitaciones_hotel)
+    app.register_blueprint(reservas)
+
     app.register_blueprint(peticiones_bp)
 
     ## Para desarrollo: crear tablas si no existen

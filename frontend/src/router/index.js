@@ -6,6 +6,9 @@ import HomeVisitas from '@/components/HomeVisitas'
 import HomeVisitasPropietarios from '@/components/HomeVisitasPropietarios'
 import HomeAdopciones from '@/components/HomeAdopciones'
 import PricingPlans from '@/components/PricingPlans.vue'
+import PropHabitacionesHotel from '../components/PropHabitacionesHotel.vue'
+import PropDetallesHabitacionHotel from '../components/PropHabitacionesHotelDetalles.vue'
+import PropMisReservas from '../components/PropHabitacionesHotelReservas.vue'
 
 Vue.use(Router)
 
@@ -36,6 +39,22 @@ export default new Router({
     { path: '/pricing-plans',
       name: 'pricing-plans',
       component: PricingPlans
+    },
+    {
+      path: '/habitaciones-hotel',
+      name: 'habitaciones-hotel',
+      component: PropHabitacionesHotel
+    },
+    {
+      path: '/detalles-habitacion/:id',
+      name: 'detalles-habitacion',
+      component: PropDetallesHabitacionHotel,
+      props: true
+    },
+    {
+      path: '/mis-reservas',
+      name: 'mis-reservas',
+      component: PropMisReservas
     }
 
   ],
