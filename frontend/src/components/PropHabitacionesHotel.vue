@@ -1,7 +1,7 @@
 <template>
   <div class="pet-hotel-container">
     <div class="hotel-header">
-      <h1 class="hotel-title">Pet Hotel Rooms</h1>
+      <h1 class="hotel-title">Habitaciones de Hotel para Mascotas</h1>
       <p class="hotel-description">
         Deja a tu mascota bajo el mejor cuidado de nuestro personal dedicado en el hotel para mascotas.
       </p>
