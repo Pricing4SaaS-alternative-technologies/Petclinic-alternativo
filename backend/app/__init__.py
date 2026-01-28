@@ -1,5 +1,6 @@
 # backend/app/__init__.py
 import os
+from app.config import Config
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
@@ -14,10 +15,11 @@ from .routes.mascotas import mascotas_bp
 from .routes.visitas import visitas_bp
 from .routes.prop_mascotas import prop_mascotas_bp
 from .routes.veterinario import veterinario_bp
-from .routes.adopciones import bp as adopciones_bp
+from .routes.adopciones import adopciones_bp
 from .routes.contratos import contratos as contratos_bp
 from .routes.habitaciones_hotel import habitaciones_hotel as habitaciones_hotel
 from .routes.reservas import reservas as reservas
+from .routes.peticiones_adopcion import peticiones_bp
 
 from .extensions import db
 
@@ -64,6 +66,7 @@ def create_app():
     app.register_blueprint(habitaciones_hotel)
     app.register_blueprint(reservas)
 
+    app.register_blueprint(peticiones_bp)
 
     ## Para desarrollo: crear tablas si no existen
     with app.app_context():
@@ -79,7 +82,7 @@ def create_app():
     app.async_loop = loop
 
     # Crea el cliente y servicios que lo usan
-    app.space_client = SpaceClient(url="http://localhost:5403", api_key="57ab59b541bafc971b7588a192661ed01e3e354a9f1464f868e28a4b66931b01")
+    app.space_client = SpaceClient(url="http://localhost:5403", api_key= Config.SPACE_API_KEY)
     #meter prueba y señalar si esta correcto
     
     # helper para usar funciones async desde las rutas sync
