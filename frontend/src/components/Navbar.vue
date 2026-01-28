@@ -55,7 +55,7 @@
         Adoptions
       </router-link>
       <router-link
-        v-if="loggedIn && userTipo==='prop_mascota'"
+        v-if="loggedIn && userTipo==='prop_mascota' || userTipo === 'prop_clinica'"
         to="/habitaciones-hotel"
         class="nav-link"
       >

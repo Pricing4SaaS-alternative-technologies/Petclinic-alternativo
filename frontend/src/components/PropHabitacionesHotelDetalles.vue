@@ -57,13 +57,28 @@
             </p>
 
             <!-- Botones de acción -->
-            <div class="action-buttons">
-              <button class="see-reservas-btn" @click="abrirModalDisponibilidad">
-                <i class="far fa-calendar-alt"></i> Consultar Disponibilidad
-              </button>
-              <button class="see-reservas-btn" @click="verMisReservas">
-                <i class="fas fa-paw"></i> Mis reservas
-              </button>
+            <div v-if="info_usuario.tipo === 'prop_mascota'">
+              <div class="action-buttons">
+                <button class="see-reservas-btn" @click="abrirModalDisponibilidad">
+                  <i class="far fa-calendar-alt"></i> Consultar Disponibilidad
+                </button>
+                <button class="see-reservas-btn" @click="verMisReservas">
+                  <i class="fas fa-paw"></i> Mis reservas
+                </button>
+              </div>
+            </div>
+            <div v-else-if="info_usuario.tipo === 'prop_clinica' || info_usuario.tipo_usuario === 'admin'">
+              <div class="action-buttons">
+                <button class="see-reservas-btn">
+                  <i class="far fa-calendar-alt"></i> Ver calendario
+                </button>
+                <button class="see-reservas-btn" @click="abrirModalEditar">
+                  <i class="fas fa-edit"></i> Editar habitación
+                </button>
+                <button v-if="!habitacion.reservable" class="eliminar-reservas-btn" @click="confirmarEliminar" :disabled="habitacion.reservable == true">
+                  <i class="fas fa-trash"></i> Eliminar habitación
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -177,6 +192,151 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal de Edición de Habitación -->
+    <div v-if="modalEditarVisible" class="modal-overlay" @click="cerrarModalEditar">
+      <div class="modal-content edit-modal" @click.stop>
+        <div class="modal-header">
+          <h2><i class="fas fa-edit"></i> Editar Habitación</h2>
+          <button class="close-modal" @click="cerrarModalEditar">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <div v-if="errorEditar" class="error-message-modal">
+            <i class="fas fa-exclamation-circle"></i> {{ errorEditar }}
+          </div>
+
+          <div v-if="successEditar" class="success-message-modal">
+            <i class="fas fa-check-circle"></i> {{ successEditar }}
+          </div>
+
+          <form @submit.prevent="guardarEdicion">
+            <div class="form-group">
+              <label for="edit-nombre">
+                <i class="fas fa-signature"></i> Nombre de la habitación *
+              </label>
+              <input
+                type="text"
+                id="edit-nombre"
+                v-model="formEditar.nombre"
+                required
+                maxlength="100"
+                :disabled="cargandoEditar"
+                placeholder="Ej: Suite para perros grandes"
+              />
+              <small class="text-muted">Máximo 100 caracteres</small>
+            </div>
+
+            <div class="form-group">
+              <label for="edit-descripcion">
+                <i class="fas fa-align-left"></i> Descripción *
+              </label>
+              <textarea
+                id="edit-descripcion"
+                v-model="formEditar.descripcion"
+                required
+                maxlength="255"
+                rows="3"
+                :disabled="cargandoEditar"
+                placeholder="Describe las características de la habitación..."
+              ></textarea>
+              <small class="text-muted">Máximo 255 caracteres</small>
+            </div>
+
+            <div class="form-group">
+              <label><i class="fas fa-ruler-combined"></i> Tamaño *</label>
+              <div class="radio-group">
+                <label
+                  v-for="tamaño in tamaños"
+                  :key="tamaño.value"
+                  :class="{ selected: formEditar.tamaño === tamaño.value }"
+                >
+                  <input
+                    type="radio"
+                    v-model="formEditar.tamaño"
+                    :value="tamaño.value"
+                    required
+                    :disabled="cargandoEditar"
+                  />
+                  {{ tamaño.label }}
+                </label>
+              </div>
+            </div>
+
+            <div v-if="formEditar.reservable == false" class="form-group">
+              <label><i class="fas fa-ruler-combined"></i> Tipo *</label>
+              <div class="radio-group">
+                <label
+                  v-for="tipo in tipos"
+                  :key="tipo.value"
+                  :class="{ selected: formEditar.tipo === tipo.value }"
+                >
+                  <input
+                    type="radio"
+                    v-model="formEditar.tipo"
+                    :value="tipo.value"
+                    required
+                    :disabled="cargandoEditar"
+                  />
+                  {{ tipo.label }}
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="edit-url_imagen">
+                <i class="fas fa-image"></i> URL de la imagen (opcional)
+              </label>
+              <input
+                type="url"
+                id="edit-url_imagen"
+                v-model="formEditar.url_imagen"
+                maxlength="255"
+                :disabled="cargandoEditar"
+                placeholder="https://ejemplo.com/imagen.jpg"
+              />
+              <small class="text-muted">Enlace a una imagen representativa</small>
+            </div>
+
+            <div class="form-group checkbox-group">
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  v-model="formEditar.reservable"
+                  :disabled="cargandoEditar"
+                />
+                <span class="checkmark"></span>
+                Habitación reservable
+              </label>
+              <small class="text-muted">Si está desactivado, la habitación no podrá ser reservada</small>
+            </div>
+
+            <!-- Vista previa de la imagen -->
+            <div v-if="formEditar.url_imagen" class="image-preview">
+              <label><i class="fas fa-eye"></i> Vista previa:</label>
+              <div class="preview-container">
+                <img
+                  :src="formEditar.url_imagen"
+                  alt="Vista previa"
+                  @error="handleImageError"
+                />
+              </div>
+            </div>
+
+            <div class="modal-actions">
+              <button type="button" class="btn btn-secondary" @click="cerrarModalEditar" :disabled="cargandoEditar">
+                Cancelar
+              </button>
+              <button type="submit" class="btn btn-primary" :disabled="cargandoEditar">
+                <i v-if="cargandoEditar" class="fas fa-spinner fa-spin"></i>
+                <i v-else class="fas fa-save"></i>
+                {{ cargandoEditar ? 'Guardando...' : 'Guardar Cambios' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -211,7 +371,7 @@ export default {
 
       habitacionId: null,
 
-      // Datos para el modal
+      // Datos para el modal de disponibilidad
       modalVisible: false,
       cargandoMascotas: false,
       todasLasMascotas: [],
@@ -224,30 +384,49 @@ export default {
       errorFechaFin: '',
 
       // Estado para la creación de reserva
-      creandoReserva: false
+      creandoReserva: false,
+
+      // Datos para el modal de edición
+      modalEditarVisible: false,
+      cargandoEditar: false,
+      errorEditar: '',
+      successEditar: '',
+      formEditar: {
+        nombre: '',
+        descripcion: '',
+        tamaño: 'mediano',
+        reservable: true,
+        url_imagen: '',
+        tipo: 'perro'
+      },
+      tamaños: [
+        { value: 'acogedor', label: 'Acogedor' },
+        { value: 'mediano', label: 'Mediano' },
+        { value: 'king_size', label: 'King Size' }
+      ],
+      tipos: [
+        { value: 'gato', label: 'Gato' },
+        { value: 'perro', label: 'Perro' },
+        { value: 'reptil', label: 'Reptil' },
+        { value: 'pajaro', label: 'Pájaro' },
+        { value: 'hamster', label: 'Hamster' },
+        { value: 'tortuga', label: 'Tortuga' }
+      ]
     }
   },
 
   computed: {
-    usuarioIniciales () {
-      if (!this.info_usuario || !this.info_usuario.tipo_usuario) return 'U'
-      return this.info_usuario.tipo_usuario.charAt(0)
-    },
-    usuarioNombre () {
-      if (!this.info_usuario || !this.info_usuario.id) return 'Usuario'
-      return `Usuario #${this.info_usuario.id}`
-    },
-    usuarioRolFormateado () {
-      if (!this.info_usuario || !this.info_usuario.tipo_usuario) return 'Rol'
-      const roleMap = {
-        'PROP_CLINICA': 'Propietario de Clínica',
-        'PROP_MASCOTA': 'Propietario de Mascota',
-        'ADMIN': 'Administrador'
-      }
-      return roleMap[this.info_usuario.tipo_usuario] || this.info_usuario.tipo_usuario
-    },
     mascotaSeleccionadaValida () {
-      return this.mascotaSeleccionada !== ''
+      return this.mascotaSeleccionada && this.mascotaSeleccionada !== ''
+    },
+
+    formularioValido () {
+      return (
+        this.mascotaSeleccionadaValida &&
+      this.fechasValidas &&
+      !this.errorFechaInicio &&
+      !this.errorFechaFin
+      )
     },
     // Filtrar mascotas por tipo de habitación
     mascotasFiltradas () {
@@ -294,15 +473,6 @@ export default {
       if (this.noches > 30) return false
 
       return true
-    },
-    // Validar formulario completo
-    formularioValido () {
-      return (
-        this.mascotaSeleccionadaValida &&
-        this.fechasValidas &&
-        !this.errorFechaInicio &&
-        !this.errorFechaFin
-      )
     }
   },
 
@@ -377,6 +547,8 @@ export default {
 
         if (response.data) {
           this.habitacion = response.data
+          // Cargar datos en el formulario de edición
+          this.cargarDatosEdicion()
         } else {
           this.error = 'No se recibieron datos de la habitación'
         }
@@ -407,6 +579,17 @@ export default {
       }
     },
 
+    cargarDatosEdicion () {
+      this.formEditar = {
+        nombre: this.habitacion.nombre || '',
+        descripcion: this.habitacion.descripcion || '',
+        tamaño: this.habitacion.tamaño || 'mediano',
+        reservable: this.habitacion.reservable || false,
+        url_imagen: this.habitacion.url_imagen || '',
+        tipo: this.habitacion.tipo || 'perro'
+      }
+    },
+
     async cargarMascotas () {
       const user = JSON.parse(localStorage.getItem('user'))
       if (!user || !user.id) {
@@ -433,7 +616,7 @@ export default {
       }
     },
 
-    // Métodos para el modal
+    // Métodos para el modal de disponibilidad
     async abrirModalDisponibilidad () {
       if (!this.habitacion.reservable) {
         alert('Esta habitación no es reservable en este momento.')
@@ -453,6 +636,130 @@ export default {
 
     cerrarModal () {
       this.modalVisible = false
+    },
+
+    // Métodos para el modal de edición
+    abrirModalEditar () {
+      // Verificar que el usuario tenga permisos para editar
+      const user = JSON.parse(localStorage.getItem('user'))
+      if (!user) {
+        alert('Debes iniciar sesión para editar una habitación.')
+        this.$router.push('/login')
+        return
+      }
+
+      // Solo propietarios de clínica y administradores pueden editar
+      if (user.tipo !== 'prop_clinica' && user.tipo_usuario !== 'admin') {
+        alert('No tienes permisos para editar habitaciones.')
+        return
+      }
+
+      this.modalEditarVisible = true
+      this.errorEditar = ''
+      this.successEditar = ''
+    },
+
+    cerrarModalEditar () {
+      this.modalEditarVisible = false
+      this.errorEditar = ''
+      this.successEditar = ''
+      this.cargandoEditar = false
+      // Recargar datos originales
+      this.cargarDatosEdicion()
+    },
+
+    handleImageError (event) {
+      event.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjZWVlZWVlIi8+Cjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0iY2VudHJhbCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSIjOTk5OTk5Ij5JbWFnZW4gbm8gZGlzcG9uaWJsZTwvdGV4dD4KPC9zdmc+'
+    },
+
+    validarFormularioEdicion () {
+      if (!this.formEditar.nombre || !this.formEditar.descripcion || !this.formEditar.tamaño) {
+        this.errorEditar = 'Por favor, completa todos los campos obligatorios'
+        return false
+      }
+
+      if (this.formEditar.nombre.length > 100) {
+        this.errorEditar = 'El nombre no puede tener más de 100 caracteres'
+        return false
+      }
+
+      if (this.formEditar.descripcion.length > 255) {
+        this.errorEditar = 'La descripción no puede tener más de 255 caracteres'
+        return false
+      }
+
+      if (this.formEditar.url_imagen && this.formEditar.url_imagen.length > 255) {
+        this.errorEditar = 'La URL de la imagen no puede tener más de 255 caracteres'
+        return false
+      }
+
+      return true
+    },
+
+    async guardarEdicion () {
+      this.errorEditar = ''
+      this.successEditar = ''
+
+      if (!this.validarFormularioEdicion()) {
+        return
+      }
+
+      this.cargandoEditar = true
+
+      try {
+        const response = await api.put(
+          `http://localhost:5000/api/habitaciones_hotel/editar/${this.habitacionId}`,
+          this.formEditar,
+          {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+            }
+          }
+        )
+
+        console.log('Respuesta de edición:', this.formEditar)
+        this.successEditar = response.data.msg || 'Habitación actualizada exitosamente'
+
+        // Actualizar los datos locales de la habitación
+        this.habitacion = {
+          ...this.habitacion,
+          ...this.formEditar
+        }
+
+        // Cerrar el modal después de 2 segundos
+        setTimeout(() => {
+          this.cerrarModalEditar()
+        }, 1000)
+      } catch (error) {
+        console.error('Error al editar la habitación:', error)
+
+        if (error.response) {
+          const { status, data } = error.response
+
+          switch (status) {
+            case 400:
+              this.errorEditar = data.msg || 'Datos inválidos'
+              break
+            case 403:
+              this.errorEditar = data.msg || 'No tienes permiso para editar esta habitación'
+              break
+            case 404:
+              this.errorEditar = data.msg || 'Habitación no encontrada'
+              break
+            case 500:
+              this.errorEditar = data.msg || 'Error en el servidor al actualizar la habitación'
+              break
+            default:
+              this.errorEditar = data.msg || 'Error al actualizar la habitación'
+          }
+        } else if (error.request) {
+          this.errorEditar = 'No se pudo conectar con el servidor. Verifica tu conexión.'
+        } else {
+          this.errorEditar = 'Error al realizar la solicitud. Por favor, intenta nuevamente.'
+        }
+      } finally {
+        this.cargandoEditar = false
+      }
     },
 
     // Validar fechas
@@ -567,6 +874,66 @@ export default {
         }
       } finally {
         this.creandoReserva = false
+      }
+    },
+
+    confirmarEliminar () {
+      if (!this.habitacion.id) {
+        alert('No se puede eliminar la habitación: ID no disponible')
+        return
+      }
+
+      const confirmacion = confirm(
+        '¿Estás seguro de que deseas eliminar esta habitación?\n\n' +
+    'Esta acción eliminará TODAS las reservas pasadas asociadas.\n' +
+    'Esta acción no se puede deshacer.'
+      )
+
+      if (confirmacion) {
+        this.eliminarHabitacion()
+      }
+    },
+
+    async eliminarHabitacion () {
+      try {
+        const response = await api.delete(
+          `http://localhost:5000/api/habitaciones_hotel/eliminar/${this.habitacionId}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+            }
+          }
+        )
+
+        alert(response.data.msg || 'Habitación eliminada con éxito')
+        this.$router.push('/habitaciones-hotel')
+      } catch (error) {
+        console.error('Error al eliminar la habitación:', error)
+
+        if (error.response) {
+          const { status, data } = error.response
+
+          switch (status) {
+            case 400:
+              alert(data.msg || 'No se puede eliminar la habitación')
+              break
+            case 403:
+              alert(data.msg || 'No tienes permiso para eliminar esta habitación')
+              break
+            case 404:
+              alert(data.msg || 'Habitación no encontrada')
+              break
+            case 500:
+              alert(data.msg || 'Error en el servidor al eliminar la habitación')
+              break
+            default:
+              alert(data.msg || 'Error al eliminar la habitación')
+          }
+        } else if (error.request) {
+          alert('No se pudo conectar con el servidor. Verifica tu conexión.')
+        } else {
+          alert('Error al realizar la solicitud. Por favor, intenta nuevamente.')
+        }
       }
     },
 
