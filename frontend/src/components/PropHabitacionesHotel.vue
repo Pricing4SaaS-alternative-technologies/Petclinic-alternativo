@@ -43,6 +43,7 @@
           <div class="room-content">
             <h3 class="room-name">{{ habitacion.nombre }}</h3>
             <p class="room-perfect-for">Perfecto para: {{ habitacion.tipo }}</p>
+            <p v-if="info_usuario.tipo === 'prop_clinica'" class="room-perfect-for">Clínica: {{ habitacion.nombre_clinica }}</p>
             <button class="see-details-btn" @click="$router.push(`/detalles-habitacion/${habitacion.id}`)">Ver detalles</button>
           </div>
         </div>
