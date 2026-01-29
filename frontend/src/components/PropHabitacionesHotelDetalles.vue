@@ -69,7 +69,7 @@
             </div>
             <div v-else-if="info_usuario.tipo === 'prop_clinica' || info_usuario.tipo_usuario === 'admin'">
               <div class="action-buttons">
-                <button class="see-reservas-btn">
+                <button class="see-reservas-btn" @click="verCalendarioReservas">
                   <i class="far fa-calendar-alt"></i> Ver calendario
                 </button>
                 <button class="see-reservas-btn" @click="abrirModalEditar">
@@ -959,6 +959,16 @@ export default {
         console.error('Error al navegar a reservas:', error)
         alert('Error al cargar las reservas')
       }
+    },
+
+    verCalendarioReservas () {
+      // Navegar al calendario de reservas con solo el ID
+      this.$router.push({
+        name: 'calendario-reservas',
+        params: {
+          habitacion_id: this.habitacion_id || this.habitacionId
+        }
+      })
     }
   }
 }
