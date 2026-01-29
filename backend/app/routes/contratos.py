@@ -68,7 +68,7 @@ def updateContratoUsuario(id_usuario):
     
     dato_contrato = {
                 "contractedServices": {
-                    "PetClinic": "1.0.0"
+                    "PetClinic": "1.0.2"
                 },
                 "subscriptionPlans": {
                     "PetClinic": nombre_plan
