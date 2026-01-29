@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from .clinicas import get_propietario_clinica
 
 from app.models import Usuario, Prop_mascota, Veterinario, Prop_clinica
 from app.models.enums import TipoUsuarioEnum, EspecialidadEnum
@@ -79,7 +80,7 @@ def updateContratoUsuario(id_usuario):
     space_client = current_app.space_client
     try:
         contrato = current_app.run_async(space_client.contracts.update_contract_subscription(str(id_usuario), dato_contrato))
-        print(f"Contrato creado exitosamente: {contrato}")
+        print(f"Contrato actualizado exitosamente: {contrato}")
         return jsonify(contrato), 200
         
     except Exception as e:
@@ -87,3 +88,35 @@ def updateContratoUsuario(id_usuario):
         if hasattr(e, 'status') and e.status == 404:
             return jsonify({"error": "Contrato no encontrado"}), 404
     return contrato
+'''
+@contratos.route('/crear-contrato-dueño-mascota/<int:id_usuario>', methods=['PUT'])
+@jwt_required()
+def crear_contrato_dueño_mascota():
+    id_usuario = int(get_jwt_identity())
+    usuario = Usuario.query.filter_by(id=id_usuario).first()
+    
+    if(usuario.tipo_usuario == TipoUsuarioEnum.PROP_CLINICA):
+        contrato = getContratoUsuario(usuario.id)
+        
+    elif usuario.tipo_usuario in (TipoUsuarioEnum.VETERINARIO, TipoUsuarioEnum.PROP_MASCOTA):
+        
+        prop_clinica = get_propietario_clinica(usuario.clinica_id)
+        contrato = getContratoUsuario(prop_clinica.id)
+        
+    try:
+        contract_data = {
+                "userContact": {
+                    "userId": str(usuario.id),
+                    "fistName": usuario.nombre,
+                    "lastName": usuario.apellidos,
+                    "email": usuario.email,
+                    "username": usuario.usuario
+                }
+            }
+        contrato.add(contract_data)
+        createContrato(contrato)
+    except Exception as e:
+        print(f"Error al crear contrato: {e}")
+        
+    return jsonify({'message': 'Contrato creado con éxito'}), 201
+'''

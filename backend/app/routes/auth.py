@@ -110,6 +110,31 @@ def register():
                 'message': f'{tipo_enum.value.capitalize()} registrado, pero falló la creación del contrato',
                 'error': str(e)
             }), 201
+            
+    elif tipo_enum == TipoUsuarioEnum.PROP_MASCOTA:
+        try:
+            contrato_clinic_owner = getContratoUsuario(get_propietario_clinica(user.clinica_id).id)
+            print("Contrato del propietario de la clínica obtenido:", contrato_clinic_owner)
+            contrato_pet_owner = contrato_clinic_owner.copy()
+
+            contrato_pet_owner["userContact"] = {
+            "userId": str(user.id),
+            "firstName": user.nombre,
+            "lastName": user.apellidos,
+            "email": user.email,
+            "username": user.usuario
+            }
+            
+            space_client = current_app.space_client
+            resultado = current_app.run_async(space_client.contracts.add_contract(contrato_pet_owner))
+            print(f"Contrato creado exitosamente para dueño de mascota ID: {user.id}", contrato_pet_owner)
+        
+        except Exception as e:
+            print(f"Error al crear contrato: {e}")
+            return jsonify({
+                'message': f'{tipo_enum.value.capitalize()} registrado, pero falló la creación del contrato',
+                'error': str(e)
+            }), 201
         
     return jsonify({'message': f'{tipo_enum.value.capitalize()} registrado con éxito'}), 201
 
@@ -138,7 +163,11 @@ def login():
     }
     if(usuario.tipo_usuario == TipoUsuarioEnum.PROP_CLINICA):
         contrato = getContratoUsuario(usuario.id)
-    elif usuario.tipo_usuario in (TipoUsuarioEnum.VETERINARIO, TipoUsuarioEnum.PROP_MASCOTA):
+        
+    elif usuario.tipo_usuario == TipoUsuarioEnum.PROP_MASCOTA:
+        contrato = getContratoUsuario(usuario.id)
+        
+    elif usuario.tipo_usuario == TipoUsuarioEnum.VETERINARIO:
         
         prop_clinica = get_propietario_clinica(usuario.clinica_id)
         contrato = getContratoUsuario(prop_clinica.id)
