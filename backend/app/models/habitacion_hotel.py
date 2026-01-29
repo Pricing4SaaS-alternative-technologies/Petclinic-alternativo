@@ -24,7 +24,7 @@ class Habitacion_hotel(db.Model):
         self.reservable = reservable
         self.tamaño = tamaño
         self.tipo = tipo
-        clinica_id = clinica_id
+        self.clinica_id = clinica_id
         
     
     def save(self):
