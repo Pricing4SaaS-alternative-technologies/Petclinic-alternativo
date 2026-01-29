@@ -100,10 +100,10 @@ def crear_mascota():
         db.session.commit()
         
         space_client = current_app.space_client
-        evaluacion = current_app.run_async(space_client.featureEvaluators.evaluate(id_usuario, "petclinic-registeredClinics", {"petclinic-maxRegisteredClinics": 1}))
+        evaluacion = current_app.run_async(space_client.featureEvaluators.evaluate(id_usuario, "petclinic-registeredPets", {"petclinic-maxRegisteredPets": 1}))
         if evaluacion.eval == False:
             nueva_mascota.delete()
-            return jsonify({'message': 'No se puede crear más clínicas con el plan actual. Por favor, actualiza tu plan.'}), 403
+            return jsonify({'message': 'No se puede crear más mascotas con el plan actual. El dueño de la clínica debe actualizar su plan.'}), 403
         
     except Exception as e:
         db.session.rollback()
