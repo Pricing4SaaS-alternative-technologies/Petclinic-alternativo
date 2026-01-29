@@ -1,5 +1,5 @@
 from datetime import datetime, date
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models.mascota import Mascota
 from app.models.usuario import Usuario
@@ -60,6 +60,7 @@ def get_mascotas_by_dueño(dueno_id):
 @jwt_required()
 def crear_mascota():
     data = request.get_json()
+    id_usuario = int(get_jwt_identity())
 
     nombre = data.get('nombre')
     cumpleaños = data.get('cumpleaños')
@@ -94,9 +95,19 @@ def crear_mascota():
         tipo=tipo,
         dueño_id=user_id
     )
-
-    db.session.add(nueva_mascota)
-    db.session.commit()
+    try:
+        db.session.add(nueva_mascota)
+        db.session.commit()
+        
+        space_client = current_app.space_client
+        evaluacion = current_app.run_async(space_client.featureEvaluators.evaluate(id_usuario, "petclinic-registeredClinics", {"petclinic-maxRegisteredClinics": 1}))
+        if evaluacion.eval == False:
+            nueva_mascota.delete()
+            return jsonify({'message': 'No se puede crear más clínicas con el plan actual. Por favor, actualiza tu plan.'}), 403
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Error al crear la mascota'}), 500
 
     return jsonify({'mensaje': 'Mascota creada con éxito'}), 201
 
