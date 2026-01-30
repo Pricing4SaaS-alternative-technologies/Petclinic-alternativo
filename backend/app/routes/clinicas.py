@@ -1,8 +1,10 @@
+
 from flask import Blueprint, request, jsonify, current_app
 from app.models.clinica import Clinica
 from app.models.usuario import Usuario
 from app.models.veterinario import Veterinario
 from app.models.prop_mascota import Prop_mascota
+from app.models.habitacion_hotel import Habitacion_hotel
 from app.models.enums import TipoUsuarioEnum
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
@@ -187,7 +189,7 @@ def delete_clinica(clinica_id):
         for veterinario in Veterinario.query.filter_by(clinica_id=clinica.id).all():
             veterinario.delete()
         
-        for habitacion in habitacion.query.filter_by(clinica_id=clinica.id).all():
+        for habitacion in Habitacion_hotel.query.filter_by(clinica_id=clinica.id).all():
             habitacion.delete
             current_app.run_async(space_client.contracts.update_usage_levels(id_usuario, usage_levels_hotel))
         # Ahora sí, borra la clínica
