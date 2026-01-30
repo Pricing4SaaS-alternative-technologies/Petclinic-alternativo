@@ -144,7 +144,7 @@ def editar_nombre_mascota(mascota_id):
 @mascotas_bp.route('/<int:id>', methods=['DELETE'])
 @jwt_required()
 def eliminar_mascota(id):
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     usuario = Usuario.query.filter_by(id=user_id).first()
     if not usuario or (usuario.tipo_usuario != TipoUsuarioEnum.PROP_MASCOTA and usuario.tipo_usuario != TipoUsuarioEnum.ADMIN):
         return jsonify({'message': 'No tienes permiso para eliminar mascotas'}), 403
@@ -154,5 +154,12 @@ def eliminar_mascota(id):
         return jsonify({'error': 'Mascota no encontrada'}), 404
 
     db.session.delete(mascota)
+    space_client = current_app.space_client
+    usage_levels = { 
+        "petclinic": {
+            "maxRegisteredPets": -1
+        }
+    }
+    current_app.run_async(space_client.contracts.update_usage_levels(user_id, usage_levels))
     db.session.commit()
     return jsonify({'mensaje': 'Mascota eliminada correctamente'}), 200
