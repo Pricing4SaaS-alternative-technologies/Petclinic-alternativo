@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from app.models.clinica import Clinica
 from app.models.usuario import Usuario
 from app.models.veterinario import Veterinario
@@ -71,7 +71,7 @@ def get_clinicas_by_propietario(propietario_id):
 @jwt_required()
 def create_clinica():
     data = request.get_json()
-    id_usuario = get_jwt_identity()
+    id_usuario = int(get_jwt_identity())
     
     # Comprobar si el usuario es propietario de clínica
     usuario = Usuario.query.filter_by(id=id_usuario).first()
@@ -97,6 +97,12 @@ def create_clinica():
     
     try:
         nueva_clinica.save()
+        space_client = current_app.space_client
+        evaluacion = current_app.run_async(space_client.featureEvaluators.evaluate(id_usuario, "petclinic-registeredClinics", {"petclinic-maxRegisteredClinics": 1}))
+        if evaluacion.eval == False:
+            nueva_clinica.delete()
+            return jsonify({'message': 'No se puede crear más clínicas con el plan actual. Por favor, actualiza tu plan.'}), 403
+            
         return jsonify({'message': 'Clínica creada correctamente', 'clinica_id': nueva_clinica.id}), 201
     except Exception as e:
         return jsonify({'message': str(e)}), 500
@@ -144,41 +150,12 @@ def edit_clinica(clinica_id):
             clinica.save()
             return jsonify({'message': 'Clínica actualizada correctamente'}), 201
         except Exception as e:
-            return jsonify({'message': str(e)}), 500      
-
-'''
-@clinicas_bp.route('/cambiar-plan/<int:clinica_id>', methods=['POST'])
-@jwt_required()
-def cambiar_plan(clinica_id):
-    data = request.get_json()
-    id_usuario = get_jwt_identity()
-    clinica = Clinica.query.filter_by(id=clinica_id).first()
-    
-    if clinica is None:
-        return jsonify({'message': 'La clínica no existe'}), 404
-    else:
-        
-        usuario = Usuario.query.filter_by(id=id_usuario).first()
-        
-        if not usuario or (usuario.tipo_usuario != TipoUsuarioEnum.PROP_CLINICA and usuario.tipo_usuario != TipoUsuarioEnum.ADMIN) or id_usuario != clinica.propietario_id:
-            return jsonify({'message': 'No tienes permiso para actualizar el plan de esta clínica'}), 403
-        
-        plan = data.get('plan')
-        if plan is None or plan not in [p.value for p in Plan]:
-            return jsonify({'message': 'Plan inválido'}), 400
-        
-        clinica.plan = plan
-        try:
-            clinica.save()
-            return jsonify({'message': 'Plan de la clinica actualizado'}), 200
-        except Exception as e:
-            return jsonify({'message': str(e)}), 500  
-'''
+            return jsonify({'message': str(e)}), 500
 
 @clinicas_bp.route('/eliminar/<int:clinica_id>', methods=['DELETE'])
 @jwt_required()
 def delete_clinica(clinica_id):
-    id_usuario = get_jwt_identity()
+    id_usuario = int(get_jwt_identity())
     clinica = Clinica.query.filter_by(id=clinica_id).first()
     
     if clinica is None:
@@ -197,6 +174,14 @@ def delete_clinica(clinica_id):
             veterinario.delete()
         # Ahora sí, borra la clínica
         clinica.delete()
+        space_client = current_app.space_client
+        usage_levels = { 
+            "petclinic": {
+                "maxRegisteredClinics": -1
+            }
+        }
+        current_app.run_async(space_client.contracts.update_usage_levels(id_usuario, usage_levels))
+        
         return jsonify({'message': 'Clínica eliminada correctamente'}), 200
     except Exception as e:
         import traceback

@@ -158,7 +158,7 @@ export default {
 
       try {
         const serviceName = 'PetClinic'
-        const version = '1.0.0'
+        const version = '1.0.2'
 
         const response = await api.get(`http://localhost:5000/api/contratos/services/${serviceName}/pricing/${version}`)
 

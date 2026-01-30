@@ -67,7 +67,8 @@ def listar_habitaciones_prop_clinica(user_id):
         "tamaño": h.tamaño.value,
         "tipo": h.tipo.value,
         "clinica_id": h.clinica_id,
-        "propietario_clinica_id": h.clinica.propietario_id
+        "propietario_clinica_id": h.clinica.propietario_id,
+        "nombre_clinica": h.clinica.nombre
     }
         for h in habitaciones if h.clinica.propietario_id == dueñoC_buscado.id
     ]), 200
