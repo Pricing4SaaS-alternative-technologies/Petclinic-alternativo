@@ -1,4 +1,5 @@
 # backend/app/routes/auth.py
+from app.extensions import db
 from .clinicas import get_propietario_clinica
 from .contratos import getContratoUsuario
 from flask import Blueprint, request, jsonify, current_app
@@ -113,7 +114,8 @@ def register():
             
     elif tipo_enum == TipoUsuarioEnum.PROP_MASCOTA:
         try:
-            contrato_clinic_owner = getContratoUsuario(get_propietario_clinica(user.clinica_id).id)
+            prop_clinica = get_propietario_clinica(user.clinica_id)
+            contrato_clinic_owner = getContratoUsuario(prop_clinica.id)
             print("Contrato del propietario de la clínica obtenido:", contrato_clinic_owner)
             contrato_pet_owner = contrato_clinic_owner.copy()
 
@@ -128,11 +130,18 @@ def register():
             space_client = current_app.space_client
             resultado = current_app.run_async(space_client.contracts.add_contract(contrato_pet_owner))
             print(f"Contrato creado exitosamente para dueño de mascota ID: {user.id}", contrato_pet_owner)
-        
+            
+            # Actualizamos el nivel de uso del contrato del propietario de clinicas
+            evaluacion = current_app.run_async(space_client.featureEvaluators.evaluate(prop_clinica.id, "petclinic-registeredPetOwners", {"petclinic-maxRegisteredPetOwners": 1}))
+            if evaluacion.eval == False:
+                user.delete()
+                return jsonify({'message': 'No se puede crear más propietarios de mascota con el plan actual. Por favor, actualiza tu plan.'}), 403
+
         except Exception as e:
             print(f"Error al crear contrato: {e}")
+            db.session.rollback()
             return jsonify({
-                'message': f'{tipo_enum.value.capitalize()} registrado, pero falló la creación del contrato',
+                'message': f'{tipo_enum.value.capitalize()} Algo fallo en la generación del contrato, haciendo rollback de la transaccion',
                 'error': str(e)
             }), 201
         
