@@ -59,27 +59,6 @@
   overflow: hidden;
 }
 
-.reserva-barra-continua {
-  display: flex;
-  align-items: center;
-  padding: 3px 6px;
-  border-radius: 2px;
-  color: white;
-  font-size: 0.7rem;
-  font-weight: 600;
-  min-height: 18px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-  line-height: 1.2;
-  word-break: break-word;
-  white-space: normal;
-  z-index: 5;
-}
-
-.reserva-nombre {
-  display: block;
-  word-break: break-word;
-  white-space: normal;
-}
 .dia.otro-mes {
   background: #f8f9fa;
   color: #bdc3c7;
@@ -87,14 +66,6 @@
 
 .dia.hoy {
   background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-}
-
-.dia.tiene-reserva {
-  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-}
-
-.dia.tiene-reserva.hoy {
-  background: linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%);
 }
 
 .dia:hover:not(.otro-mes) {
@@ -140,7 +111,7 @@
   line-height: 1.2;
 }
 
-.reserva-nombre {
+.reserva-barra .reserva-nombre {
   display: block;
   word-break: break-word;
   white-space: normal;

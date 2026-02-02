@@ -38,7 +38,7 @@
           <div
             v-for="dia in diasCalendario"
             :key="`${dia.fecha}`"
-            :class="['dia', { 'otro-mes': !dia.mesActual }, { 'hoy': dia.esHoy }, { 'tiene-reserva': dia.reservas.length > 0 }]"
+            :class="['dia', { 'otro-mes': !dia.mesActual }, { 'hoy': dia.esHoy }]"
           >
             <div class="numero-dia">{{ dia.numero }}</div>
             <div v-if="dia.reservas.length > 0" class="reservas-en-celda">
@@ -110,12 +110,13 @@ export default {
     },
     reservasDelMes () {
       return this.reservas.filter(r => {
-        const fechaInicio = new Date(r.fecha_inicio)
-        const fechaFin = new Date(r.fecha_fin)
-        const primerDia = new Date(this.añoActual, this.mesActual, 1)
-        const ultimoDia = new Date(this.añoActual, this.mesActual + 1, 0)
+        const fechaInicio = r.fecha_inicio.split('T')[0]
+        const fechaFin = r.fecha_fin.split('T')[0]
+        const primerDia = `${this.añoActual}-${String(this.mesActual + 1).padStart(2, '0')}-01`
+        const ultimoDiaDate = new Date(this.añoActual, this.mesActual + 1, 0)
+        const ultimoDia = `${ultimoDiaDate.getFullYear()}-${String(ultimoDiaDate.getMonth() + 1).padStart(2, '0')}-${String(ultimoDiaDate.getDate()).padStart(2, '0')}`
 
-        return (fechaInicio <= ultimoDia && fechaFin >= primerDia)
+        return (fechaInicio <= ultimoDia && fechaFin > primerDia)
       }).sort((a, b) => new Date(a.fecha_inicio) - new Date(b.fecha_inicio))
     }
   },
@@ -150,6 +151,13 @@ export default {
       }
       try {
         this.info_usuario = JSON.parse(raw)
+        // Validar que el objeto tiene la estructura esperada
+        if (!this.info_usuario || typeof this.info_usuario.tipo !== 'string') {
+          this.jwtValido = false
+          localStorage.removeItem('jwt')
+          localStorage.removeItem('user')
+          return
+        }
         if (this.info_usuario.tipo !== 'prop_clinica' && this.info_usuario.tipo !== 'admin') {
           this.jwtValido = false
           return
@@ -157,6 +165,8 @@ export default {
         this.jwtValido = true
       } catch (e) {
         this.jwtValido = false
+        localStorage.removeItem('jwt')
+        localStorage.removeItem('user')
         console.error('Error al parsear usuario:', e)
       }
     },
@@ -169,8 +179,14 @@ export default {
         this.habitacionNombre = data.habitacion_nombre
         this.generarCalendario()
       } catch (e) {
-        this.error = 'Error al cargar los datos. Intenta de nuevo.'
-        console.error(e)
+        if (e.response && e.response.status === 403) {
+          this.error = 'No tienes permiso para ver estas reservas.'
+        } else if (e.response && e.response.status === 404) {
+          this.error = 'La habitación no existe.'
+        } else {
+          this.error = 'Error al cargar los datos. Intenta de nuevo.'
+        }
+        console.error('Error en cargarDatos:', e)
       } finally {
         this.loading = false
       }
@@ -205,12 +221,11 @@ export default {
       this.diasCalendario = dias
     },
     crearDiaCalendario (numero, fecha, mesActual) {
-      const fechaStr = fecha.toISOString().split('T')[0]
+      const fechaStr = this.formatearFechaLocal(fecha)
       const reservasDelDia = this.reservas.filter(r => {
-        const inicio = new Date(r.fecha_inicio)
-        const fin = new Date(r.fecha_fin)
-        const diaActual = new Date(fechaStr)
-        return diaActual >= inicio && diaActual < fin
+        const inicio = r.fecha_inicio.split('T')[0]
+        const fin = r.fecha_fin.split('T')[0]
+        return fechaStr >= inicio && fechaStr <= fin
       })
 
       const hoy = new Date()
@@ -253,6 +268,12 @@ export default {
       const mes = (fecha.getMonth() + 1).toString().padStart(2, '0')
       const año = fecha.getFullYear()
       return `${dia}/${mes}/${año}`
+    },
+    formatearFechaLocal (fecha) {
+      const dia = fecha.getDate().toString().padStart(2, '0')
+      const mes = (fecha.getMonth() + 1).toString().padStart(2, '0')
+      const año = fecha.getFullYear()
+      return `${año}-${mes}-${dia}`
     },
     generarColor (reservaId) {
       if (!this.colorMap[reservaId]) {
