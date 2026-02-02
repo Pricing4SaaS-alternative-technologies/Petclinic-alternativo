@@ -4,6 +4,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models.usuario import Usuario
 from app.models.reserva import Reserva
 from app.models.mascota import Mascota
+from app.models.clinica import Clinica
 from app.models.enums import TipoUsuarioEnum
 from app.extensions import db
 from app.models.habitacion_hotel import Habitacion_hotel
@@ -91,6 +92,43 @@ def listar_reservas():
         'fecha_inicio': reserva.fecha_inicio.isoformat(),
         'fecha_fin': reserva.fecha_fin.isoformat()
     } for reserva in reservas]), 200
+
+@reservas.route('/habitacion/<int:habitacion_id>', methods=['GET'])
+@jwt_required()
+def listar_reservas_habitacion(habitacion_id):
+    
+    id_usuario = int(get_jwt_identity())
+    usuario = Usuario.query.get_or_404(id_usuario)
+    rol_usuario = usuario.tipo_usuario
+    
+    # Solo los dueños de clínica y admins pueden ver las reservas de sus habitaciones
+    if rol_usuario != TipoUsuarioEnum.PROP_CLINICA and rol_usuario != TipoUsuarioEnum.ADMIN:
+        return jsonify({'message': 'No tienes permiso para ver las reservas de esta habitación'}), 403
+    
+    # Verificar que la habitación existe
+    habitacion = Habitacion_hotel.query.get_or_404(habitacion_id)
+    
+    # Si es prop_clinica, verificar que la habitación pertenece a su clínica
+    if rol_usuario == TipoUsuarioEnum.PROP_CLINICA:
+        clinica = Clinica.query.filter_by(propietario_id=id_usuario).first()
+        if not clinica or habitacion.clinica_id != clinica.id:
+            return jsonify({'message': 'No tienes permiso para ver las reservas de esta habitación'}), 403
+    
+    # Obtener todas las reservas de la habitación
+    reservas_list = Reserva.query.filter_by(habitacion_id=habitacion_id).all()
+    
+    return jsonify({
+        'habitacion_nombre': habitacion.nombre,
+        'reservas': [{
+            'id': reserva.id,
+            'mascota_id': reserva.mascota_id,
+            'mascota_nombre': reserva.mascota.nombre,
+            'dueño_nombre': reserva.mascota.dueño.nombre,
+            'habitacion_id': reserva.habitacion_id,
+            'fecha_inicio': reserva.fecha_inicio.isoformat(),
+            'fecha_fin': reserva.fecha_fin.isoformat()
+        } for reserva in reservas_list]
+    }), 200
     
 @reservas.route('/crear', methods=['POST'])
 @jwt_required()

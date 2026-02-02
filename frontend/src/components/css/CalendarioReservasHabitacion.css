@@ -1,0 +1,449 @@
+/* CalendarioReservasHabitacion.css - Calendario de reservas de habitación de hotel */
+
+.calendario-reservas-container {
+  padding: 20px 10px;
+  max-width: 1400px;
+  margin: 0 auto;
+  font-family: 'Arial', sans-serif;
+}
+
+/* ===================== CALENDARIO GRID ===================== */
+.calendario-wrapper {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 30px;
+  border: 2px solid #ecf0f1;
+}
+
+.dias-semana {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+  padding: 0;
+  margin: 0;
+}
+
+.dia-semana {
+  padding: 10px 2px;
+  text-align: center;
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.dias-calendario {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0;
+  padding: 0;
+  margin: 0;
+  position: relative;
+}
+
+.dia {
+  aspect-ratio: auto;
+  border: 1px solid #ecf0f1;
+  padding: 1px 3px 3px 3px;
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  height: 90px;
+  background: white;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.dia.otro-mes {
+  background: #f8f9fa;
+  color: #bdc3c7;
+}
+
+.dia.hoy {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+}
+
+.dia:hover:not(.otro-mes) {
+  background: #f0f8ff;
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+  transform: translateY(-2px);
+}
+
+.numero-dia {
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: #2c3e50;
+  width: 100%;
+  text-align: left;
+}
+
+.dia.otro-mes .numero-dia {
+  color: #bdc3c7;
+}
+
+.reservas-en-celda {
+  width: 100%;
+  font-size: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-top: 2px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.reserva-barra {
+  display: block;
+  padding: 2px 3px;
+  border-radius: 2px;
+  white-space: normal;
+  word-break: break-word;
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 600;
+  min-height: 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  line-height: 1.2;
+}
+
+.reserva-barra .reserva-nombre {
+  display: block;
+  word-break: break-word;
+  white-space: normal;
+}
+
+/* ===================== HEADER ===================== */
+.calendario-header {
+  text-align: center;
+  margin-bottom: 25px;
+  padding: 0 10px;
+  position: relative;
+}
+
+.calendario-title {
+  font-size: 2.5rem;
+  color: #2c3e50;
+  margin-bottom: 15px;
+  margin-top: 0;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.calendario-description {
+  font-size: 1rem;
+  color: #7f8c8d;
+  line-height: 1.2;
+  max-width: 800px;
+  margin: 0 auto 20px auto;
+  font-weight: 500;
+}
+
+.btn-volver {
+  background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+.btn-volver:hover {
+  background: linear-gradient(135deg, #7f8c8d 0%, #5f6c6f 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(127, 140, 141, 0.3);
+}
+
+.btn-volver:active {
+  transform: translateY(0);
+}
+
+/* Loading State */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 20px;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 60px;
+  height: 60px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-container p {
+  font-size: 1rem;
+  color: #7f8c8d;
+  margin: 15px 0 0 0;
+}
+
+/* ===================== MAIN CONTENT ===================== */
+.calendario-content {
+  background: white;
+  border-radius: 8px;
+  padding: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 10px;
+}
+
+.calendario-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 30px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.nav-btn {
+  background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+  color: white;
+  border: none;
+  padding: 7px 14px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.nav-btn:hover {
+  background: linear-gradient(135deg, #2980b9 0%, #1a252f 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+}
+
+.nav-btn:active {
+  transform: translateY(0);
+}
+
+.mes-actual {
+  font-size: 1rem;
+  color: #2c3e50;
+  font-weight: 600;
+  margin: 0;
+  min-width: 140px;
+  text-align: center;
+}
+
+/* ===================== LEYENDA Y LISTA ===================== */
+.leyenda-reservas {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 30px;
+  border-left: 4px solid #3498db;
+}
+
+.leyenda-reservas h3 {
+  color: #2c3e50;
+  font-size: 1.2rem;
+  margin: 0 0 15px 0;
+  font-weight: 600;
+}
+
+.lista-reservas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+.reserva-item {
+  background: white;
+  padding: 15px;
+  border-radius: 6px;
+  border-left: 4px solid #3498db;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.reserva-item:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.reserva-mascota {
+  font-weight: 700;
+  color: #2c3e50;
+  font-size: 0.95rem;
+  margin-bottom: 5px;
+}
+
+.reserva-dueño {
+  font-size: 0.85rem;
+  color: #7f8c8d;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.reserva-fechas {
+  font-size: 0.8rem;
+  color: #2c3e50;
+  margin-bottom: 5px;
+}
+
+.reserva-dias {
+  font-size: 0.8rem;
+  color: #27ae60;
+  font-weight: 600;
+}
+
+.sin-reservas {
+  padding: 30px 20px;
+  text-align: center;
+  color: #7f8c8d;
+  font-size: 1rem;
+  background: white;
+  border-radius: 6px;
+}
+
+.sin-reservas p {
+  margin: 0;
+}
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width: 1024px) {
+  .calendario-wrapper {
+    padding: 15px;
+  }
+
+  .dias-calendario {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  .dia {
+    min-height: 80px;
+    padding: 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .calendario-wrapper {
+    padding: 10px;
+  }
+
+  .dias-semana {
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+
+  .semana-dia {
+    font-size: 0.85rem;
+    padding: 8px 4px;
+  }
+
+  .dias-calendario {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+  }
+
+  .dia {
+    min-height: 70px;
+    padding: 6px;
+    border-radius: 4px;
+  }
+
+  .numero-dia {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .reservas-dia {
+    gap: 3px;
+  }
+
+  .reserva-barra {
+    height: 18px;
+    font-size: 0.65rem;
+    padding: 2px 4px;
+    border-radius: 2px;
+  }
+
+  .lista-reservas {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+  }
+
+  .reserva-item {
+    padding: 12px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .calendario-wrapper {
+    padding: 8px;
+  }
+
+  .dias-semana {
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+    margin-bottom: 8px;
+  }
+
+  .semana-dia {
+    font-size: 0.7rem;
+    padding: 6px 2px;
+  }
+
+  .dias-calendario {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+  }
+
+  .dia {
+    min-height: 60px;
+    padding: 4px;
+  }
+
+  .numero-dia {
+    font-size: 0.75rem;
+    margin-bottom: 3px;
+  }
+
+  .reservas-dia {
+    gap: 2px;
+  }
+
+  .reserva-barra {
+    height: 16px;
+    font-size: 0.6rem;
+    padding: 1px 3px;
+  }
+
+  .lista-reservas {
+    grid-template-columns: 1fr;
+  }
+
+  .reserva-item {
+    padding: 10px;
+    font-size: 0.85rem;
+  }
+}
+
+

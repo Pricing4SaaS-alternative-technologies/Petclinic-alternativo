@@ -5,6 +5,7 @@ import AuthPage from '@/components/AuthPage'
 import HomeVisitas from '@/components/HomeVisitas'
 import HomeVisitasPropietarios from '@/components/HomeVisitasPropietarios'
 import CalendarioVisitas from '@/components/CalendarioVisitas'
+import CalendarioReservasHabitacion from '@/components/CalendarioReservasHabitacion'
 import HomeAdopciones from '@/components/HomeAdopciones'
 import PricingPlans from '@/components/PricingPlans.vue'
 import PropHabitacionesHotel from '../components/PropHabitacionesHotel.vue'
@@ -60,6 +61,12 @@ export default new Router({
       path: '/mis-reservas',
       name: 'mis-reservas',
       component: PropMisReservas
+    },
+    {
+      path: '/calendario-reservas/:habitacion_id',
+      name: 'calendario-reservas',
+      component: CalendarioReservasHabitacion,
+      props: true
     }
 
   ],

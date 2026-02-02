@@ -38,12 +38,12 @@
         to="/mis-visitas"
         class="sidebar-link"
       >
-        Vet visits
+        Visitas
       </router-link>
       <router-link
         v-if="loggedIn && userTipo === 'prop_mascota'"
         to="/calendario-visitas"
-        class="nav-link"
+        class="sidebar-link"
       >
         Calendario de visitas
       </router-link>
@@ -52,12 +52,12 @@
         to="/adopciones"
         class="sidebar-link"
       >
-        Adoptions
+        Adopciones
       </router-link>
       <router-link
         v-if="loggedIn && userTipo==='prop_mascota' || userTipo === 'prop_clinica'"
         to="/habitaciones-hotel"
-        class="nav-link"
+        class="sidebar-link"
       >
         Habitaciones hotel
       </router-link>
