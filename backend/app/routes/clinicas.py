@@ -1,8 +1,10 @@
+
 from flask import Blueprint, request, jsonify, current_app
 from app.models.clinica import Clinica
 from app.models.usuario import Usuario
 from app.models.veterinario import Veterinario
 from app.models.prop_mascota import Prop_mascota
+from app.models.habitacion_hotel import Habitacion_hotel
 from app.models.enums import TipoUsuarioEnum
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
@@ -167,13 +169,32 @@ def delete_clinica(clinica_id):
         return jsonify({'message': 'No tienes permiso para eliminar esta clínica'}), 403
     
     try:
+        space_client = current_app.space_client
+        usage_levels_hotel = { 
+            "petclinic": {
+                "maxPetHotelRooms": -1
+            }
+        }
+        
+        usage_levels_users = { 
+            "petclinic": {
+                "maxRegisteredPetOwners": -1
+            }
+        }
         # nos cargamos primero a todos los usuarios base ligados a la clinica a borrar
         for propietario in Prop_mascota.query.filter_by(clinica_id=clinica.id).all():
             propietario.delete()
+            current_app.run_async(space_client.contracts.update_usage_levels(id_usuario, usage_levels_users))
+        
         for veterinario in Veterinario.query.filter_by(clinica_id=clinica.id).all():
             veterinario.delete()
+        
+        for habitacion in Habitacion_hotel.query.filter_by(clinica_id=clinica.id).all():
+            habitacion.delete
+            current_app.run_async(space_client.contracts.update_usage_levels(id_usuario, usage_levels_hotel))
         # Ahora sí, borra la clínica
         clinica.delete()
+        
         space_client = current_app.space_client
         usage_levels = { 
             "petclinic": {
@@ -181,7 +202,6 @@ def delete_clinica(clinica_id):
             }
         }
         current_app.run_async(space_client.contracts.update_usage_levels(id_usuario, usage_levels))
-        
         return jsonify({'message': 'Clínica eliminada correctamente'}), 200
     except Exception as e:
         import traceback

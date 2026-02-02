@@ -167,7 +167,7 @@ def detalles_habitacion(habitacion_id):
 @habitaciones_hotel.route('/crear-habitacion', methods=['POST'])
 @jwt_required()
 def crear_habitacion():
-    id_usuario = get_jwt_identity()
+    id_usuario = int(get_jwt_identity())
     usuario = Usuario.query.get_or_404(id_usuario)
     rol_usuario = usuario.tipo_usuario
     
@@ -227,9 +227,12 @@ def crear_habitacion():
         if url_imagen:
             habitacion.url_imagen = url_imagen
         
-        db.session.add(habitacion)
-        db.session.commit()
-        
+        habitacion.save()
+        space_client = current_app.space_client
+        evaluacion = current_app.run_async(space_client.featureEvaluators.evaluate(id_usuario, "petclinic-petHotelManagement", {"petclinic-maxPetHotelRooms": 1}))
+        if evaluacion.eval == False:
+            habitacion.delete()
+            return jsonify({'message': 'No se puede crear más habitaciones con el plan actual. Por favor, actualiza tu plan.'}), 403
         return jsonify({
             'msg': 'Habitación creada con éxito',
             'id': habitacion.id,
@@ -356,6 +359,14 @@ def eliminar_habitacion(habitacion_id):
     
     try:
         habitacion.delete()
+        # actualización de los niveles de uso para lso casos donde se elimina la habitación
+        space_client = current_app.space_client
+        usage_levels = { 
+            "petclinic": {
+                "maxPetHotelRooms": -1
+            }
+        }
+        current_app.run_async(space_client.contracts.update_usage_levels(id_usuario, usage_levels))
         return jsonify({'msg': 'Habitación eliminada con éxito'}), 200
     except Exception as e:
         db.session.rollback()
