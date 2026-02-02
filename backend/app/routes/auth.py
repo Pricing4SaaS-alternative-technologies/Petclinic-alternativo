@@ -167,6 +167,10 @@ def login():
     elif usuario.tipo_usuario == TipoUsuarioEnum.PROP_MASCOTA:
         contrato = getContratoUsuario(usuario.id)
         
+        prop_clinica = get_propietario_clinica(usuario.clinica_id)
+        usuario_payload['clinica_id'] = usuario.clinica_id
+        usuario_payload['prop_clinica_id'] = prop_clinica.id
+        
     elif usuario.tipo_usuario == TipoUsuarioEnum.VETERINARIO:
         
         prop_clinica = get_propietario_clinica(usuario.clinica_id)
