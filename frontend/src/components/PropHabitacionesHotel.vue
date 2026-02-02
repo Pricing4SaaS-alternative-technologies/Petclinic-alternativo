@@ -304,6 +304,7 @@ export default {
       try {
         this.info_usuario = JSON.parse(rawUser)
         this.jwtValido = true
+        console.log('Usuario info:', this.info_usuario)
 
         // Según el tipo de usuario, cargar las habitaciones correspondientes
         if (this.info_usuario.tipo === 'prop_mascota') {

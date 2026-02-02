@@ -121,8 +121,8 @@ def crear_reserva():
     
     if Reserva.query.filter(
         Reserva.habitacion_id == habitacion_hotel_id,
-        Reserva.fecha_fin > fecha_inicio,
-        Reserva.fecha_inicio < fecha_fin
+        Reserva.fecha_fin >= fecha_inicio,
+        Reserva.fecha_inicio <= fecha_fin
     ).first():
         return jsonify({'message': 'La habitación ya está reservada en las fechas seleccionadas'}), 400
     id_clinica_mascota = Usuario.query.get_or_404(mascota.dueño_id).clinica_id
