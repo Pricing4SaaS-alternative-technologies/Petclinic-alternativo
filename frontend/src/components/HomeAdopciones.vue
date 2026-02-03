@@ -9,7 +9,16 @@
       <section class="panel">
         <div class="panel-header">
           <h3>Mis adopciones</h3>
-          <button class="btn-crear" @click="cargarMisAdopciones">↻ Refrescar</button>
+          <div class="panel-actions">
+            <button
+              v-if="info_usuario && info_usuario.tipo === 'prop_mascota'"
+              class="btn-crear"
+              @click="abrirModalCrear"
+            >
+              ➕ Crear adopción
+            </button>
+            <button class="btn-crear" @click="cargarMisAdopciones">↻ Refrescar</button>
+          </div>
         </div>
 
         <p v-if="errorMis" class="mensaje-error">{{ errorMis }}</p>
@@ -42,9 +51,19 @@
         <div class="subpanel" v-if="adopcionSeleccionada">
           <div class="panel-header">
             <h3>Peticiones ({{ adopcionSeleccionada.mascota_nombre }})</h3>
-            <button class="btn-crear" @click="cargarPeticionesDeAdopcion(adopcionSeleccionada.id)">
-              ↻ Refrescar
-            </button>
+            <div class="panel-actions">
+              <button
+                class="btn-eliminar"
+                @click="abrirModalEliminar"
+                :disabled="tienePeticionesSinRechazar"
+                :title="tienePeticionesSinRechazar ? 'No se puede eliminar una adopción con peticiones pendientes o aprobadas' : 'Eliminar adopción'"
+              >
+                🗑️ Eliminar
+              </button>
+              <button class="btn-crear" @click="cargarPeticionesDeAdopcion(adopcionSeleccionada.id)">
+                ↻ Refrescar
+              </button>
+            </div>
           </div>
 
           <p v-if="errorPeticiones" class="mensaje-error">{{ errorPeticiones }}</p>
@@ -139,6 +158,31 @@
       </div>
     </div>
 
+    <!-- Modal crear adopción -->
+    <div class="modal-overlay" v-if="mostrarCrear">
+      <div class="modal">
+        <h3>Crear adopción</h3>
+
+        <label>Mascota</label>
+        <select v-model="nuevaAdopcion.mascota_id">
+          <option disabled value="">-- Selecciona una mascota --</option>
+          <option v-for="m in misMascotas" :key="m.id" :value="m.id">
+            {{ m.nombre }}
+          </option>
+        </select>
+
+        <label>Descripción</label>
+        <input v-model="nuevaAdopcion.descripcion" maxlength="255" />
+
+        <p v-if="errorCreacion" class="mensaje-error">{{ errorCreacion }}</p>
+
+        <div class="modal-buttons">
+          <button @click="crearAdopcion">Enviar</button>
+          <button class="cancelar" @click="cerrarCrear">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Modal aceptar -->
     <div class="modal-overlay" v-if="mostrarAceptar">
       <div class="modal">
@@ -172,6 +216,25 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal eliminar adopción -->
+    <div class="modal-overlay" v-if="mostrarEliminar">
+      <div class="modal">
+        <h3>Eliminar adopción</h3>
+        <p>
+          ¿Estás seguro de que deseas eliminar la adopción de
+          <strong>{{ adopcionSeleccionada.mascota_nombre }}</strong>?
+        </p>
+        <p class="advertencia">Esta acción no se puede deshacer.</p>
+
+        <p v-if="errorEliminar" class="mensaje-error">{{ errorEliminar }}</p>
+
+        <div class="modal-buttons">
+          <button class="btn-eliminar" @click="eliminarAdopcion">Eliminar</button>
+          <button class="cancelar" @click="cerrarEliminar">Cancelar</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div v-else class="no-auth">
@@ -196,18 +259,30 @@ export default {
 
       adopcionesClinica: [],
 
+      misMascotas: [],
+
       errorMis: '',
       errorPeticiones: '',
       errorClinica: '',
       errorSolicitud: '',
+      errorCreacion: '',
+      errorEliminar: '',
 
       mostrarSolicitud: false,
       adopcionSolicitud: null,
       razonSolicitud: '',
 
+      mostrarCrear: false,
+      nuevaAdopcion: {
+        mascota_id: '',
+        descripcion: ''
+      },
+
       mostrarAceptar: false,
       mostrarRechazar: false,
-      peticionAccion: null
+      peticionAccion: null,
+
+      mostrarEliminar: false
     }
   },
   created () {
@@ -216,6 +291,11 @@ export default {
   },
   beforeUnmount () {
     window.removeEventListener('logout', this.checkAuth)
+  },
+  computed: {
+    tienePeticionesSinRechazar () {
+      return this.peticiones.some(p => (p.estado_peticion || '').toLowerCase() !== 'rechazada')
+    }
   },
   methods: {
     checkAuth () {
@@ -268,6 +348,16 @@ export default {
       } catch (e) {
         console.error('Error al cargar adopciones de clínica:', e.response)
         this.errorClinica = (e.response && e.response.data && e.response.data.msg) || 'Error al cargar adopciones de clínica'
+      }
+    },
+
+    async cargarMisMascotas () {
+      try {
+        const { data } = await api.get('/mascotas/listar-tus-mascotas')
+        this.misMascotas = data
+      } catch (e) {
+        console.error('Error al cargar mascotas:', e.response)
+        this.misMascotas = []
       }
     },
 
@@ -332,6 +422,50 @@ export default {
       }
     },
 
+    // ===== Crear adopción =====
+    async abrirModalCrear () {
+      this.errorCreacion = ''
+      this.nuevaAdopcion = { mascota_id: '', descripcion: '' }
+      await this.cargarMisMascotas()
+      this.mostrarCrear = true
+    },
+
+    cerrarCrear () {
+      this.mostrarCrear = false
+      this.nuevaAdopcion = { mascota_id: '', descripcion: '' }
+      this.errorCreacion = ''
+    },
+
+    async crearAdopcion () {
+      this.errorCreacion = ''
+      const descripcion = (this.nuevaAdopcion.descripcion || '').trim()
+      if (!this.nuevaAdopcion.mascota_id) {
+        this.errorCreacion = 'Selecciona una mascota'
+        return
+      }
+      if (!descripcion) {
+        this.errorCreacion = 'Descripción requerida'
+        return
+      }
+      if (descripcion.length > 255) {
+        this.errorCreacion = 'La descripción no puede tener más de 255 caracteres'
+        return
+      }
+
+      try {
+        await api.post('/adopciones/crear', {
+          mascota_id: this.nuevaAdopcion.mascota_id,
+          descripcion
+        })
+        this.cerrarCrear()
+        await this.cargarMisAdopciones()
+        await this.cargarAdopcionesClinica()
+      } catch (e) {
+        console.error('Error al crear adopción:', e.response)
+        this.errorCreacion = (e.response && e.response.data && e.response.data.msg) || 'Error al crear adopción'
+      }
+    },
+
     // ===== Aprobar / Rechazar =====
     badgeEstado (estado) {
       const e = (estado || '').toLowerCase()
@@ -391,6 +525,32 @@ export default {
       } catch (e) {
         console.error('Error al rechazar petición:', e.response)
         this.errorPeticiones = (e.response && e.response.data && e.response.data.msg) || 'Error al rechazar petición'
+      }
+    },
+
+    // ===== Eliminar adopción =====
+    abrirModalEliminar () {
+      this.errorEliminar = ''
+      this.mostrarEliminar = true
+    },
+
+    cerrarEliminar () {
+      this.mostrarEliminar = false
+      this.errorEliminar = ''
+    },
+
+    async eliminarAdopcion () {
+      this.errorEliminar = ''
+      if (!this.adopcionSeleccionada) return
+
+      try {
+        await api.delete(`/adopciones/eliminar/${this.adopcionSeleccionada.id}`)
+        this.cerrarEliminar()
+        await this.cargarMisAdopciones()
+        await this.cargarAdopcionesClinica()
+      } catch (e) {
+        console.error('Error al eliminar adopción:', e.response)
+        this.errorEliminar = (e.response && e.response.data && e.response.data.msg) || 'Error al eliminar adopción'
       }
     },
 
@@ -457,6 +617,12 @@ h2 {
   font-weight: 700;
   color: #333;
   margin: 0;
+}
+
+.panel-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 /* ===========================
@@ -552,8 +718,15 @@ button {
   transition: background 0.2s ease, transform 0.1s ease;
 }
 
-button:hover {
+button:hover:not(:disabled) {
   transform: translateY(-1px);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #6c757d !important;
+  box-shadow: none !important;
 }
 
 /* Botón principal */
@@ -565,6 +738,17 @@ button:hover {
 
 .btn-crear:hover {
   background: linear-gradient(135deg, #e69500, #fca311);
+}
+
+/* Botón eliminar */
+.btn-eliminar {
+  background: linear-gradient(135deg, #dc3545, #c82333);
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(220, 53, 69, 0.25);
+}
+
+.btn-eliminar:hover {
+  background: linear-gradient(135deg, #c82333, #bd2130);
 }
 
 /* ===========================
@@ -638,6 +822,7 @@ button:hover {
 }
 
 .modal input,
+.modal select,
 .modal textarea {
   width: 100%;
   padding: 9px 10px;
@@ -681,6 +866,15 @@ button:hover {
   color: #c82333;
   font-weight: 700;
   margin-top: 0.5rem;
+}
+
+.advertencia {
+  color: #856404;
+  background: #fff3cd;
+  padding: 0.5rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  margin: 0.5rem 0;
 }
 
 /* ===========================

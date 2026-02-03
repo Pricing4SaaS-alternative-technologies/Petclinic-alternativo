@@ -5,7 +5,8 @@ from app.extensions import db
 from app.models.adopcion import Adopcion
 from app.models.mascota import Mascota
 from app.models.usuario import Usuario
-from app.models.enums import TipoUsuarioEnum
+from app.models.peticion_adopcion import Peticion_adopcion
+from app.models.enums import TipoUsuarioEnum, EstadoPeticion
 
 adopciones_bp = Blueprint('adopciones', __name__, url_prefix='/api/adopciones')
 
@@ -142,6 +143,13 @@ def eliminar_adopcion(adopcion_id):
 
     if adopcion_borrar.dueño_anterior_id != usuario_id:
         return jsonify({'msg':'No puedes eliminar una adopcion de otro dueño!'}), 403
+
+    # Verificar si hay peticiones pendientes o aprobadas
+    peticiones = Peticion_adopcion.query.filter_by(adopcion_id=adopcion_id).all()
+    
+    for peticion in peticiones:
+        if peticion.estado_peticion != EstadoPeticion.RECHAZADA:
+            return jsonify({'msg':'No puedes eliminar una adopción con peticiones pendientes o aprobadas'}), 400
 
     adopcion_borrar.delete()
     return jsonify({'msg': 'Eliminada'}), 200

@@ -184,7 +184,7 @@ def aceptar_peticion(peticion_id):
         return jsonify({'message': str(e)}), 500
     
 
-@peticiones_bp.route('/rechazar/<int:peticion_id>')
+@peticiones_bp.route('/rechazar/<int:peticion_id>', methods=['PUT'])
 @jwt_required()
 def rechazar_peticion(peticion_id):
     usuario_id = int(get_jwt_identity())
