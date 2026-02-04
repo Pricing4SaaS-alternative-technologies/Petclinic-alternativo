@@ -93,7 +93,7 @@
 import api from '@/api/axios'
 
 export default {
-  name: 'HomeVisitas',
+  name: 'Visitas',
   data () {
     return {
       info_usuario: null,
@@ -316,5 +316,5 @@ export default {
 </script>
 
 <style scoped>
-@import './css/HomeVisitas.css';
+@import './css/Visitas.css';
 </style>
