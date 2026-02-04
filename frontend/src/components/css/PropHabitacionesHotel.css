@@ -293,16 +293,24 @@
   background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
   color: white;
   border: none;
-  padding: 14px 30px;
+  padding: 12px 24px;
   border-radius: 8px;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  width: 50%;
-  margin-top: auto;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.see-reservas-btn:hover {
+  background: linear-gradient(135deg, #2980b9 0%, #1a252f 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
 }
 
 /* PropHabitacionesHotelModal.css */
