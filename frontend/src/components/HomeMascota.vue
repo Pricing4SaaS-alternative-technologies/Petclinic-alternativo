@@ -1,26 +1,28 @@
 <template>
-  <div class="mascotas-wrapper">
-    <div class="mascotas-content">
-      <div class="mascotas-header">
-        <h2>🐶 Mis Mascotas</h2>
+  <div>
+    <div class="mascotas-wrapper">
+      <div class="mascotas-content">
+        <div class="mascotas-header">
+          <h2>🐶 Mis Mascotas</h2>
+        </div>
+
+        <button class="btn-crear" @click="mostrarModal = true">➕ Añadir Mascota</button>
+
+        <ul v-if="mascotas.length" class="mascota-lista">
+          <li v-for="mascota in mascotas" :key="mascota.id" class="mascota-card">
+            <div class="mascota-info">
+              <h3>{{ mascota.nombre }}</h3>
+              <div class="mascota-tipo">Tipo: <span class="tipo-valor">{{ mascota.tipo }}</span></div>
+              <div class="mascota-fecha">Cumpleaños: <span class="fecha-valor">{{ formatearFecha(mascota.cumpleaños) }}</span></div>
+            </div>
+            <div class="mascota-acciones">
+              <button class="btn-editar" @click="abrirEdicion(mascota)" title="Editar">✏️</button>
+              <button class="btn-eliminar" @click="eliminarMascota(mascota.id)" title="Eliminar">🗑️</button>
+            </div>
+          </li>
+        </ul>
+        <p v-else class="no-mascotas">No tienes mascotas registradas.</p>
       </div>
-
-      <button class="btn-crear" @click="mostrarModal = true">➕ Añadir Mascota</button>
-
-      <ul v-if="mascotas.length" class="mascota-lista">
-        <li v-for="mascota in mascotas" :key="mascota.id" class="mascota-card">
-          <div class="mascota-info">
-            <h3>{{ mascota.nombre }}</h3>
-            <div class="mascota-tipo">Tipo: <span class="tipo-valor">{{ mascota.tipo }}</span></div>
-            <div class="mascota-fecha">Cumpleaños: <span class="fecha-valor">{{ formatearFecha(mascota.cumpleaños) }}</span></div>
-          </div>
-          <div class="mascota-acciones">
-            <button class="btn-editar" @click="abrirEdicion(mascota)" title="Editar">✏️</button>
-            <button class="btn-eliminar" @click="eliminarMascota(mascota.id)" title="Eliminar">🗑️</button>
-          </div>
-        </li>
-      </ul>
-      <p v-else class="no-mascotas">No tienes mascotas registradas.</p>
     </div>
 
     <!-- Modal para crear mascota -->
