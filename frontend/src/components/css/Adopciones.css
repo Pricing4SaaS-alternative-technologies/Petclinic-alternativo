@@ -26,7 +26,7 @@ h2 {
 }
 
 .panel {
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 14px;
   padding: 1.5rem;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);

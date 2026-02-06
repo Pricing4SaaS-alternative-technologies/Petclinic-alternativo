@@ -1,8 +1,10 @@
 /* Wrapper del contenedor */
 .mascotas-wrapper {
-  background: white;
+  background: transparent;
   min-height: 100vh;
   padding: 2rem 1rem;
+  position: relative;
+  z-index: 1;
 }
 
 /* Contenedor principal */
