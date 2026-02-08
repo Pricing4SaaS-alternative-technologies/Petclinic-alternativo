@@ -274,6 +274,31 @@
   border-color: #95a5a6;
 }
 
+.modal-buttons .btn-eliminar {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+  border: none;
+}
+
+.modal-buttons .btn-eliminar:hover {
+  background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+  box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+  transform: translateY(-2px);
+}
+
+/* Advertencia */
+.advertencia {
+  color: #e67e22;
+  background: linear-gradient(135deg, rgba(230, 126, 34, 0.1) 0%, rgba(243, 156, 18, 0.1) 100%);
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  margin: 1rem 0;
+  border-left: 4px solid #e67e22;
+  font-weight: 500;
+}
+
 /* Mensaje de error */
 .mensaje-error {
   color: #e74c3c;
