@@ -126,7 +126,7 @@ def crear_peticion():
     # vemos que no puedas generar otra petición para la isma adopción
     peticion_existente = Peticion_adopcion.query.filter_by(adopcion_id=adopcion_id, solicitante_id=usuario_id).first()
     if peticion_existente:
-        return jsonify({'msg':'Ya has realizado una petición para esta adopción'}), 400
+        return jsonify({'msg':'Tu petición de adopción ha sido rechazada por el propietario, no puedes hacer otra petición'}), 400
     
     nueva_peticion = Peticion_adopcion(
         razon_adopcion=razon_adopcion,

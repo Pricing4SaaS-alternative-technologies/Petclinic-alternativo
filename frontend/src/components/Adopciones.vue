@@ -126,7 +126,13 @@
             </div>
 
             <div class="acciones" v-if="puedeSolicitar(a)">
-              <button @click="abrirModalSolicitud(a)">📩 Solicitar adopción</button>
+              <button
+                @click="abrirModalSolicitud(a)"
+                :disabled="tienePeticionPendiente(a)"
+                :title="tienePeticionPendiente(a) ? 'Tu petición está a la espera de ser revisada' : 'Solicitar adopción'"
+              >
+                📩 Solicitar adopción
+              </button>
             </div>
 
             <p v-else class="no-visitas">
@@ -257,6 +263,8 @@ export default {
       adopcionSeleccionada: null,
       peticiones: [],
 
+      misPeticiones: [],
+
       adopcionesClinica: [],
 
       misMascotas: [],
@@ -321,6 +329,7 @@ export default {
 
         this.cargarMisAdopciones()
         this.cargarAdopcionesClinica()
+        this.cargarMisPeticiones()
       } catch (e) {
         console.error('Error al parsear usuario:', e)
         this.jwtValido = false
@@ -345,9 +354,20 @@ export default {
       try {
         const { data } = await api.get(`/adopciones/clinica/${this.clinicaId}`)
         this.adopcionesClinica = data
+        await this.cargarMisPeticiones()
       } catch (e) {
         console.error('Error al cargar adopciones de clínica:', e.response)
         this.errorClinica = (e.response && e.response.data && e.response.data.msg) || 'Error al cargar adopciones de clínica'
+      }
+    },
+
+    async cargarMisPeticiones () {
+      try {
+        const { data } = await api.get(`/peticiones_adopcion/usuario/${this.usuarioId}`)
+        this.misPeticiones = data
+      } catch (e) {
+        console.error('Error al cargar mis peticiones:', e.response)
+        this.misPeticiones = []
       }
     },
 
@@ -385,6 +405,16 @@ export default {
       return true
     },
 
+    estadoPeticionUsuario (adopcion) {
+      if (!adopcion) return ''
+      const peticion = this.misPeticiones.find(p => p.adopcion_id === adopcion.id)
+      return (peticion && peticion.estado_peticion ? peticion.estado_peticion : '').toLowerCase()
+    },
+
+    tienePeticionPendiente (adopcion) {
+      return this.estadoPeticionUsuario(adopcion) === 'pendiente'
+    },
+
     abrirModalSolicitud (adopcion) {
       this.adopcionSolicitud = adopcion
       this.razonSolicitud = ''
@@ -416,6 +446,7 @@ export default {
           razon_adopcion: this.razonSolicitud.trim()
         })
         this.cerrarSolicitud()
+        await this.cargarMisPeticiones()
       } catch (e) {
         console.error('Error al crear solicitud:', e.response)
         this.errorSolicitud = (e.response && e.response.data && e.response.data.msg) || 'Error al crear solicitud'
