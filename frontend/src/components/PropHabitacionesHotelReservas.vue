@@ -1,88 +1,92 @@
 <template>
-  <div class="reservas-container">
-    <div class="reservas-header">
-      <h1 class="reservas-title">Mis Reservas</h1>
-      <button class="back-btn" @click="$router.go(-1)">
-        <i class="fas fa-arrow-left"></i> Volver
-      </button>
-    </div>
-
-    <div v-if="jwtValido">
-      <div v-if="loading || cargandoReservas" class="loading-container">
-        <div class="loading-spinner"></div>
-        <p>Cargando reservas...</p>
+  <div class="reservas-wrapper">
+    <div class="reservas-content">
+      <div class="reservas-header">
+        <h2>🛏️ Mis Reservas</h2>
+        <button class="back-btn" @click="$router.go(-1)">
+          <i class="fas fa-arrow-left"></i> Volver
+        </button>
       </div>
 
-      <div v-else-if="habitacionesReservadas.length > 0" class="rooms-grid">
-        <div v-for="habitacion in habitacionesReservadas" :key="habitacion.id" class="room-card">
-          <div class="room-image-container">
-            <img v-if="habitacion.url_imagen" :src="habitacion.url_imagen" :alt="habitacion.nombre" class="room-image" />
-            <div v-else class="no-image-placeholder">
-              <span>No Image</span>
-            </div>
-            <div class="reserved-badge">RESERVADA</div>
-          </div>
-          <div class="room-content">
-            <h3 class="room-name">{{ habitacion.nombre }}</h3>
+      <div v-if="jwtValido">
+        <div v-if="loading || cargandoReservas" class="loading-container">
+          <div class="loading-spinner"></div>
+          <p>Cargando reservas...</p>
+        </div>
 
-            <!-- Sección de fechas de reserva -->
-            <div v-if="habitacion.reservas && habitacion.reservas.length > 0" class="reservas-dates">
-              <h4 class="reservas-subtitle">Fechas reservadas:</h4>
-              <div v-for="(reserva, index) in habitacion.reservas" :key="index" class="reserva-item">
-                <div class="reserva-date-range">
-                  <i class="fas fa-calendar-alt"></i>
-                  {{ formatearFecha(reserva.fecha_inicio) }} - {{ formatearFecha(reserva.fecha_fin) }}
-                </div>
-                <div class="reserva-status" :class="{
-                  'status-active': reserva.estado === 'activa',
-                  'status-pending': reserva.estado === 'pendiente',
-                  'status-completed': reserva.estado === 'completada'
-                }">
-                  {{ reserva.estado }}
+        <div v-else-if="habitacionesReservadas.length > 0" class="rooms-grid">
+          <div v-for="habitacion in habitacionesReservadas" :key="habitacion.id" class="room-card">
+            <div class="room-image-container">
+              <img v-if="habitacion.url_imagen" :src="habitacion.url_imagen" :alt="habitacion.nombre" class="room-image" />
+              <div v-else class="no-image-placeholder">
+                <i class="fas fa-bed"></i>
+                <span>Sin imagen</span>
+              </div>
+              <div class="reserved-badge">RESERVADA</div>
+            </div>
+            <div class="room-content">
+              <h3 class="room-name">{{ habitacion.nombre }}</h3>
+
+              <!-- Sección de fechas de reserva -->
+              <div v-if="habitacion.reservas && habitacion.reservas.length > 0" class="reservas-dates">
+                <h4 class="reservas-subtitle">Reservas:</h4>
+                <div v-for="(reserva, index) in habitacion.reservas" :key="index" class="reserva-item">
+                  <div class="reserva-mascota">
+                    <i class="fas fa-paw"></i>
+                    <strong>{{ obtenerNombreMascota(reserva.mascota_id) }}</strong>
+                  </div>
+                  <div class="reserva-date-range">
+                    <i class="fas fa-calendar-alt"></i>
+                    {{ formatearFecha(reserva.fecha_inicio) }} - {{ formatearFecha(reserva.fecha_fin) }}
+                  </div>
+                  <div class="reserva-status" :class="{
+                    'status-active': reserva.estado === 'activa',
+                    'status-pending': reserva.estado === 'pendiente',
+                    'status-completed': reserva.estado === 'completada'
+                  }">
+                    {{ reserva.estado }}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div v-else class="no-reservas-dates">
-              <p class="no-dates-text">No hay fechas de reserva disponibles</p>
-            </div>
+              <div v-else class="no-reservas-dates">
+                <p class="no-dates-text">No hay fechas de reserva disponibles</p>
+              </div>
 
-            <div class="room-details">
-              <span class="room-detail"><i class="fas fa-paw"></i> Tipo: {{ habitacion.tipo }}</span>
-              <span class="room-detail"><i class="fas fa-expand-arrows-alt"></i> Tamaño: {{ habitacion.tamaño }}</span>
+              <div class="room-details">
+                <span class="room-detail"><i class="fas fa-paw"></i> Tipo: {{ habitacion.tipo }}</span>
+                <span class="room-detail"><i class="fas fa-expand-arrows-alt"></i> Tamaño: {{ habitacion.tamaño }}</span>
+              </div>
             </div>
-            <div class="room-actions">
-              <!-- Aquí podrías agregar botones de acción si los necesitas -->
-            </div>
+          </div>
+        </div>
+
+        <div v-else class="no-reservas">
+          <div class="empty-state">
+            <i class="fas fa-bed empty-icon"></i>
+            <h3>No tienes reservas activas</h3>
+            <p>¡Explora nuestras habitaciones y reserva para tu mascota!</p>
+            <button class="explore-btn" @click="$router.push('/habitaciones-hotel')">
+              <i class="fas fa-search"></i> Ver habitaciones disponibles
+            </button>
           </div>
         </div>
       </div>
 
-      <div v-else class="no-reservas">
-        <div class="empty-state">
-          <i class="fas fa-bed empty-icon"></i>
-          <h3>No tienes reservas activas</h3>
-          <p>¡Explora nuestras habitaciones y reserva para tu mascota!</p>
-          <button class="explore-btn" @click="$router.push('/habitaciones-hotel')">
-            <i class="fas fa-search"></i> Ver habitaciones disponibles
+      <div v-else class="no-auth">
+        <div class="auth-error">
+          <i class="fas fa-exclamation-triangle"></i>
+          <p class="error">No estás autorizado para ver esta información. Por favor, inicia sesión.</p>
+          <button class="login-btn" @click="$router.push('/login')">
+            <i class="fas fa-sign-in-alt"></i> Iniciar sesión
           </button>
         </div>
       </div>
-    </div>
 
-    <div v-else class="no-auth">
-      <div class="auth-error">
-        <i class="fas fa-exclamation-triangle"></i>
-        <p class="error">No estás autorizado para ver esta información. Por favor, inicia sesión.</p>
-        <button class="login-btn" @click="$router.push('/login')">
-          <i class="fas fa-sign-in-alt"></i> Iniciar sesión
-        </button>
+      <div v-if="error" class="error-message">
+        <i class="fas fa-exclamation-circle"></i>
+        {{ error }}
       </div>
-    </div>
-
-    <div v-if="error" class="error-message">
-      <i class="fas fa-exclamation-circle"></i>
-      {{ error }}
     </div>
   </div>
 </template>
@@ -273,6 +277,11 @@ export default {
         month: '2-digit',
         year: 'numeric'
       })
+    },
+
+    obtenerNombreMascota (mascotaId) {
+      const mascota = this.todasLasMascotas.find(m => m.id === mascotaId)
+      return mascota ? mascota.nombre : 'Mascota desconocida'
     }
   }
 }

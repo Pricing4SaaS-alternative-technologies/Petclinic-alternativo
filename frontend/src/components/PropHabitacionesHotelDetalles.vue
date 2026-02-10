@@ -87,57 +87,47 @@
 
     <!-- Modal de Disponibilidad -->
     <div v-if="modalVisible" class="modal-overlay" @click="cerrarModal">
-      <div class="modal-content" @click.stop>
-        <div class="modal-header">
-          <h2>Disponibilidad de la habitación</h2>
-          <button class="close-modal" @click="cerrarModal">&times;</button>
-        </div>
-
-        <div class="modal-body">
+      <div class="modal-disponibilidad" @click.stop>
+        <h3>Disponibilidad de la habitación</h3>
+        <form @submit.prevent="confirmarReserva">
           <!-- Selector de fechas -->
-          <div class="availability-dates">
-            <div class="date-range">
-              <label class="date-label">
+          <div class="fechas-container">
+            <div class="fecha-group">
+              <label>
                 <i class="far fa-calendar-alt"></i> Fecha de entrada
               </label>
-              <div class="date-input-container">
-                <input
-                  type="date"
-                  v-model="fechaInicio"
-                  class="date-input"
-                  :min="fechaMinima"
-                  @input="validarFechas"
-                >
-                <i class="fas fa-calendar-alt date-icon"></i>
-              </div>
-              <div v-if="errorFechaInicio" class="date-error">
+              <input
+                type="date"
+                v-model="fechaInicio"
+                class="fecha-input"
+                :min="fechaMinima"
+                @input="validarFechas"
+              >
+              <div v-if="errorFechaInicio" class="fecha-error">
                 <i class="fas fa-exclamation-circle"></i> {{ errorFechaInicio }}
               </div>
             </div>
 
-            <div class="date-range">
-              <label class="date-label">
+            <div class="fecha-group">
+              <label>
                 <i class="far fa-calendar-alt"></i> Fecha de salida
               </label>
-              <div class="date-input-container">
-                <input
-                  type="date"
-                  v-model="fechaFin"
-                  class="date-input"
-                  :min="fechaInicio || fechaMinima"
-                  @input="validarFechas"
-                >
-                <i class="fas fa-calendar-alt date-icon"></i>
-              </div>
-              <div v-if="errorFechaFin" class="date-error">
+              <input
+                type="date"
+                v-model="fechaFin"
+                class="fecha-input"
+                :min="fechaInicio || fechaMinima"
+                @input="validarFechas"
+              >
+              <div v-if="errorFechaFin" class="fecha-error">
                 <i class="fas fa-exclamation-circle"></i> {{ errorFechaFin }}
               </div>
             </div>
           </div>
 
           <!-- Selector de mascotas -->
-          <div class="pet-selection">
-            <label class="pet-label">
+          <div class="mascota-group">
+            <label>
               <i class="fas fa-paw"></i> Selecciona una mascota
             </label>
 
@@ -150,7 +140,7 @@
             <select
               v-else-if="mascotasFiltradas.length > 0"
               id="pet-select"
-              class="pet-select"
+              class="mascota-select"
               v-model="mascotaSeleccionada"
             >
               <option value="" disabled>Selecciona una mascota...</option>
@@ -164,7 +154,7 @@
             </select>
 
             <!-- Mensaje si no hay mascotas disponibles -->
-            <div v-else class="no-pets-message">
+            <div v-else class="no-mascotas-mensaje">
               <p><i class="fas fa-info-circle"></i>
                 {{ todasLasMascotas.length === 0 ?
                   'No tienes mascotas registradas.' :
@@ -174,22 +164,26 @@
             </div>
           </div>
 
+          <!-- Mensaje de error general -->
+          <div v-if="errorReserva" class="error-reserva">
+            <i class="fas fa-exclamation-circle"></i> {{ errorReserva }}
+          </div>
+
           <!-- Botones del modal -->
-          <div class="modal-actions">
-            <button class="btn btn-secondary" @click="cerrarModal">
+          <div class="modal-buttons">
+            <button type="button" class="btn-cancelar" @click="cerrarModal">
               Cancelar
             </button>
             <button
-              class="btn btn-primary"
-              @click="confirmarReserva"
-              :disabled="!formularioValido || creandoReserva"
+              type="submit"
+              class="btn-confirmar"
             >
               <i v-if="creandoReserva" class="fas fa-spinner fa-spin"></i>
               <i v-else class="fas fa-calendar-check"></i>
               {{ creandoReserva ? 'Creando reserva...' : 'Confirmar Reserva' }}
             </button>
           </div>
-        </div>
+        </form>
       </div>
     </div>
 
@@ -385,6 +379,7 @@ export default {
 
       // Estado para la creación de reserva
       creandoReserva: false,
+      errorReserva: '',
 
       // Datos para el modal de edición
       modalEditarVisible: false,
@@ -497,6 +492,7 @@ export default {
         this.fechaFin = ''
         this.errorFechaInicio = ''
         this.errorFechaFin = ''
+        this.errorReserva = ''
         this.creandoReserva = false
       }
     }
@@ -797,9 +793,37 @@ export default {
     },
 
     async confirmarReserva () {
-      if (!this.formularioValido) {
-        alert('Por favor, completa todos los campos correctamente.')
+      // Limpiar error previo
+      this.errorReserva = ''
+
+      // Validaciones con mensajes visuales
+      if (!this.fechaInicio) {
+        this.errorReserva = 'Por favor, selecciona una fecha de entrada'
         return
+      }
+
+      if (!this.fechaFin) {
+        this.errorReserva = 'Por favor, selecciona una fecha de salida'
+        return
+      }
+
+      if (this.errorFechaInicio) {
+        this.errorReserva = this.errorFechaInicio
+        return
+      }
+
+      if (this.errorFechaFin) {
+        this.errorReserva = this.errorFechaFin
+        return
+      }
+
+      if (!this.mascotaSeleccionada) {
+        this.errorReserva = 'Por favor, selecciona una mascota'
+        return
+      }
+
+      if (this.creandoReserva) {
+        return // Evitar doble clic
       }
 
       this.creandoReserva = true
