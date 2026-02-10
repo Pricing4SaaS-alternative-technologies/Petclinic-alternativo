@@ -1,38 +1,380 @@
-.clinica-card {
-  border: 1px solid #e0e0e0;
-  border-radius: 10px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  background-color: rgba(255, 255, 255, 0.95);
+/* Estilo moderno para Home Clínica */
+
+.clinicas-wrapper {
+  background: transparent;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  position: relative;
+  z-index: 1;
 }
 
-.clinica-list {
-  border: 1px solid #e0e0e0;
-  overflow-y: auto;
-  border-radius: 10px;
-  max-height: 30%;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  background-color: rgba(255, 255, 255, 0.95);
+.clinicas-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 3rem 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.boton-grande {
-  padding: 1rem 2rem;
-  font-size: 1.2rem;
-  background-color: #4caf50;
+/* Header */
+.clinicas-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid #ecf0f1;
+}
+
+.clinicas-title {
+  color: #2c3e50;
+  font-size: 2.2rem;
+  margin: 0;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.clinicas-title i {
+  color: #f39c12;
+  font-size: 2rem;
+}
+
+.username {
+  color: #1e90ff;
+}
+
+/* Plan info */
+.plan-info {
+  text-align: center;
+  font-size: 1.3rem;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.plan-info i {
+  color: #f39c12;
+  font-size: 1.5rem;
+}
+
+.plan-badge {
+  text-align: center;
+  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: inline-block;
+  margin: 0 auto 2rem;
+  box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
+  display: block;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Botones de acción */
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
   color: white;
   border: none;
-  border-radius: 8px;
+  padding: 1rem 2rem;
+  border-radius: 25px;
   cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.boton-grande:hover {
-  background-color: #43a047;
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, #1e90ff 0%, #1565c0 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(30, 144, 255, 0.3);
+}
+
+.btn-secondary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(30, 144, 255, 0.4);
+}
+
+/* Grid de clínicas */
+.clinicas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.clinica-card {
+  background: white;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid #ecf0f1;
+}
+
+.clinica-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 30px rgba(30, 144, 255, 0.2);
+}
+
+.card-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.card-header h3 {
+  color: white;
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+.info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+.info-row:hover {
+  background: #e9ecef;
+}
+
+.info-row:last-child {
+  margin-bottom: 0;
+}
+
+.info-row i {
+  color: #1e90ff;
+  font-size: 1.2rem;
+  min-width: 20px;
+  margin-top: 2px;
+}
+
+.info-row div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.info-row .label {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 0.9rem;
+}
+
+.info-row .value {
+  color: #7f8c8d;
+  font-size: 0.95rem;
+}
+
+.card-actions {
+  display: flex;
+  gap: 10px;
+  padding: 1rem 1.5rem;
+  background: #f8f9fa;
+  border-top: 1px solid #ecf0f1;
+}
+
+.btn-edit {
+  flex: 1;
+  background: linear-gradient(135deg, #1e90ff 0%, #1565c0 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.btn-edit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(30, 144, 255, 0.3);
+}
+
+.btn-delete {
+  flex: 1;
+  background: linear-gradient(135deg, #ef5350 0%, #d32f2f 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.btn-delete:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 83, 80, 0.3);
+}
+
+
+/* Estado vacío */
+.sin-clinicas {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 15px;
+  margin: 2rem 0;
+}
+
+.empty-state {
+  max-width: 450px;
+  margin: 0 auto;
+}
+
+.empty-icon {
+  font-size: 5rem;
+  color: #bdc3c7;
+  margin-bottom: 1.5rem;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.empty-state h3 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+.empty-state p {
+  color: #7f8c8d;
+  margin-bottom: 2rem;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* Sin plan */
+.no-plan {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: rgba(255, 243, 205, 0.6);
+  border-radius: 15px;
+  margin: 2rem 0;
+}
+
+.warning-state {
+  max-width: 450px;
+  margin: 0 auto;
+}
+
+.warning-state i {
+  font-size: 5rem;
+  color: #f39c12;
+  margin-bottom: 1.5rem;
+}
+
+.warning-state h3 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+.warning-state p {
+  color: #7f8c8d;
+  margin-bottom: 2rem;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* No autorizado */
+.no-auth {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: rgba(255, 235, 238, 0.6);
+  border-radius: 15px;
+  margin: 2rem 0;
+}
+
+.error-state {
+  max-width: 450px;
+  margin: 0 auto;
+}
+
+.error-state i {
+  font-size: 5rem;
+  color: #ef5350;
+  margin-bottom: 1.5rem;
 }
 
 .error {
-  color: red;
-  font-weight: bold;
+  color: #ef5350;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
 }
 
 /* Modal */
@@ -40,65 +382,349 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.4);
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 999;
+  z-index: 9999;
+  animation: fadeIn 0.2s ease;
 }
 
-.modal {
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.modal-clinica {
   background: white;
-  padding: 2rem;
-  border-radius: 12px;
+  padding: 0;
+  border-radius: 20px;
   width: 90%;
-  max-width: 400px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  max-width: 500px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.2s ease-out;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  max-height: 90vh;
+  overflow-y: auto;
+  will-change: transform, opacity;
 }
 
-.modal label {
+@keyframes slideIn {
+  0% {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 20px 20px 0 0;
+}
+
+.modal-header h3 {
+  color: white;
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.close-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  font-size: 1.2rem;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+/* Modal de confirmación de eliminación */
+.modal-confirmacion {
+  background: white;
+  padding: 0;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 450px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.2s ease-out;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  will-change: transform, opacity;
+}
+
+.modal-header-warning {
+  background: linear-gradient(135deg, #ef5350 0%, #d32f2f 100%);
+  padding: 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 20px 20px 0 0;
+}
+
+.modal-header-warning h3 {
+  color: white;
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-body-confirmacion {
+  padding: 2rem;
+  text-align: center;
+}
+
+.modal-body-confirmacion p {
+  font-size: 1.1rem;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.modal-body-confirmacion .warning-text {
+  font-size: 0.95rem;
+  color: #ef5350;
+  font-weight: 600;
+  margin-bottom: 0;
+}
+
+.modal-confirmacion .modal-buttons {
+  padding: 0 2rem 2rem 2rem;
+}
+
+.btn-confirmar-eliminar {
+  flex: 1;
+  background: linear-gradient(135deg, #ef5350 0%, #d32f2f 100%);
+  color: white;
+  border: none;
+  padding: 0.85rem 1.5rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(239, 83, 80, 0.3);
+}
+
+.btn-confirmar-eliminar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(239, 83, 80, 0.4);
+}
+
+.modal-clinica form {
+  padding: 2rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
   display: block;
-  margin-top: 1rem;
-  font-weight: bold;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.modal input,
-.modal select {
+.form-group label i {
+  color: #1e90ff;
+}
+
+.form-group input {
   width: 100%;
-  padding: 0.5rem;
-  margin-top: 0.3rem;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border: 2px solid #ecf0f1;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #1e90ff;
+  box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.1);
+}
+
+.mensaje-error {
+  background: #ffebee;
+  color: #ef5350;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-left: 4px solid #ef5350;
+  animation: shake 0.5s ease;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
 }
 
 .modal-buttons {
   display: flex;
-  justify-content: space-between;
-  margin-top: 1.5rem;
+  gap: 12px;
+  margin-top: 2rem;
 }
 
-.modal-buttons button {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.modal-buttons .cancelar {
-  background-color: #f44336;
+.btn-save {
+  flex: 1;
+  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
   color: white;
+  border: none;
+  padding: 0.85rem 1.5rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
 }
 
-.modal-buttons .cancelar:hover {
-  background-color: #d32f2f;
+.btn-save:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
 }
 
-.mensaje-error {
-  color: red;
-  font-size: 0.9rem;
-  font-weight: normal;
-  margin-top: 0.5rem;
-  text-align: center;
+.btn-cancel {
+  flex: 1;
+  background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+  color: white;
+  border: none;
+  padding: 0.85rem 1.5rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(127, 140, 141, 0.3);
+}
+
+.btn-cancel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(127, 140, 141, 0.4);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .clinicas-wrapper {
+    padding: 1rem;
+  }
+
+  .clinicas-content {
+    padding: 2rem 1.5rem;
+    border-radius: 15px;
+  }
+
+  .clinicas-title {
+    font-size: 1.8rem;
+  }
+
+  .clinicas-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .card-actions {
+    flex-direction: column;
+  }
+
+  .modal-clinica {
+    width: 95%;
+    max-width: none;
+  }
+
+  .modal-buttons {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .clinicas-title {
+    font-size: 1.5rem;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .plan-info {
+    font-size: 1.1rem;
+  }
+
+  .card-header h3 {
+    font-size: 1.3rem;
+  }
+
+  .empty-icon,
+  .warning-state i,
+  .error-state i {
+    font-size: 4rem;
+  }
 }
