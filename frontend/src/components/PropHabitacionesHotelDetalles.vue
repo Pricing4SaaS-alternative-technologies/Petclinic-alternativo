@@ -189,22 +189,18 @@
 
     <!-- Modal de Edición de Habitación -->
     <div v-if="modalEditarVisible" class="modal-overlay" @click="cerrarModalEditar">
-      <div class="modal-content edit-modal" @click.stop>
-        <div class="modal-header">
-          <h2><i class="fas fa-edit"></i> Editar Habitación</h2>
-          <button class="close-modal" @click="cerrarModalEditar">&times;</button>
+      <div class="modal" @click.stop>
+        <h3><i class="fas fa-edit"></i> Editar Habitación</h3>
+
+        <div v-if="errorEditar" class="error-message-modal">
+          <i class="fas fa-exclamation-circle"></i> {{ errorEditar }}
         </div>
 
-        <div class="modal-body">
-          <div v-if="errorEditar" class="error-message-modal">
-            <i class="fas fa-exclamation-circle"></i> {{ errorEditar }}
-          </div>
+        <div v-if="successEditar" class="success-message-modal">
+          <i class="fas fa-check-circle"></i> {{ successEditar }}
+        </div>
 
-          <div v-if="successEditar" class="success-message-modal">
-            <i class="fas fa-check-circle"></i> {{ successEditar }}
-          </div>
-
-          <form @submit.prevent="guardarEdicion">
+        <form @submit.prevent="guardarEdicion">
             <div class="form-group">
               <label for="edit-nombre">
                 <i class="fas fa-signature"></i> Nombre de la habitación *
@@ -317,18 +313,17 @@
               </div>
             </div>
 
-            <div class="modal-actions">
-              <button type="button" class="btn btn-secondary" @click="cerrarModalEditar" :disabled="cargandoEditar">
-                Cancelar
-              </button>
-              <button type="submit" class="btn btn-primary" :disabled="cargandoEditar">
+            <div class="modal-buttons">
+              <button type="submit" class="btn-crear" :disabled="cargandoEditar">
                 <i v-if="cargandoEditar" class="fas fa-spinner fa-spin"></i>
                 <i v-else class="fas fa-save"></i>
                 {{ cargandoEditar ? 'Guardando...' : 'Guardar Cambios' }}
               </button>
+              <button type="button" class="cancelar" @click="cerrarModalEditar" :disabled="cargandoEditar">
+                Cancelar
+              </button>
             </div>
           </form>
-        </div>
       </div>
     </div>
   </div>

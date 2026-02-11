@@ -34,13 +34,13 @@
 .rooms-title {
   font-size: 2.2rem;
   color: #2c3e50;
-  margin-bottom: 40px;
-  text-align: center;
+  margin-bottom: 0;
+  text-align: left;
   font-weight: 600;
   border-bottom: 3px solid #3498db;
   display: inline-block;
   padding-bottom: 10px;
-  width: 100%;
+  white-space: nowrap;
 }
 
 .rooms-grid {
@@ -327,7 +327,17 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.rooms-header-content {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  flex: 1;
+  min-width: 300px;
 }
 
 .header-actions {
@@ -338,26 +348,41 @@
 
 /* Estilos para el botón de crear habitación */
 .create-room-btn {
-  background-color: #4CAF50;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
+  padding: 12px 28px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.3s;
+  font-size: 1.05rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  white-space: nowrap;
 }
 
 .create-room-btn:hover {
-  background-color: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.45);
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+.create-room-btn:active {
+  transform: translateY(0);
 }
 
 .create-room-btn:disabled {
-  background-color: #cccccc;
+  background: linear-gradient(135deg, #cccccc 0%, #999999 100%);
   cursor: not-allowed;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transform: none;
+}
+
+.create-room-btn i {
+  font-size: 1.1rem;
 }
 
 /* Estilos del modal */
@@ -365,70 +390,97 @@
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 10000;
+  will-change: opacity;
 }
 
-.modal-content {
-  background: white;
-  border-radius: 8px;
+.modal {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 2.5rem;
   width: 90%;
   max-width: 600px;
   max-height: 90vh;
   overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  animation: slideInModal 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.crear-modal {
-  width: 90%;
-  max-width: 500px;
+@keyframes slideInModal {
+  from {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
-.modal-header {
-  padding: 20px;
-  border-bottom: 1px solid #eee;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.modal h3 {
+  color: #2c3e50;
+  font-size: 1.6rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  margin-top: 0;
 }
 
-.modal-header h2 {
-  margin: 0;
-  font-size: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.modal label {
+  font-weight: 600;
+  color: #2c3e50;
+  display: block;
+  margin-top: 1.2rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
 }
 
-.close-modal {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: #666;
+.modal input,
+.modal select,
+.modal textarea {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  border: 2px solid #ecf0f1;
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
 }
 
-.modal-body {
-  padding: 20px;
+.modal input:focus,
+.modal select:focus,
+.modal textarea:focus {
+  outline: none;
+  border-color: #1e90ff;
+  box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.1);
+}
+
+.modal textarea {
+  resize: vertical;
+  min-height: 100px;
 }
 
 /* Estilos del formulario */
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 0;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 8px;
-  font-weight: 500;
-  color: #333;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #2c3e50;
   display: flex;
   align-items: center;
   gap: 8px;
+  font-size: 0.95rem;
+  margin-top: 1.2rem;
 }
 
 .form-group input[type="text"],
@@ -437,56 +489,80 @@
 .form-group select,
 .form-group textarea {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
+  padding: 0.85rem 1rem;
+  border: 2px solid #ecf0f1;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  margin-top: 0.5rem;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #1e90ff;
+  box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.1);
 }
 
 .clinica-select {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
+  padding: 0.85rem 1rem;
+  border: 2px solid #ecf0f1;
+  border-radius: 12px;
+  font-size: 0.95rem;
   background-color: white;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  margin-top: 0.5rem;
+}
+
+.clinica-select:focus {
+  outline: none;
+  border-color: #1e90ff;
+  box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.1);
 }
 
 .form-group textarea {
   resize: vertical;
-  min-height: 80px;
+  min-height: 100px;
 }
 
 .text-muted {
   display: block;
-  margin-top: 5px;
-  color: #666;
-  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  color: #7f8c8d;
+  font-size: 0.85rem;
+  font-weight: 400;
 }
 
 /* Radio group para tamaños y tipos */
 .radio-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
+  gap: 12px;
+  margin-top: 0.75rem;
 }
 
 .radio-group label {
   padding: 10px 15px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 2px solid #ecf0f1;
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s;
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-top: 0;
+  margin-bottom: 0;
+  font-weight: 500;
 }
 
 .radio-group label.selected {
-  background-color: #4CAF50;
+  background-color: #1e90ff;
   color: white;
-  border-color: #4CAF50;
+  border-color: #1e90ff;
 }
 
 .radio-group input[type="radio"] {
@@ -495,7 +571,7 @@
 
 /* Checkbox para reservable */
 .checkbox-group {
-  margin-top: 20px;
+  margin-top: 1.2rem;
 }
 
 .checkbox-label {
@@ -504,7 +580,9 @@
   cursor: pointer;
   position: relative;
   padding-left: 35px;
-  margin-bottom: 5px;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #2c3e50;
 }
 
 .checkbox-label input {
@@ -521,16 +599,19 @@
   left: 0;
   height: 25px;
   width: 25px;
-  background-color: #eee;
-  border-radius: 4px;
+  background-color: #ecf0f1;
+  border-radius: 6px;
+  border: 2px solid #ecf0f1;
+  transition: all 0.3s ease;
 }
 
 .checkbox-label:hover input ~ .checkmark {
-  background-color: #ccc;
+  border-color: #1e90ff;
 }
 
 .checkbox-label input:checked ~ .checkmark {
-  background-color: #4CAF50;
+  background-color: #1e90ff;
+  border-color: #1e90ff;
 }
 
 .checkmark:after {
@@ -544,8 +625,8 @@
 }
 
 .checkbox-label .checkmark:after {
-  left: 9px;
-  top: 5px;
+  left: 8px;
+  top: 4px;
   width: 5px;
   height: 10px;
   border: solid white;
@@ -555,19 +636,22 @@
 
 /* Vista previa de imagen */
 .image-preview {
-  margin-top: 20px;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .image-preview label {
-  margin-bottom: 10px;
+  margin-top: 1rem;
+  margin-bottom: 0.75rem;
+  display: block;
 }
 
 .preview-container {
   width: 100%;
   max-width: 200px;
   height: 150px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 2px solid #ecf0f1;
+  border-radius: 12px;
   overflow: hidden;
 }
 
@@ -578,43 +662,47 @@
 }
 
 /* Botones del modal */
-.modal-actions {
+.modal-buttons {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  margin-top: 30px;
-  padding-top: 20px;
-  border-top: 1px solid #eee;
+  gap: 1rem;
+  margin-top: 2rem;
 }
 
-.btn {
-  padding: 10px 20px;
+.modal-buttons button {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
   border: none;
-  border-radius: 4px;
   cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease;
 }
 
-.btn-primary {
-  background-color: #4CAF50;
+.btn-crear {
+  background: linear-gradient(135deg, #1e90ff 0%, #1c7ed6 100%);
   color: white;
+  box-shadow: 0 4px 15px rgba(30, 144, 255, 0.3);
 }
 
-.btn-primary:hover:not(:disabled) {
-  background-color: #45a049;
+.btn-crear:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1c7ed6 0%, #155bc0 100%);
+  box-shadow: 0 6px 20px rgba(30, 144, 255, 0.4);
 }
 
-.btn-secondary {
-  background-color: #6c757d;
-  color: white;
+.modal-buttons .cancelar {
+  background-color: #ecf0f1;
+  color: #2c3e50;
+  border: 2px solid #bdc3c7;
 }
 
-.btn-secondary:hover:not(:disabled) {
-  background-color: #5a6268;
+.modal-buttons .cancelar:hover:not(:disabled) {
+  background-color: #bdc3c7;
+  border-color: #95a5a6;
 }
 
-.btn:disabled {
+.modal-buttons button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -622,11 +710,11 @@
 /* Mensajes de error y éxito */
 .error-message-modal,
 .success-message-modal {
-  padding: 10px;
-  border-radius: 4px;
-  margin-bottom: 20px;
+  padding: 1rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
 }
 
@@ -646,8 +734,19 @@
 @media (max-width: 768px) {
   .rooms-header {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     gap: 1rem;
+  }
+  
+  .rooms-header-content {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .create-room-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 14px 20px;
   }
   
   .header-actions {
@@ -655,18 +754,26 @@
     justify-content: flex-end;
   }
   
-  .modal-content {
+  .modal {
     width: 95%;
     max-width: 95%;
+    padding: 2rem 1.5rem;
   }
   
-  .crear-modal {
-    width: 95%;
-    max-width: 95%;
+  .modal h3 {
+    font-size: 1.4rem;
   }
   
   .radio-group {
     flex-direction: column;
+  }
+  
+  .modal-buttons {
+    flex-direction: column-reverse;
+  }
+  
+  .modal-buttons button {
+    padding: 0.85rem 1.5rem;
   }
 }
 

@@ -9,19 +9,23 @@
 
     <div v-if="jwtValido">
       <div class="rooms-header">
-        <h2 class="rooms-title">Todas las habitaciones</h2>
+        <div class="rooms-header-content">
+          <h2 class="rooms-title">Todas las habitaciones</h2>
+
+          <!-- Botón para crear habitación (solo para prop_clinica y admin) -->
+          <button
+            v-if="info_usuario.tipo === 'prop_clinica' || info_usuario.tipo_usuario === 'admin'"
+            class="create-room-btn"
+            @click="abrirModalCrear"
+          >
+            <i class="fas fa-plus"></i> Crear Habitación
+          </button>
+        </div>
 
         <div class="header-actions">
           <div v-if="info_usuario.tipo === 'prop_mascota'">
             <button class="see-reservas-btn" @click="verMisReservas">
               <i class="fas fa-paw"></i> Mis reservas
-            </button>
-          </div>
-
-          <!-- Botón para crear habitación (solo para prop_clinica y admin) -->
-          <div v-if="info_usuario.tipo === 'prop_clinica' || info_usuario.tipo_usuario === 'admin'">
-            <button class="create-room-btn" @click="abrirModalCrear">
-              <i class="fas fa-plus"></i> Crear Habitación
             </button>
           </div>
         </div>
@@ -64,20 +68,16 @@
 
     <!-- Modal para crear nueva habitación -->
     <div v-if="modalCrearVisible" class="modal-overlay" @click="cerrarModalCrear">
-      <div class="modal-content crear-modal" @click.stop>
-        <div class="modal-header">
-          <h2><i class="fas fa-plus"></i> Crear Nueva Habitación</h2>
-          <button class="close-modal" @click="cerrarModalCrear">&times;</button>
+      <div class="modal" @click.stop>
+        <h3><i class="fas fa-plus"></i> Crear Nueva Habitación</h3>
+
+        <div v-if="errorCrear" class="error-message-modal">
+          <i class="fas fa-exclamation-circle"></i> {{ errorCrear }}
         </div>
 
-        <div class="modal-body">
-          <div v-if="errorCrear" class="error-message-modal">
-            <i class="fas fa-exclamation-circle"></i> {{ errorCrear }}
-          </div>
-
-          <div v-if="successCrear" class="success-message-modal">
-            <i class="fas fa-check-circle"></i> {{ successCrear }}
-          </div>
+        <div v-if="successCrear" class="success-message-modal">
+          <i class="fas fa-check-circle"></i> {{ successCrear }}
+        </div>
 
           <form @submit.prevent="guardarCreacion">
             <div class="form-group">
@@ -219,18 +219,17 @@
               </div>
             </div>
 
-            <div class="modal-actions">
-              <button type="button" class="btn btn-secondary" @click="cerrarModalCrear" :disabled="cargandoCrear">
-                Cancelar
-              </button>
-              <button type="submit" class="btn btn-primary" :disabled="cargandoCrear">
+            <div class="modal-buttons">
+              <button type="submit" class="btn-crear" :disabled="cargandoCrear">
                 <i v-if="cargandoCrear" class="fas fa-spinner fa-spin"></i>
                 <i v-else class="fas fa-save"></i>
                 {{ cargandoCrear ? 'Creando...' : 'Crear Habitación' }}
               </button>
+              <button type="button" class="cancelar" @click="cerrarModalCrear" :disabled="cargandoCrear">
+                Cancelar
+              </button>
             </div>
           </form>
-        </div>
       </div>
     </div>
   </div>
