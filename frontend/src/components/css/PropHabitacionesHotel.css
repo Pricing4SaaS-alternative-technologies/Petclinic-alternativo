@@ -346,9 +346,9 @@
   align-items: center;
 }
 
-/* Estilos para el botón de crear habitación */
+/* Estilos para el botón de crear habitación (tonos azules) */
 .create-room-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #5dade2 0%, #2e86c1 100%);
   color: white;
   border: none;
   padding: 12px 28px;
@@ -360,14 +360,14 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 15px rgba(46, 134, 193, 0.28);
   white-space: nowrap;
 }
 
 .create-room-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.45);
-  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  box-shadow: 0 6px 20px rgba(46, 134, 193, 0.42);
+  background: linear-gradient(135deg, #2e86c1 0%, #5dade2 100%);
 }
 
 .create-room-btn:active {
