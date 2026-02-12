@@ -7,7 +7,7 @@
       </p>
     </div>
 
-    <div v-if="jwtValido">
+    <div v-if="jwtValido" class="white-zone">
       <div class="rooms-header">
         <div class="rooms-header-content">
           <h2 class="rooms-title">Todas las habitaciones</h2>
