@@ -13,7 +13,8 @@
   "dependencies": {
     "axios": "^0.21.1",
     "vue": "^2.5.2",
-    "vue-router": "^3.0.1"
+    "vue-router": "^3.0.1",
+    "@npm_team/space-vue-client": "^1.0.0"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",
