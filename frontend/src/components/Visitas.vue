@@ -1,27 +1,33 @@
 <template>
-  <div class="visitas-container" v-if="jwtValido">
-    <h2>🩺 Visitas</h2>
-    <button class="btn-crear" @click="openCrear">➕ Nueva Visita</button>
-
-    <!-- Lista de visitas, TODO generar filtros por mascota -->
-    <ul v-if="visitas.length" class="visita-lista">
-      <li class="visita-card">
-        <span><strong>Nombre Mascota</strong></span>
-        <span><strong>Descripción</strong></span>
-        <span><strong>Fecha y Hora</strong></span>
-        <span><strong>Acciones</strong></span>
-      </li>
-      <li v-for="v in visitas" :key="v.id" class="visita-card">
-        <span>{{ v.mascota_nombre }}</span>
-        <span>{{ v.descripcion }}</span>
-        <span>{{ formatearFecha(v.fecha) }}</span>
-        <div class="acciones">
-          <button @click="abrirEditar(v)">✏️</button>
-          <button @click="abrirEliminar(v)">🗑️</button>
+  <div>
+    <div class="visitas-wrapper" v-if="jwtValido">
+      <div class="visitas-content">
+        <div class="visitas-header">
+          <h2>🩺 Mis Visitas</h2>
         </div>
-      </li>
-    </ul>
-    <p v-else class="no-visitas">No hay visitas registradas.</p>
+
+        <button class="btn-crear" @click="openCrear">➕ Nueva Visita</button>
+
+        <ul v-if="visitas.length" class="visita-lista">
+          <li v-for="v in visitas" :key="v.id" class="visita-card">
+            <div class="visita-info">
+              <h3>{{ v.mascota_nombre }}</h3>
+              <div class="visita-desc">{{ v.descripcion }}</div>
+              <div class="visita-fecha">📅 {{ formatearFecha(v.fecha) }}</div>
+            </div>
+            <div class="visita-acciones">
+              <button class="btn-editar" @click="abrirEditar(v)" title="Editar">✏️</button>
+              <button class="btn-eliminar" @click="abrirEliminar(v)" title="Eliminar">🗑️</button>
+            </div>
+          </li>
+        </ul>
+        <p v-else class="no-visitas">No hay visitas registradas.</p>
+      </div>
+    </div>
+
+    <div class="no-auth" v-else>
+      <p class="error">No estás autorizado. Por favor, inicia sesión como veterinario.</p>
+    </div>
 
     <!-- Modal Crear -->
     <div class="modal-overlay" v-if="mostrarCrear">
@@ -72,6 +78,7 @@
         </div>
       </div>
     </div>
+
     <!-- Modal Eliminar -->
     <div class="modal-overlay" v-if="mostrarEliminar">
       <div class="modal">
@@ -84,16 +91,13 @@
       </div>
     </div>
   </div>
-  <div v-else class="no-auth">
-    <p class="error">No estás autorizado. Por favor, inicia sesión como veterinario.</p>
-  </div>
 </template>
 
 <script>
 import api from '@/api/axios'
 
 export default {
-  name: 'HomeVisitas',
+  name: 'Visitas',
   data () {
     return {
       info_usuario: null,
@@ -316,5 +320,5 @@ export default {
 </script>
 
 <style scoped>
-@import './css/HomeVisitas.css';
+@import './css/Visitas.css';
 </style>

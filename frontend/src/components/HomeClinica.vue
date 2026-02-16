@@ -1,77 +1,208 @@
-import { useRouter } from 'vue-router'
 <template>
-  <div class="clinicas-container">
-    <h2>Consulta aquí tus clínicas</h2>
+  <div>
+    <div class="clinicas-wrapper">
+      <div class="clinicas-content">
+        <!-- Header con emoji y título -->
+        <div class="clinicas-header">
+          <h2 class="clinicas-title">
+            <i class="fas fa-crown"></i>
+            <span>Consulta aquí tus clínicas</span>
+          </h2>
+        </div>
 
-    <div v-if="jwtValido && has_plan">
-      <h3><strong>Plan:</strong> {{contract_info.subscriptionPlans["petclinic"]}}</h3>
-      <button class="boton-grande" @click="modalCreacion = true">Añadir Clínica</button>
-      <button class="boton-grande" @click="$router.push('/pricing-plans')">Pricing plans</button>
-      <div v-if="clinicas.length > 0" class="clinica-list">
+        <div v-if="jwtValido && has_plan">
+          <!-- Info del plan -->
+          <div class="plan-badge">
+            <strong>Plan:</strong> {{ contract_info.subscriptionPlans["petclinic"] }}
+          </div>
 
-        <div v-for="clinica in clinicas" :key="clinica.id" class="clinica-card">
-          <h3>{{ clinica.nombre }}</h3>
-          <p><strong>Dirección:</strong> {{ clinica.direccion }}</p>
-          <p><strong>Teléfono:</strong> {{ clinica.telefono }}</p>
-          <button class="boton-grande" @click="iniciaEdicion(clinica)">Editar clinica</button>
-          <button class="boton-grande" @click="eliminarClinica(clinica)">Borrar clinica</button>
+          <!-- Botones de acción principales -->
+          <div class="action-buttons">
+            <button class="btn-primary" @click="abrirModalCreacion">
+              <i class="fas fa-plus-circle"></i>
+              Añadir Clínica
+            </button>
+            <button class="btn-secondary" @click="$router.push('/pricing-plans')">
+              <i class="fas fa-star"></i>
+              Pricing plans
+            </button>
+          </div>
+
+        <!-- Lista de clínicas -->
+        <div v-if="clinicas.length > 0" class="clinicas-grid">
+          <div v-for="clinica in clinicas" :key="clinica.id" class="clinica-card">
+            <div class="card-header">
+              <h3>{{ clinica.nombre }}</h3>
+            </div>
+            <div class="card-body">
+              <div class="info-row">
+                <i class="fas fa-map-marker-alt"></i>
+                <div>
+                  <span class="label">Dirección:</span>
+                  <span class="value">{{ clinica.direccion }}</span>
+                </div>
+              </div>
+              <div class="info-row">
+                <i class="fas fa-phone"></i>
+                <div>
+                  <span class="label">Teléfono:</span>
+                  <span class="value">{{ clinica.telefono }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="card-actions">
+              <button class="btn-edit" @click="iniciaEdicion(clinica)">
+                <i class="fas fa-edit"></i>
+                Editar clínica
+              </button>
+              <button class="btn-delete" @click="abrirModalEliminacion(clinica)">
+                <i class="fas fa-trash-alt"></i>
+                Borrar clínica
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sin clínicas -->
+        <div v-else class="sin-clinicas">
+          <div class="empty-state">
+            <i class="fas fa-hospital empty-icon"></i>
+            <h3>No tienes clínicas asociadas</h3>
+            <p>Añade tu primera clínica para empezar a gestionar tu negocio</p>
+            <button class="btn-primary" @click="abrirModalCreacion">
+              <i class="fas fa-plus-circle"></i>
+              Añadir Primera Clínica
+            </button>
+          </div>
         </div>
       </div>
-      <div v-else class="sin-clinicas">
-        <p>No tienes clinicas asociadas.</p>
+
+      <!-- Sin plan -->
+      <div v-else-if="!has_plan" class="no-plan">
+        <div class="warning-state">
+          <i class="fas fa-exclamation-triangle"></i>
+          <h3>No perteneces a ningún plan</h3>
+          <p>Contrata un plan para acceder a todas las funciones</p>
+          <button class="btn-primary" @click="$router.push('/pricing-plans')">
+            <i class="fas fa-star"></i>
+            Ver Planes
+          </button>
+        </div>
+      </div>
+
+      <!-- No autorizado -->
+      <div v-else class="no-auth">
+        <div class="error-state">
+          <i class="fas fa-lock"></i>
+          <p class="error">No estás autorizado para ver esta información.</p>
+        </div>
       </div>
     </div>
-    <div v-else-if="!has_plan">
-        <h3>No perteneces a ningun plan! Contrata uno para acceder a las funciones</h3>
-    </div>
-    <div v-else class="no-auth">
-      <p class="error">No estás autorizado para ver esta información.</p>
-    </div>
-    <!-- Modal para crear mascota -->
-    <div class="modal-overlay" v-if="modalCreacion">
-      <div class="modal">
-        <h3>Nueva Clinica</h3>
+  </div>
+
+  <!-- Modal para crear clínica -->
+  <div class="modal-overlay" v-if="modalCreacion" @click.self="modalCreacion = false">
+      <div class="modal-clinica">
+        <div class="modal-header">
+          <h3><i class="fas fa-plus-circle"></i> Nueva Clínica</h3>
+          <button class="close-btn" @click="modalCreacion = false">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
         <form @submit.prevent="crearClinica">
+          <div class="form-group">
+            <label><i class="fas fa-hospital"></i> Nombre:</label>
+            <input type="text" v-model="clinicaForm.nombre" placeholder="Nombre de la clínica" required />
+          </div>
 
-          <label>Nombre:</label>
-          <input type="text" v-model="clinicaForm.nombre" required />
+          <div class="form-group">
+            <label><i class="fas fa-map-marker-alt"></i> Dirección:</label>
+            <input type="text" v-model="clinicaForm.direccion" placeholder="Dirección completa" required />
+          </div>
 
-          <label>Dirección</label>
-          <input type="text" v-model="clinicaForm.direccion" required />
+          <div class="form-group">
+            <label><i class="fas fa-phone"></i> Teléfono:</label>
+            <input type="text" v-model="clinicaForm.telefono" placeholder="Número de teléfono" required />
+          </div>
 
-          <label>Teléfono:</label>
-          <input type="text" v-model="clinicaForm.telefono" required />
+          <p v-if="errorCreacion" class="mensaje-error">
+            <i class="fas fa-exclamation-circle"></i> {{ errorCreacion }}
+          </p>
 
-          <p v-if="errorCreacion" class="mensaje-error">{{ errorCreacion }}</p>
           <div class="modal-buttons">
-            <button type="submit">Guardar</button>
-            <button type="button" class="cancelar" @click="modalCreacion = false">Cancelar</button>
+            <button type="submit" class="btn-save">
+              <i class="fas fa-check"></i> Guardar
+            </button>
+            <button type="button" class="btn-cancel" @click="modalCreacion = false">
+              <i class="fas fa-times"></i> Cancelar
+            </button>
           </div>
         </form>
       </div>
     </div>
 
-        <!-- Modal para editar Clinica -->
-    <div class="modal-overlay" v-if="modalEdicion">
-      <div class="modal">
-        <h3>Editando Clinica: {{ clinicaSeleccionada.nombre }}</h3>
+    <!-- Modal para editar clínica -->
+    <div class="modal-overlay" v-if="modalEdicion" @click.self="modalEdicion = false">
+      <div class="modal-clinica">
+        <div class="modal-header">
+          <h3><i class="fas fa-edit"></i> Editando: {{ clinicaSeleccionada.nombre }}</h3>
+          <button class="close-btn" @click="modalEdicion = false">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
         <form @submit.prevent="editarClinica">
+          <div class="form-group">
+            <label><i class="fas fa-hospital"></i> Nombre:</label>
+            <input type="text" v-model="clinicaForm.nombre" required />
+          </div>
 
-          <label>Nombre:</label>
-          <input type="text" v-model="clinicaForm.nombre" required />
+          <div class="form-group">
+            <label><i class="fas fa-map-marker-alt"></i> Dirección:</label>
+            <input type="text" v-model="clinicaForm.direccion" required />
+          </div>
 
-          <label>Dirección</label>
-          <input type="text" v-model="clinicaForm.direccion" required />
+          <div class="form-group">
+            <label><i class="fas fa-phone"></i> Teléfono:</label>
+            <input type="text" v-model="clinicaForm.telefono" required />
+          </div>
 
-          <label>Teléfono:</label>
-          <input type="text" v-model="clinicaForm.telefono" required />
+          <p v-if="errorEdicion" class="mensaje-error">
+            <i class="fas fa-exclamation-circle"></i> {{ errorEdicion }}
+          </p>
 
-          <p v-if="errorEdicion" class="mensaje-error">{{ errorEdicion }}</p>
           <div class="modal-buttons">
-            <button type="submit">Guardar</button>
-            <button type="button" class="cancelar" @click="modalEdicion = false">Cancelar</button>
+            <button type="submit" class="btn-save">
+              <i class="fas fa-check"></i> Guardar
+            </button>
+            <button type="button" class="btn-cancel" @click="modalEdicion = false">
+              <i class="fas fa-times"></i> Cancelar
+            </button>
           </div>
         </form>
+      </div>
+    </div>
+
+    <!-- Modal para confirmar eliminación -->
+    <div class="modal-overlay" v-if="modalEliminacion" @click.self="modalEliminacion = false">
+      <div class="modal-confirmacion">
+        <div class="modal-header-warning">
+          <h3><i class="fas fa-exclamation-triangle"></i> Confirmar Eliminación</h3>
+          <button class="close-btn" @click="modalEliminacion = false">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body-confirmacion">
+          <p>¿Estás seguro de que quieres eliminar la clínica <strong>{{ clinicaSeleccionada ? clinicaSeleccionada.nombre : '' }}</strong>?</p>
+          <p class="warning-text">Esta acción no se puede deshacer.</p>
+        </div>
+        <div class="modal-buttons">
+          <button type="button" class="btn-confirmar-eliminar" @click="confirmarEliminacion">
+            <i class="fas fa-trash-alt"></i> Sí, Eliminar
+          </button>
+          <button type="button" class="btn-cancel" @click="modalEliminacion = false">
+            <i class="fas fa-times"></i> Cancelar
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -88,6 +219,7 @@ export default {
       clinicas: [],
       modalCreacion: false,
       modalEdicion: false,
+      modalEliminacion: false,
       clinicaSeleccionada: null,
       clinicaForm: {
         nombre: '',
@@ -109,6 +241,11 @@ export default {
     window.removeEventListener('logout', this.checkAuth)
   },
   methods: {
+    abrirModalCreacion () {
+      this.clinicaForm = { nombre: '', direccion: '', telefono: '' }
+      this.errorCreacion = ''
+      this.modalCreacion = true
+    },
     checkAuth () {
       const token = localStorage.getItem('jwt')
       const rawUser = localStorage.getItem('user')
@@ -179,18 +316,22 @@ export default {
         alert('No tienes permiso para crear clínicas.')
       }
     },
-    async eliminarClinica (clinica) {
+    abrirModalEliminacion (clinica) {
       if (this.jwtValido && this.has_plan) {
-        if (confirm(`¿Estás seguro de que quieres eliminar la clínica ${clinica.nombre}?`)) {
-          try {
-            await api.delete(`http://localhost:5000/api/clinicas/eliminar/${clinica.id}`)
-            await this.fetchClinicasPropias()
-          } catch (error) {
-            console.error('Error al eliminar clínica:', error.message, error)
-          }
-        }
+        this.clinicaSeleccionada = clinica
+        this.modalEliminacion = true
       } else {
         alert('No tienes permiso para eliminar clínicas.')
+      }
+    },
+    async confirmarEliminacion () {
+      try {
+        await api.delete(`http://localhost:5000/api/clinicas/eliminar/${this.clinicaSeleccionada.id}`)
+        this.modalEliminacion = false
+        this.clinicaSeleccionada = null
+        await this.fetchClinicasPropias()
+      } catch (error) {
+        console.error('Error al eliminar clínica:', error.message, error)
       }
     },
     iniciaEdicion (clinica) {

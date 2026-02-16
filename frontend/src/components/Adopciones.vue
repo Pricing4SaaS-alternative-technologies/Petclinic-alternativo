@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="visitas-container" v-if="jwtValido">
     <h2>🐾 Adopciones</h2>
 
@@ -126,7 +126,13 @@
             </div>
 
             <div class="acciones" v-if="puedeSolicitar(a)">
-              <button @click="abrirModalSolicitud(a)">📩 Solicitar adopción</button>
+              <button
+                @click="abrirModalSolicitud(a)"
+                :disabled="tienePeticionPendiente(a)"
+                :title="tienePeticionPendiente(a) ? 'Tu petición está a la espera de ser revisada' : 'Solicitar adopción'"
+              >
+                📩 Solicitar adopción
+              </button>
             </div>
 
             <p v-else class="no-visitas">
@@ -257,6 +263,8 @@ export default {
       adopcionSeleccionada: null,
       peticiones: [],
 
+      misPeticiones: [],
+
       adopcionesClinica: [],
 
       misMascotas: [],
@@ -321,6 +329,7 @@ export default {
 
         this.cargarMisAdopciones()
         this.cargarAdopcionesClinica()
+        this.cargarMisPeticiones()
       } catch (e) {
         console.error('Error al parsear usuario:', e)
         this.jwtValido = false
@@ -345,9 +354,20 @@ export default {
       try {
         const { data } = await api.get(`/adopciones/clinica/${this.clinicaId}`)
         this.adopcionesClinica = data
+        await this.cargarMisPeticiones()
       } catch (e) {
         console.error('Error al cargar adopciones de clínica:', e.response)
         this.errorClinica = (e.response && e.response.data && e.response.data.msg) || 'Error al cargar adopciones de clínica'
+      }
+    },
+
+    async cargarMisPeticiones () {
+      try {
+        const { data } = await api.get(`/peticiones_adopcion/usuario/${this.usuarioId}`)
+        this.misPeticiones = data
+      } catch (e) {
+        console.error('Error al cargar mis peticiones:', e.response)
+        this.misPeticiones = []
       }
     },
 
@@ -385,6 +405,16 @@ export default {
       return true
     },
 
+    estadoPeticionUsuario (adopcion) {
+      if (!adopcion) return ''
+      const peticion = this.misPeticiones.find(p => p.adopcion_id === adopcion.id)
+      return (peticion && peticion.estado_peticion ? peticion.estado_peticion : '').toLowerCase()
+    },
+
+    tienePeticionPendiente (adopcion) {
+      return this.estadoPeticionUsuario(adopcion) === 'pendiente'
+    },
+
     abrirModalSolicitud (adopcion) {
       this.adopcionSolicitud = adopcion
       this.razonSolicitud = ''
@@ -416,6 +446,7 @@ export default {
           razon_adopcion: this.razonSolicitud.trim()
         })
         this.cerrarSolicitud()
+        await this.cargarMisPeticiones()
       } catch (e) {
         console.error('Error al crear solicitud:', e.response)
         this.errorSolicitud = (e.response && e.response.data && e.response.data.msg) || 'Error al crear solicitud'
@@ -569,322 +600,5 @@ export default {
 </script>
 
 <style scoped>
-/*@import './css/vistaAdopciones.css';*/
-
-/* ===========================
-   CONTENEDOR PRINCIPAL
-   =========================== */
-
-.adopciones-container {
-  max-width: 1200px;
-  margin: auto;
-  padding: 2rem;
-}
-
-h2 {
-  margin-bottom: 1.5rem;
-  font-weight: 700;
-  color: #333;
-}
-
-/* ===========================
-   LAYOUT (2 COLUMNAS)
-   =========================== */
-
-.adopciones-layout {
-  display: grid;
-  grid-template-columns: 1fr 1fr; /*2 columnas */
-  gap: 2rem;
-  align-items: start;
-}
-
-.panel {
-  background: #ffffff;
-  border-radius: 14px;
-  padding: 1.5rem;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
-}
-
-.panel-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.panel-header h3 {
-  font-weight: 700;
-  color: #333;
-  margin: 0;
-}
-
-.panel-actions {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-/* ===========================
-   LISTAS
-   =========================== */
-
-.lista {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  list-style: none;
-  padding-left: 0;
-  margin: 0;
-}
-ul {
-  list-style: none;
-  padding-left: 0;
-  margin: 0;
-}
-
-/* ===========================
-   ITEMS / CARDS
-   =========================== */
-
-.item {
-  background: #fafafa;
-  border-radius: 12px;
-  border: 1px solid #e4e4e4;
-  padding: 1rem;
-  cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
-}
-
-.item.active {
-  background: #fff7e6;
-  border: 2px solid #f4a100;
-}
-
-/* ===========================
-   BADGES (ESTADOS)
-   =========================== */
-
-.badge {
-  padding: 4px 12px;
-  font-size: 0.75rem;
-  border-radius: 999px;
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.badge-abierta {
-  background: #fff3cd;
-  color: #856404;
-}
-
-.badge-cerrada {
-  background: #e2e3e5;
-  color: #383d41;
-}
-
-.badge-pendiente {
-  background: #ffe8a1;
-  color: #7a5d00;
-}
-
-.badge-aprobada {
-  background: #d4edda;
-  color: #155724;
-}
-
-.badge-rechazada {
-  background: #f8d7da;
-  color: #721c24;
-}
-
-/* ===========================
-   BOTONES
-   =========================== */
-
-button {
-  border-radius: 10px;
-  padding: 7px 14px;
-  font-weight: 700;
-  border: none;
-  cursor: pointer;
-  transition: background 0.2s ease, transform 0.1s ease;
-}
-
-button:hover:not(:disabled) {
-  transform: translateY(-1px);
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  background: #6c757d !important;
-  box-shadow: none !important;
-}
-
-/* Botón principal */
-.btn-crear {
-  background: linear-gradient(135deg, #f4a100, #ffb703);
-  color: #fff;
-  box-shadow: 0 4px 10px rgba(244, 161, 0, 0.25);
-}
-
-.btn-crear:hover {
-  background: linear-gradient(135deg, #e69500, #fca311);
-}
-
-/* Botón eliminar */
-.btn-eliminar {
-  background: linear-gradient(135deg, #dc3545, #c82333);
-  color: #fff;
-  box-shadow: 0 4px 10px rgba(220, 53, 69, 0.25);
-}
-
-.btn-eliminar:hover {
-  background: linear-gradient(135deg, #c82333, #bd2130);
-}
-
-/* ===========================
-   ACCIONES (APROBAR / RECHAZAR)
-   =========================== */
-
-.acciones {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.acciones button {
-  font-size: 0.85rem;
-  padding: 7px 12px;
-}
-
-/* Aprobar */
-.acciones button.aprobar {
-  background: #28a745;
-  color: #ffffff;
-}
-
-.acciones button.aprobar:hover {
-  background: #218838;
-}
-
-/* Rechazar */
-.acciones button.rechazar {
-  background: #dc3545;
-  color: #ffffff;
-}
-
-.acciones button.rechazar:hover {
-  background: #c82333;
-}
-
-/* ===========================
-   MODALES
-   =========================== */
-
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 999;
-}
-
-.modal {
-  background: #ffffff;
-  border-radius: 14px;
-  padding: 1.5rem;
-  width: 100%;
-  max-width: 450px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-}
-
-.modal h3 {
-  margin-bottom: 1rem;
-  font-weight: 800;
-}
-
-.modal label {
-  font-weight: 700;
-  display: block;
-  margin-top: 0.75rem;
-}
-
-.modal input,
-.modal select,
-.modal textarea {
-  width: 100%;
-  padding: 9px 10px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  margin-top: 0.25rem;
-}
-
-.modal textarea {
-  resize: none;
-}
-
-/* Botones del modal */
-.modal-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  margin-top: 1.25rem;
-}
-
-.modal-buttons button.cancelar {
-  background: #6c757d;
-  color: #ffffff;
-}
-
-.modal-buttons button.cancelar:hover {
-  background: #5a6268;
-}
-
-/* ===========================
-   MENSAJES
-   =========================== */
-
-.no-visitas {
-  color: #777;
-  font-style: italic;
-  margin-top: 0.5rem;
-}
-
-.mensaje-error {
-  color: #c82333;
-  font-weight: 700;
-  margin-top: 0.5rem;
-}
-
-.advertencia {
-  color: #856404;
-  background: #fff3cd;
-  padding: 0.5rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  margin: 0.5rem 0;
-}
-
-/* ===========================
-   RESPONSIVE
-   =========================== */
-
-@media (max-width: 900px) {
-  .adopciones-layout {
-    grid-template-columns: 1fr; /* ✅ solo aquí 1 columna */
-  }
-}
-
+@import './css/Adopciones.css';
 </style>

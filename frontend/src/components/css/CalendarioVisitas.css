@@ -117,7 +117,7 @@
 
 /* ===================== CALENDARIO ===================== */
 .calendario-wrapper {
-  background: white;
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 12px;
   overflow: hidden;
   margin-bottom: 30px;

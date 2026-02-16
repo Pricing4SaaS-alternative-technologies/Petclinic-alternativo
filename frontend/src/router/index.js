@@ -2,11 +2,11 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Home from '@/components/Home'
 import AuthPage from '@/components/AuthPage'
-import HomeVisitas from '@/components/HomeVisitas'
-import HomeVisitasPropietarios from '@/components/HomeVisitasPropietarios'
+import Visitas from '@/components/Visitas'
+import VisitasPropietarios from '@/components/VisitasPropietarios'
 import CalendarioVisitas from '@/components/CalendarioVisitas'
 import CalendarioReservasHabitacion from '@/components/CalendarioReservasHabitacion'
-import HomeAdopciones from '@/components/HomeAdopciones'
+import Adopciones from '@/components/Adopciones'
 import PricingPlans from '@/components/PricingPlans.vue'
 import PropHabitacionesHotel from '../components/PropHabitacionesHotel.vue'
 import PropDetallesHabitacionHotel from '../components/PropHabitacionesHotelDetalles.vue'
@@ -28,11 +28,11 @@ export default new Router({
     },
     { path: '/visitas',
       name: 'visitas',
-      component: HomeVisitas
+      component: Visitas
     },
     { path: '/mis-visitas',
       name: 'mis-visitas',
-      component: HomeVisitasPropietarios
+      component: VisitasPropietarios
     },
     { path: '/calendario-visitas',
       name: 'calendario-visitas',
@@ -40,7 +40,7 @@ export default new Router({
     },
     { path: '/adopciones',
       name: 'adopciones',
-      component: HomeAdopciones
+      component: Adopciones
     },
     { path: '/pricing-plans',
       name: 'pricing-plans',

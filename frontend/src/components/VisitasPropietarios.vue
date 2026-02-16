@@ -19,7 +19,7 @@
 import api from '@/api/axios'
 
 export default {
-  name: 'HomeVisitasPropietario',
+  name: 'VisitasPropietarios',
   data () {
     return {
       jwtValido: false,
@@ -74,5 +74,5 @@ export default {
 </script>
 
 <style scoped>
-@import './css/HomeVisitas.css';
+@import './css/Visitas.css';
 </style>
