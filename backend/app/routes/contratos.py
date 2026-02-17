@@ -88,6 +88,27 @@ def updateContratoUsuario(id_usuario):
         if hasattr(e, 'status') and e.status == 404:
             return jsonify({"error": "Contrato no encontrado"}), 404
     return contrato
+
+
+@contratos.route('/generate-token/<int:id_usuario>', methods=['POST'])
+@jwt_required()
+def generate_user_pricing_token(id_usuario):
+    
+    usuario_loggeado_id = int(get_jwt_identity())
+ 
+    if usuario_loggeado_id != id_usuario:
+        return jsonify({'message': 'No tienes permiso para generar un token para este usuario'}), 403
+
+    space_client = current_app.space_client
+    try:
+        token = current_app.run_async(space_client.featureEvaluators.generate_user_pricing_token(id_usuario))
+        print(f"Token generado exitosamente para usuario ID: {id_usuario}", token)
+        return jsonify({"token": token}), 200
+    except Exception as e:
+        print(f"Error al generar token: {e}")
+        return jsonify({"error": "Error al generar token"}), 500
+
+
 '''
 @contratos.route('/crear-contrato-dueño-mascota/<int:id_usuario>', methods=['PUT'])
 @jwt_required()
