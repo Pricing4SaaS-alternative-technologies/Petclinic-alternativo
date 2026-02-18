@@ -210,9 +210,49 @@ export default {
     formatearFecha (fechaISO) {
       const [a, m, d] = fechaISO.split('T')[0].split('-')
       return `${d}-${m}-${a}`
+    },
+    async obtenerSpaceToken (userId) {
+      try {
+        const res = await axios.post(
+          `http://localhost:5000/api/contratos/generate-token/${userId}`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('jwt')}`
+            }
+          }
+        )
+        console.log('HomeMascota: Token obtenido', res.data.token)
+
+        return res.data.token
+      } catch (error) {
+        console.error('Error obteniendo space token:', error)
+        throw error
+      }
+    },
+
+    async revisarToken () {
+      console.log('Revisando token al cargar HomeMascota')
+      const user = JSON.parse(localStorage.getItem('user'))
+      if (!user) {
+        this.$router.push('/login')
+        return
+      }
+      try {
+        const payload = this.$tokenService.getPayload()
+        if (!payload || payload.sub !== user.id) {
+          const nuevoToken = await this.obtenerSpaceToken(user.id)
+          this.$tokenService.update(nuevoToken)
+          console.log('TOKEN ACTUAL', this.$tokenService.getPayload())
+        }
+      } catch (error) {
+        console.error('Error al revisar token:', error)
+        this.$router.push('/login')
+      }
     }
   },
   created () {
+    this.revisarToken()
     this.cargarMascotas()
   }
 }
