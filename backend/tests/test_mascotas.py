@@ -1,22 +1,36 @@
+import os
 import pytest
 import time
+import tempfile
+from types import SimpleNamespace
 from app import create_app, db
 from app.models.mascota import Mascota
 from app.models.prop_mascota import Prop_mascota
 from app.models.clinica import Clinica
 from app.models.prop_clinica import Prop_clinica
-from app.models.enums import TipoUsuarioEnum
 from flask_jwt_extended import create_access_token
 
 @pytest.fixture
 def client():
-    app = create_app()
-    with app.test_client() as client:
+    db_fd, db_path = tempfile.mkstemp(suffix=".db")
+    app = create_app({
+        "TESTING": True,
+        "SQLALCHEMY_DATABASE_URI": f"sqlite:///{db_path}",
+        "SQLALCHEMY_TRACK_MODIFICATIONS": False,
+    })
+    try:
+        with app.test_client() as client:
+            with app.app_context():
+                db.create_all()
+            yield client
+            with app.app_context():
+                db.drop_all()
+    finally:
         with app.app_context():
-            db.create_all()
-        yield client
-        with app.app_context():
-            db.drop_all()
+            db.session.remove()
+            db.engine.dispose()
+        os.close(db_fd)
+        os.unlink(db_path)
 
 @pytest.fixture
 def add_user(client):
@@ -70,66 +84,95 @@ def auth(client, add_user):
     return access_token
 
 
-def test_create_mascota(client, auth):
-    response = client.post('/api/mascotas/crear-mascota', json={
+@pytest.fixture
+def space_client_allow(client):
+    class FeatureEvaluators:
+        def evaluate(self, *args, **kwargs):
+            return SimpleNamespace(eval=True)
+
+    class Contracts:
+        def update_usage_levels(self, *args, **kwargs):
+            return SimpleNamespace(ok=True)
+
+    class SpaceClient:
+        def __init__(self):
+            self.featureEvaluators = FeatureEvaluators()
+            self.contracts = Contracts()
+
+        def close(self):
+            return SimpleNamespace(ok=True)
+
+    client.application.space_client = SpaceClient()
+    client.application.run_async = lambda coro: coro
+    return client
+
+
+def _crear_mascota(client, auth):
+    return client.post('/api/mascotas/crear-mascota', json={
         'nombre': 'Fido',
         'cumpleaños': '2020-01-01',
         'tipo': 'PERRO'
     }, headers={'Authorization': f'Bearer {auth}'})
-    assert response.status_code in [201, 403]
 
 
-def test_get_mis_mascotas(client, auth, add_user):
-    with client.application.app_context():
-        client.post('/api/mascotas/crear-mascota', json={
-            'nombre': 'Fido',
-            'cumpleaños': '2020-01-01',
-            'tipo': 'PERRO'
-        }, headers={'Authorization': f'Bearer {auth}'})
+def test_create_mascota_ok(client, auth, space_client_allow):
+    response = _crear_mascota(client, auth)
+    assert response.status_code == 201
+
+
+def test_create_mascota_faltan_campos(client, auth, space_client_allow):
+    response = client.post('/api/mascotas/crear-mascota', json={
+        'cumpleaños': '2020-01-01',
+        'tipo': 'PERRO'
+    }, headers={'Authorization': f'Bearer {auth}'})
+    assert response.status_code == 400
+
+
+def test_get_mis_mascotas_ok(client, auth, add_user, space_client_allow):
+    _crear_mascota(client, auth)
     response = client.get('/api/mascotas/listar-tus-mascotas', headers={'Authorization': f'Bearer {auth}'})
     assert response.status_code == 200
     data = response.json
     assert isinstance(data, list)
 
 
-def test_update_mascota(client, auth, add_user):
+def test_get_mis_mascotas_sin_auth(client):
+    response = client.get('/api/mascotas/listar-tus-mascotas')
+    assert response.status_code in [401, 422]
+
+
+def test_update_mascota_ok(client, auth, add_user, space_client_allow):
+    _crear_mascota(client, auth)
     with client.application.app_context():
-        response = client.post('/api/mascotas/crear-mascota', json={
-            'nombre': 'Fido',
-            'cumpleaños': '2020-01-01',
-            'tipo': 'PERRO'
-        }, headers={'Authorization': f'Bearer {auth}'})
-        if response.status_code == 201:
-            mascota_id = response.json.get('id', 1)
-        else:
-            # Si la mascota se creó, obtener su ID
-            mascota_response = client.get('/api/mascotas/listar-tus-mascotas', headers={'Authorization': f'Bearer {auth}'})
-            if mascota_response.json:
-                mascota_id = mascota_response.json[0]['id']
-            else:
-                mascota_id = 1
-    
+        mascota = Mascota.query.filter_by(dueño_id=add_user).first()
+        mascota_id = mascota.id
+
     response = client.patch(f'/api/mascotas/{mascota_id}', json={
         'nombre': 'Fido Actualizado'
     }, headers={'Authorization': f'Bearer {auth}'})
-    assert response.status_code in [200, 404]
+    assert response.status_code == 200
 
 
-def test_delete_mascota(client, auth, add_user):
+def test_update_mascota_nombre_requerido(client, auth, add_user, space_client_allow):
+    _crear_mascota(client, auth)
     with client.application.app_context():
-        response = client.post('/api/mascotas/crear-mascota', json={
-            'nombre': 'Fido',
-            'cumpleaños': '2020-01-01',
-            'tipo': 'PERRO'
-        }, headers={'Authorization': f'Bearer {auth}'})
-        if response.status_code == 201:
-            mascota_id = response.json.get('id', 1)
-        else:
-            mascota_response = client.get('/api/mascotas/listar-tus-mascotas', headers={'Authorization': f'Bearer {auth}'})
-            if mascota_response.json:
-                mascota_id = mascota_response.json[0]['id']
-            else:
-                mascota_id = 1
-    
+        mascota = Mascota.query.filter_by(dueño_id=add_user).first()
+        mascota_id = mascota.id
+
+    response = client.patch(f'/api/mascotas/{mascota_id}', json={}, headers={'Authorization': f'Bearer {auth}'})
+    assert response.status_code == 400
+
+
+def test_delete_mascota_ok(client, auth, add_user, space_client_allow):
+    _crear_mascota(client, auth)
+    with client.application.app_context():
+        mascota = Mascota.query.filter_by(dueño_id=add_user).first()
+        mascota_id = mascota.id
+
     response = client.delete(f'/api/mascotas/{mascota_id}', headers={'Authorization': f'Bearer {auth}'})
-    assert response.status_code in [200, 404]
+    assert response.status_code == 200
+
+
+def test_delete_mascota_no_encontrada(client, auth, space_client_allow):
+    response = client.delete('/api/mascotas/999999', headers={'Authorization': f'Bearer {auth}'})
+    assert response.status_code == 404
