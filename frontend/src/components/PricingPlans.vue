@@ -214,22 +214,43 @@ export default {
           newPlan: planName
         }, {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`, // Asegurar el token
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
             'Content-Type': 'application/json'
           }
         })
 
         console.log(`Cambiando al plan ${planName}`, response.data)
 
-        // Actualizar el plan actual del usuario
-        this.planUserActual = response.data.subscriptionPlans['petclinic']
+        const nuevoPlan = response.data.subscriptionPlans['PetClinic'] || response.data.subscriptionPlans['petclinic'] || planName
 
-        // Mostrar mensaje de éxito
+        this.planUserActual = nuevoPlan
+
+        const contratoActual = JSON.parse(localStorage.getItem('contrato') || '{}')
+
+        if (!contratoActual.subscriptionPlans) {
+          contratoActual.subscriptionPlans = {}
+        }
+
+        // Actualizar el plan en el localStorage
+        contratoActual.subscriptionPlans.PetClinic = nuevoPlan
+        localStorage.setItem('contrato', JSON.stringify(contratoActual))
+
+        window.dispatchEvent(new Event('contrato-updated')) // Para notificar a otros componentes que el contrato ha sido actualizado
+
         alert(`Plan cambiado a ${planName} exitosamente`)
-        await this.loadUserInfo()
+        this.$router.go()
       } catch (error) {
         console.error('Error al cambiar de plan:', error)
         this.errorEdicion = 'Error al cambiar de plan. Por favor, intenta nuevamente.'
+      }
+    },
+
+    async actualizarDatosUsuario () {
+      const rawContrato = localStorage.getItem('contrato')
+      const parsedContrato = rawContrato ? JSON.parse(rawContrato) : null
+
+      if (parsedContrato !== null) {
+        this.planUserActual = parsedContrato.subscriptionPlans['PetClinic'] || parsedContrato.subscriptionPlans['petclinic'] || this.planUserActual
       }
     },
 

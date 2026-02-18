@@ -13,7 +13,7 @@
         <div v-if="jwtValido && has_plan">
           <!-- Info del plan -->
           <div class="plan-badge">
-            <strong>Plan:</strong> {{ contract_info.subscriptionPlans["petclinic"] }}
+            <strong>Plan:</strong> {{ contract_info.subscriptionPlans["PetClinic"] || contract_info.subscriptionPlans["petclinic"]}}
           </div>
 
           <!-- Botones de acción principales -->
