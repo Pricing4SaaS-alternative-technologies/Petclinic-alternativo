@@ -40,13 +40,15 @@
       >
         Visitas
       </router-link>
-      <router-link
-        v-if="loggedIn && userTipo === 'prop_mascota'"
-        to="/calendario-visitas"
-        class="sidebar-link"
-      >
-        Calendario de visitas
-      </router-link>
+
+        <router-link
+          v-if="loggedIn && userTipo === 'prop_mascota'"
+          to="/calendario-visitas"
+          class="sidebar-link"
+        >
+          Calendario de visitas
+        </router-link>
+
       <router-link
         v-if="loggedIn && userTipo==='prop_mascota'"
         to="/adopciones"
@@ -72,7 +74,7 @@ import { Feature } from '@npm_team/space-vue-client'
 export default {
   name: 'Navbar',
   components: {
-    Feature // Registramos el componente aquí
+    Feature
   },
   data () {
     return {
@@ -117,6 +119,7 @@ export default {
       localStorage.removeItem('jwt')
       localStorage.removeItem('user')
       localStorage.removeItem('contrato')
+      localStorage.removeItem('pricing_token')
       window.dispatchEvent(new Event('logout'))
 
       // nos cargamos el error de la consola de duplicateNav
