@@ -17,7 +17,7 @@ export const syncSpaceToken = async (router) => {
     console.error('Error obteniendo el payload antiguo:', error)
   }
   console.log('Antiguo Payload:', antiguoPayload)
-  let antiguoStr = antiguoPayload ? JSON.stringify(antiguoPayload.subscriptionContext) : null
+  const antiguoStr = antiguoPayload ? JSON.stringify(antiguoPayload.subscriptionContext) : null
 
   try {
     const res = await axios.post(

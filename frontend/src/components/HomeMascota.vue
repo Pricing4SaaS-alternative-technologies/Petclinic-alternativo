@@ -5,7 +5,12 @@
         <div class="mascotas-header">
           <h2>🐶 Mis Mascotas</h2>
         </div>
-        <button class="btn-crear" @click="mostrarModal = true">➕ Añadir Mascota</button>
+        <Feature id="petclinic-maxRegisteredPets">
+          <on>
+            <button class="btn-crear" @click="mostrarModal = true">➕ Añadir Mascota</button>
+          </on>
+        </Feature>
+
         <ul v-if="mascotas.length" class="mascota-lista">
           <li v-for="mascota in mascotas" :key="mascota.id" class="mascota-card">
             <div class="mascota-info">
@@ -86,9 +91,15 @@
 <script>
 import axios from 'axios'
 import { syncSpaceToken } from '@/utils/spaceSync'
+import { Feature, On, Default } from '@npm_team/space-vue-client'
 
 export default {
   name: 'MisMascotas',
+  components: {
+    Feature,
+    On,
+    Default
+  },
   data () {
     return {
       mascotas: [],
@@ -219,8 +230,8 @@ export default {
 
   },
   async created () {
-    await syncSpaceToken(this.$router)
-    this.cargarMascotas()
+    // await syncSpaceToken(this.$router)
+    await this.cargarMascotas()
   }
 }
 </script>
