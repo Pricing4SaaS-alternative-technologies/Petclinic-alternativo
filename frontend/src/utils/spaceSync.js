@@ -1,10 +1,8 @@
 import axios from 'axios'
 import { tokenService } from '@npm_team/space-vue-client'
+import { spaceState } from '@/main'
 
-/* Lógica centralizada para sincronizar el token de SPACE */
 export const syncSpaceToken = async (router) => {
-  console.log('Sincronizando token de SPACE...')
-
   const user = JSON.parse(localStorage.getItem('user'))
   const jwt = localStorage.getItem('jwt')
 
@@ -12,26 +10,39 @@ export const syncSpaceToken = async (router) => {
     if (router) router.push('/login')
     return
   }
+  let antiguoPayload
+  try {
+    antiguoPayload = spaceState.payload || null
+  } catch (error) {
+    console.error('Error obteniendo el payload antiguo:', error)
+  }
+  console.log('Antiguo Payload:', antiguoPayload)
+  let antiguoStr = antiguoPayload ? JSON.stringify(antiguoPayload.subscriptionContext) : null
 
   try {
-    const payload = tokenService.getPayload()
+    const res = await axios.post(
+      `http://localhost:5000/api/contratos/generate-token/${user.id}`,
+      {},
+      { headers: { Authorization: `Bearer ${jwt}` } }
+    )
 
-    // Si no hay token o es de otro usuario, lo regeneramos
-    if (!payload || payload.sub !== String(user.id)) {
-      const res = await axios.post(
-        `http://localhost:5000/api/contratos/generate-token/${user.id}`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${jwt}` }
-        }
-      )
+    const nuevoToken = res.data.token
+    console.log('Token:', nuevoToken)
 
-      console.log('SPACE: Nuevo token obtenido y actualizado')
-      console.log('Token obtenido', res.data.token)
-      tokenService.update(res.data.token)
+    const nuevoPayload = nuevoToken ? JSON.parse((atob(nuevoToken.split('.')[1]))) : null
+    console.log('Nuevo Payload:', nuevoPayload)
+    const nuevoStr = nuevoPayload ? JSON.stringify(nuevoPayload.subscriptionContext) : null
+
+    if (antiguoStr !== nuevoStr) {
+      console.log('Antiguo Contexto:', antiguoStr)
+      console.log('Nuevo Contexto:', nuevoStr)
+      tokenService.update(nuevoToken)
+      console.log('¡EL CONTENIDO DEL TOKEN HA CAMBIADO REALMENTE!')
+      console.log('Nuevo Contexto:', nuevoPayload.subscriptionContext)
+    } else {
+      console.log('El token se ha refrescado (iat nuevo), pero los permisos son idénticos.')
     }
   } catch (error) {
-    console.error('Error en la sincronización de SPACE:', error)
-    // Opcional: si falla el token de precios, podrías redirigir o manejar el error
+    console.error('Error sincronizando token:', error)
   }
 }

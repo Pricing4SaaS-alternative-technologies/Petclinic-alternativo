@@ -11,7 +11,7 @@ Vue.config.productionTip = false
 
 Vue.prototype.$tokenService = tokenService
 
-const spaceState = Vue.observable({
+export const spaceState = Vue.observable({
   payload: tokenService.getPayload()
 })
 

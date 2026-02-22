@@ -5,9 +5,7 @@
         <div class="mascotas-header">
           <h2>🐶 Mis Mascotas</h2>
         </div>
-
         <button class="btn-crear" @click="mostrarModal = true">➕ Añadir Mascota</button>
-
         <ul v-if="mascotas.length" class="mascota-lista">
           <li v-for="mascota in mascotas" :key="mascota.id" class="mascota-card">
             <div class="mascota-info">
@@ -108,8 +106,6 @@ export default {
     }
   },
   computed: {
-    // Generamos una clave única basada en el token actual
-    // Si el token cambia, los componentes <feature> se reiniciarán con los nuevos permisos
     spaceKey () {
       return this.$spaceState.payload ? this.$spaceState.payload.iat : 'sin-token'
     }
@@ -126,6 +122,7 @@ export default {
           }
         })
         this.mascotas = res.data
+        await syncSpaceToken(this.$router)
       } catch (error) {
         console.error('Error al cargar mascotas:', error)
       }
