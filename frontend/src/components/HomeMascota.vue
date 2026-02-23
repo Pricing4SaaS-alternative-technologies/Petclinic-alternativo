@@ -5,11 +5,8 @@
         <div class="mascotas-header">
           <h2>🐶 Mis Mascotas</h2>
         </div>
-        <Feature id="petclinic-maxRegisteredPets">
-          <on>
-            <button class="btn-crear" @click="mostrarModal = true">➕ Añadir Mascota</button>
-          </on>
-        </Feature>
+           <button class="btn-crear" @click="mostrarModal = true">➕ Añadir Mascota</button>
+
         <ul v-if="mascotas.length" class="mascota-lista">
           <li v-for="mascota in mascotas" :key="mascota.id" class="mascota-card">
             <div class="mascota-info">

@@ -121,10 +121,10 @@ export default {
     }
   },
 
-  created () {
+  async created () {
     this.checkAuth()
     window.addEventListener('logout', this.checkAuth)
-    this.obtenerContrato()
+    await this.obtenerContrato()
   },
 
   beforeUnmount () {
