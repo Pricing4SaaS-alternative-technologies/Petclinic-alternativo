@@ -29,11 +29,9 @@ const webpackConfig = merge(baseWebpackConfig, {
   
   // CONFIGURACIÓN DEL SERVIDOR: Adiós a la pantalla negra de warnings
   devServer: {
+    historyApiFallback: true,
     client: {
-      overlay: {
-        errors: true,    // Solo muestra la pantalla negra si hay un error fatal
-        warnings: false, // Oculta los warnings de la vista del navegador
-      },
+      overlay: false, // Desactiva la pantalla negra de warnings
     },
   },
   
