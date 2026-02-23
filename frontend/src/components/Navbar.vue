@@ -69,13 +69,8 @@
 
 <script>
 
-import { Feature } from '@npm_team/space-vue-client'
-
 export default {
   name: 'Navbar',
-  components: {
-    Feature
-  },
   data () {
     return {
       loggedIn: !!localStorage.getItem('jwt'), // Estado inicial basado en el token
