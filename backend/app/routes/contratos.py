@@ -145,7 +145,6 @@ def crear_contrato_dueño_mascota():
 @contratos.route('/contractAddon/<int:id_usuario>', methods=['PUT'])
 @jwt_required()
 def contratarAddon(id_usuario):
-    # 1. Identificación del usuario y obtención del contrato actual
     id_usuario_jwt = int(get_jwt_identity())
     usuario = Usuario.query.get(id_usuario_jwt)
     if not usuario:
@@ -153,11 +152,10 @@ def contratarAddon(id_usuario):
         
     contrato_actual = getContratoUsuario(usuario.id)
     
-    # 2. Obtener el addon desde el cuerpo de la petición
-    data = request.get_json()
-    addon_key = data.get('addons') # Ej: "extraClinics"
 
-    # 3. Mapeo: Nombre del Addon -> Feature de límite en el YAML
+    data = request.get_json()
+    addon_key = data.get('addons')
+
     addon_to_feature = {
         "extraPetOwners": "maxRegisteredPetOwners",
         "extraClinics": "maxRegisteredClinics",
@@ -172,7 +170,6 @@ def contratarAddon(id_usuario):
     full_feature_id = f"petclinic-{feature_name}"
     space_client = current_app.space_client
     
-    # 4. Evaluación preventiva: ¿Podemos añadir una unidad más?
     try:
         evaluacion = current_app.run_async(
             space_client.featureEvaluators.evaluate(
@@ -189,11 +186,9 @@ def contratarAddon(id_usuario):
     except Exception as e:
         print(f"Advertencia en evaluación: {e}")
 
-    # 5. PASO 1: Actualizar la suscripción (Sumar +1)
     plan_actual = contrato_actual.get('subscriptionPlans', {}).get('PetClinic', 'GOLD')
     addons_existentes = contrato_actual.get('subscriptionAddOns', {})
     
-    # Extraer cantidad actual de forma segura (manejando si es int o dict)
     valor_previo = addons_existentes.get(addon_key, 0)
     if isinstance(valor_previo, dict):
         cantidad_actual = valor_previo.get('quantity', 0)
@@ -202,7 +197,6 @@ def contratarAddon(id_usuario):
         
     nueva_cantidad = cantidad_actual + 1
     
-    # Preparamos el nuevo diccionario de addons manteniendo los demás
     nuevos_addons = dict(addons_existentes)
     nuevos_addons[addon_key] = {"quantity": nueva_cantidad}
 
@@ -213,13 +207,10 @@ def contratarAddon(id_usuario):
     }
     
     try:
-        # Ejecutamos la actualización del contrato en el servicio de contratos
         contrato_actualizado = current_app.run_async(
             space_client.contracts.update_contract_subscription(str(id_usuario_jwt), dato_contrato)
         )
 
-        # 6. PASO 2: Sincronizar Usage Levels (Vital para que el límite suba en Postman)
-        # Esto envía los niveles actualizados al evaluador de features
         usage_levels_actualizados = contrato_actualizado.get('usageLevels', {})
         
         current_app.run_async(
