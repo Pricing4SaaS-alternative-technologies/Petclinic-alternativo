@@ -4,7 +4,7 @@
     <nav class="navbar-top">
       <div class="navbar-logo">
         <router-link to="/" class="nav-logo-link">
-          <img src="@/assets/logo.png" alt="Logo" class="nav-logo" />
+          <img :src="logo" alt="Logo" class="nav-logo" />
         </router-link>
       </div>
       <div v-if="!loggedIn" class="nav-links-right">
@@ -68,7 +68,7 @@
 </template>
 
 <script>
-
+import logoImg from '@/assets/logo.png'
 export default {
   name: 'Navbar',
   data () {
@@ -77,7 +77,8 @@ export default {
       usuarioActual: {},
       userTipo: '',
       contract_info: null,
-      has_plan: false
+      has_plan: false,
+      logo: logoImg
     }
   },
   methods: {
