@@ -10,7 +10,6 @@
             <button class="btn-crear" @click="mostrarModal = true">➕ Añadir Mascota</button>
           </on>
         </Feature>
-
         <ul v-if="mascotas.length" class="mascota-lista">
           <li v-for="mascota in mascotas" :key="mascota.id" class="mascota-card">
             <div class="mascota-info">
@@ -91,14 +90,13 @@
 <script>
 import axios from 'axios'
 import { syncSpaceToken } from '@/utils/spaceSync'
-import { Feature, On, Default } from '@npm_team/space-vue-client'
+import { Feature, On } from '@npm_team/space-vue-client'
 
 export default {
   name: 'MisMascotas',
   components: {
     Feature,
-    On,
-    Default
+    On
   },
   data () {
     return {
