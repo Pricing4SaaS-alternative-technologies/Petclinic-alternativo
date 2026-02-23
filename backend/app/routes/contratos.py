@@ -141,3 +141,97 @@ def crear_contrato_dueño_mascota():
         
     return jsonify({'message': 'Contrato creado con éxito'}), 201
 '''
+
+@contratos.route('/contractAddon/<int:id_usuario>', methods=['PUT'])
+@jwt_required()
+def contratarAddon(id_usuario):
+    # 1. Identificación del usuario y obtención del contrato actual
+    id_usuario_jwt = int(get_jwt_identity())
+    usuario = Usuario.query.get(id_usuario_jwt)
+    if not usuario:
+        return jsonify({"error": "Usuario no encontrado"}), 404
+        
+    contrato_actual = getContratoUsuario(usuario.id)
+    
+    # 2. Obtener el addon desde el cuerpo de la petición
+    data = request.get_json()
+    addon_key = data.get('addons') # Ej: "extraClinics"
+
+    # 3. Mapeo: Nombre del Addon -> Feature de límite en el YAML
+    addon_to_feature = {
+        "extraPetOwners": "maxRegisteredPetOwners",
+        "extraClinics": "maxRegisteredClinics",
+        "extraPetHotelRooms": "maxPetHotelRooms",
+        "extraPet": "maxRegisteredPets"
+    }
+
+    feature_name = addon_to_feature.get(addon_key)
+    if not feature_name:
+        return jsonify({"error": f"El addon '{addon_key}' no está mapeado a ninguna feature"}), 400
+
+    full_feature_id = f"petclinic-{feature_name}"
+    space_client = current_app.space_client
+    
+    # 4. Evaluación preventiva: ¿Podemos añadir una unidad más?
+    try:
+        evaluacion = current_app.run_async(
+            space_client.featureEvaluators.evaluate(
+                str(id_usuario_jwt), 
+                full_feature_id, 
+                {full_feature_id: 1}
+            )
+        )
+        if not evaluacion.eval:
+            return jsonify({
+                "message": f"Límite de {addon_key} alcanzado según la política del plan.",
+                "details": evaluacion.description
+            }), 403
+    except Exception as e:
+        print(f"Advertencia en evaluación: {e}")
+
+    # 5. PASO 1: Actualizar la suscripción (Sumar +1)
+    plan_actual = contrato_actual.get('subscriptionPlans', {}).get('PetClinic', 'GOLD')
+    addons_existentes = contrato_actual.get('subscriptionAddOns', {})
+    
+    # Extraer cantidad actual de forma segura (manejando si es int o dict)
+    valor_previo = addons_existentes.get(addon_key, 0)
+    if isinstance(valor_previo, dict):
+        cantidad_actual = valor_previo.get('quantity', 0)
+    else:
+        cantidad_actual = valor_previo
+        
+    nueva_cantidad = cantidad_actual + 1
+    
+    # Preparamos el nuevo diccionario de addons manteniendo los demás
+    nuevos_addons = dict(addons_existentes)
+    nuevos_addons[addon_key] = {"quantity": nueva_cantidad}
+
+    dato_contrato = {
+        "contractedServices": {"PetClinic": "1.0.2"},
+        "subscriptionPlans": {"PetClinic": plan_actual},
+        "subscriptionAddOns": nuevos_addons
+    }
+    
+    try:
+        # Ejecutamos la actualización del contrato en el servicio de contratos
+        contrato_actualizado = current_app.run_async(
+            space_client.contracts.update_contract_subscription(str(id_usuario_jwt), dato_contrato)
+        )
+
+        # 6. PASO 2: Sincronizar Usage Levels (Vital para que el límite suba en Postman)
+        # Esto envía los niveles actualizados al evaluador de features
+        usage_levels_actualizados = contrato_actualizado.get('usageLevels', {})
+        
+        current_app.run_async(
+            space_client.contracts.update_usage_levels(
+                str(id_usuario_jwt), 
+                usage_levels_actualizados
+            )
+        )
+        
+        print(f"Éxito: Addon {addon_key} actualizado a {nueva_cantidad} para usuario {id_usuario_jwt}")
+        return jsonify(contrato_actualizado), 200
+        
+    except Exception as e:
+        print(f"Error crítico en el proceso de suscripción: {e}")
+        return jsonify({"error": str(e)}), 500

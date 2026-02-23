@@ -4,7 +4,6 @@
     <h2 class="page-subtitle">Manage your pricing plan</h2>
 
     <div v-if="jwtValido">
-      <!-- Mostrar planes disponibles -->
       <div class="plans-grid">
         <div v-for="(plan, planName) in pricingPlans" :key="planName" class="plan-card"
           :class="{ 'current-plan': isCurrentPlan(planName) }">
@@ -51,15 +50,21 @@
         </div>
       </div>
 
-      <!-- Add-ons section -->
       <div v-if="addOns && Object.keys(addOns).length" class="addons-section">
         <h3>Available Add-ons</h3>
         <div class="addons-grid">
           <div v-for="(addon, addonKey) in addOns" :key="addonKey" class="addon-card">
+            <div v-if="getAddonQuantity(addonKey) > 0" class="addon-quantity-badge">
+              Contratado: {{ getAddonQuantity(addonKey) }}
+            </div>
+
             <h4>{{ addon.name }}</h4>
             <p class="addon-description">{{ addon.description }}</p>
             <p class="addon-price">€{{ addon.price }}</p>
             <p class="addon-available">Available for: {{ addon.availableFor.join(', ') }}</p>
+            <button class="change-plan-btn" @click="subscribeToAddon(addonKey)">
+              Subscribe
+            </button>
           </div>
         </div>
       </div>
@@ -119,6 +124,7 @@ export default {
   created () {
     this.checkAuth()
     window.addEventListener('logout', this.checkAuth)
+    this.obtenerContrato()
   },
 
   beforeUnmount () {
@@ -142,7 +148,7 @@ export default {
         this.jwtValido = true
         this.obtenerPlanes()
         if (parsedContrato !== null && parsedContrato !== '') {
-          this.planUserActual = parsedContrato.subscriptionPlans['petclinic'] || parsedContrato.subscriptionPlans['PetClinic'] || null
+          this.planUserActual = parsedContrato.subscriptionPlans.petclinic || parsedContrato.subscriptionPlans.PetClinic || null
         }
       } catch (e) {
         console.error('Error al parsear el usuario:', e)
@@ -162,7 +168,7 @@ export default {
 
         const response = await api.get(`http://localhost:5000/api/contratos/services/${serviceName}/pricing/${version}`)
 
-        console.log('Datos de pricing:', response.data)
+        console.log('Datos de los pricings:', response.data)
 
         if (response.data) {
           this.datosPricing = response.data
@@ -176,15 +182,28 @@ export default {
       }
     },
 
+    // Función añadida para obtener la cantidad de un addon específico del contrato guardado
+    getAddonQuantity (addonKey) {
+      const rawContrato = localStorage.getItem('contrato')
+      if (!rawContrato) return 0
+      try {
+        const contrato = JSON.parse(rawContrato)
+        const addonData = contrato.subscriptionAddOns ? contrato.subscriptionAddOns[addonKey] : null
+        return addonData ? addonData.quantity : 0
+      } catch (e) {
+        return 0
+      }
+    },
+
     // Función para obtener nombres amigables de features
     getFeatureName (featureKey) {
       const featureMap = {
-        'petHotelCalendar': 'Pet Hotel Calendar',
-        'visitCalendar': 'Visit Calendar',
-        'registeredPets': 'Registered Pets',
-        'registeredClinics': 'Registered Clinics',
-        'petHotelManagement': 'Pet Hotel Management',
-        'registeredPetOwners': 'Registered Pet Owners'
+        petHotelCalendar: 'Pet Hotel Calendar',
+        visitCalendar: 'Visit Calendar',
+        registeredPets: 'Registered Pets',
+        registeredClinics: 'Registered Clinics',
+        petHotelManagement: 'Pet Hotel Management',
+        registeredPetOwners: 'Registered Pet Owners'
       }
       return featureMap[featureKey] || featureKey
     },
@@ -192,10 +211,10 @@ export default {
     // Función para obtener nombres amigables de límites
     getLimitName (limitKey) {
       const limitMap = {
-        'maxRegisteredPets': 'Max Pets',
-        'maxRegisteredClinics': 'Max Clinics',
-        'maxPetHotelRooms': 'Max Pet Hotel Rooms',
-        'maxRegisteredPetOwners': 'Max Pet Owners'
+        maxRegisteredPets: 'Max Pets',
+        maxRegisteredClinics: 'Max Clinics',
+        maxPetHotelRooms: 'Max Pet Hotel Rooms',
+        maxRegisteredPetOwners: 'Max Pet Owners'
       }
       return limitMap[limitKey] || limitKey
     },
@@ -214,14 +233,14 @@ export default {
           newPlan: planName
         }, {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
             'Content-Type': 'application/json'
           }
         })
 
         console.log(`Cambiando al plan ${planName}`, response.data)
 
-        const nuevoPlan = response.data.subscriptionPlans['PetClinic'] || response.data.subscriptionPlans['petclinic'] || planName
+        const nuevoPlan = response.data.subscriptionPlans.PetClinic || response.data.subscriptionPlans.petclinic || planName
 
         this.planUserActual = nuevoPlan
 
@@ -245,12 +264,83 @@ export default {
       }
     },
 
+    async subscribeToAddon (addonKey) {
+      if (!this.jwtValido) {
+        alert('Debes iniciar sesión para contratar un addon.')
+        return
+      }
+
+      // Confirmación simple al usuario
+      if (!confirm(`¿Estás seguro de que deseas suscribirte al addon: ${addonKey}?`)) {
+        return
+      }
+
+      this.loading = true
+      this.errorEdicion = ''
+
+      try {
+        const response = await api.put(`http://localhost:5000/api/contratos/contractAddon/${this.info_usuario.id}`, {
+          addons: addonKey
+        }, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+            'Content-Type': 'application/json'
+          }
+        })
+
+        console.log('Addon contratado exitosamente:', response.data)
+
+        localStorage.setItem('contrato', JSON.stringify(response.data))
+
+        window.dispatchEvent(new Event('contrato-updated'))
+
+        alert(`Te has suscrito a ${addonKey} correctamente.`)
+        // Opcional: recargar contrato localmente para actualizar badge sin refrescar
+        this.obtenerContrato()
+      } catch (error) {
+        console.error('Error al contratar addon:', error)
+        this.errorEdicion = error.response?.data?.error || 'Error al procesar la suscripción del addon.'
+        alert(this.errorEdicion)
+      } finally {
+        this.loading = false
+      }
+    },
+
     async actualizarDatosUsuario () {
       const rawContrato = localStorage.getItem('contrato')
       const parsedContrato = rawContrato ? JSON.parse(rawContrato) : null
 
       if (parsedContrato !== null) {
-        this.planUserActual = parsedContrato.subscriptionPlans['PetClinic'] || parsedContrato.subscriptionPlans['petclinic'] || this.planUserActual
+        this.planUserActual = parsedContrato.subscriptionPlans.PetClinic || parsedContrato.subscriptionPlans.petclinic || this.planUserActual
+      }
+    },
+
+    async obtenerContrato () {
+      try {
+        const token = localStorage.getItem('token') || localStorage.getItem('jwt')
+        // USAR .get en lugar de .put
+        const response = await api.get(`http://localhost:5000/api/contratos/getContract/${this.info_usuario.id}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          }
+        })
+
+        // Axios ya parsea el JSON en .data
+        const contrato = response.data
+        console.log('¡CONTRATO RECUPERADO!', contrato)
+        // Guardar en el estado para que la UI se actualice
+        if (contrato) {
+          this.planUserActual = contrato.subscriptionPlans.PetClinic || contrato.subscriptionPlans.petclinic
+          localStorage.setItem('contrato', JSON.stringify(contrato))
+        }
+        return contrato
+      } catch (error) {
+        if (error.response && error.response.status === 404) {
+          console.warn('El usuario no tiene un contrato activo.')
+          return null
+        }
+        console.error('Error al obtener el contrato:', error)
       }
     },
 
@@ -264,5 +354,5 @@ export default {
 </script>
 
 <style scoped>
-@import './css/PricingPlan.css';
+@import './css/PricingPlan.css'
 </style>
