@@ -56,14 +56,31 @@
           <div v-for="(addon, addonKey) in addOns" :key="addonKey" class="addon-card">
             <div v-if="getAddonQuantity(addonKey) > 0" class="addon-quantity-badge">
               Contratado: {{ getAddonQuantity(addonKey) }}
+              <span v-if="getAddonMaxQuantity(addon) !== 'Sin límite'">
+                / {{ getAddonMaxQuantity(addon) }}
+              </span>
             </div>
 
-            <h4>{{ addon.name }}</h4>
+            <h4>{{ addon.name || addonKey }}</h4>
             <p class="addon-description">{{ addon.description }}</p>
             <p class="addon-price">€{{ addon.price }}</p>
 
-            <button class="change-plan-btn" @click="subscribeToAddon(addonKey)">
-              Subscribe
+            <div class="addon-details" style="margin: 15px 0; font-size: 0.9em; background: #f8f9fa; padding: 10px; border-radius: 8px;">
+              <p v-if="getAddonIncrementText(addon)" style="margin: 0 0 5px 0;">
+                <strong>Aumenta:</strong> {{ getAddonIncrementText(addon) }}
+              </p>
+              <p style="margin: 0;">
+                <strong>Límite de compra:</strong> Máximo {{ getAddonMaxQuantity(addon) }}
+              </p>
+            </div>
+
+            <button
+              class="change-plan-btn"
+              @click="subscribeToAddon(addonKey)"
+              :disabled="isAddonMaxedOut(addonKey, addon)"
+              :style="isAddonMaxedOut(addonKey, addon) ? 'background-color: #ccc; cursor: not-allowed;' : ''"
+            >
+              {{ isAddonMaxedOut(addonKey, addon) ? 'Límite alcanzado' : 'Subscribe' }}
             </button>
           </div>
         </div>
@@ -197,15 +214,32 @@ export default {
       }
     },
 
-    // Función añadida para obtener la cantidad de un addon específico del contrato guardado
     getAddonQuantity (addonKey) {
       const rawContrato = localStorage.getItem('contrato')
       if (!rawContrato) return 0
+
       try {
         const contrato = JSON.parse(rawContrato)
-        const addonData = contrato.subscriptionAddOns ? contrato.subscriptionAddOns[addonKey] : null
-        return addonData ? addonData.quantity : 0
+        if (!contrato.subscriptionAddOns) return 0
+
+        const petClinicAddons = contrato.subscriptionAddOns.PetClinic || contrato.subscriptionAddOns.petclinic || {}
+
+        if (petClinicAddons[addonKey] !== undefined) {
+          if (typeof petClinicAddons[addonKey] === 'number') {
+            return petClinicAddons[addonKey]
+          } else if (petClinicAddons[addonKey].quantity !== undefined) {
+            return petClinicAddons[addonKey].quantity
+          }
+        }
+
+        const oldAddonData = contrato.subscriptionAddOns[addonKey]
+        if (oldAddonData && oldAddonData.quantity !== undefined) {
+          return oldAddonData.quantity
+        }
+
+        return 0
       } catch (e) {
+        console.error('Error leyendo cantidad de addon:', e)
         return 0
       }
     },
@@ -312,6 +346,7 @@ export default {
         alert(`Te has suscrito a ${addonKey} correctamente.`)
         // Opcional: recargar contrato localmente para actualizar badge sin refrescar
         this.obtenerContrato()
+        this.$router.go()
       } catch (error) {
         console.error('Error al contratar addon:', error)
         this.errorEdicion = error.response?.data?.error || 'Error al procesar la suscripción del addon.'
@@ -333,7 +368,6 @@ export default {
     async obtenerContrato () {
       try {
         const token = localStorage.getItem('token') || localStorage.getItem('jwt')
-        // USAR .get en lugar de .put
         const response = await api.get(`http://localhost:5000/api/contratos/getContract/${this.info_usuario.id}`, {
           headers: {
             'Content-Type': 'application/json',
@@ -341,10 +375,8 @@ export default {
           }
         })
 
-        // Axios ya parsea el JSON en .data
         const contrato = response.data
         console.log('¡CONTRATO RECUPERADO!', contrato)
-        // Guardar en el estado para que la UI se actualice
         if (contrato) {
           this.planUserActual = contrato.subscriptionPlans.PetClinic || contrato.subscriptionPlans.petclinic
           localStorage.setItem('contrato', JSON.stringify(contrato))
@@ -357,6 +389,39 @@ export default {
         }
         console.error('Error al obtener el contrato:', error)
       }
+    },
+    // Obtiene el máximo permitido (soporta posibles errores tipográficos del Swagger como subscriptionContraint)
+    getAddonMaxQuantity (addon) {
+      const constraints = addon.subscriptionConstraints || addon.subscriptionContraint || {}
+      return constraints.maxQuantity || 'Sin límite'
+    },
+
+    // Genera el texto de cuánto aumenta ("+3 Max Pets")
+    getAddonIncrementText (addon) {
+      if (!addon.usageLimitsExtensions) return null
+
+      const keys = Object.keys(addon.usageLimitsExtensions)
+      if (keys.length === 0) return null
+
+      const limitKey = keys[0]
+      let limitValue = addon.usageLimitsExtensions[limitKey]
+
+      // En el JSON, puede venir directamente como número (3) o como objeto { value: 3 }
+      if (typeof limitValue === 'object' && limitValue !== null) {
+        limitValue = limitValue.value
+      }
+
+      const friendlyName = this.getLimitName(limitKey)
+      return `+${limitValue} ${friendlyName}`
+    },
+
+    // Comprueba si el usuario ya ha llegado al tope de compras de este add-on
+    isAddonMaxedOut (addonKey, addon) {
+      const currentQty = this.getAddonQuantity(addonKey)
+      const maxQty = this.getAddonMaxQuantity(addon)
+
+      if (maxQty === 'Sin límite') return false
+      return currentQty >= maxQty
     },
 
     // Función para formatear números grandes
