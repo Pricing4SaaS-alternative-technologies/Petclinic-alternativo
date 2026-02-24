@@ -61,7 +61,7 @@
             <h4>{{ addon.name }}</h4>
             <p class="addon-description">{{ addon.description }}</p>
             <p class="addon-price">€{{ addon.price }}</p>
-            <p class="addon-available">Available for: {{ addon.availableFor.join(', ') }}</p>
+
             <button class="change-plan-btn" @click="subscribeToAddon(addonKey)">
               Subscribe
             </button>
@@ -104,10 +104,25 @@ export default {
       return this.datosPricing.plans
     },
 
-    // Computed property para los add-ons
+    // Computed property para los add-ons (AHORA FILTRADO)
     addOns () {
       if (!this.datosPricing || !this.datosPricing.addOns) return {}
-      return this.datosPricing.addOns
+
+      // Si no tenemos el plan actual cargado, no mostramos addons por seguridad
+      if (!this.planUserActual) return {}
+
+      const allAddons = this.datosPricing.addOns
+      const filteredAddons = {}
+
+      Object.keys(allAddons).forEach(key => {
+        const addon = allAddons[key]
+        // Solo incluimos el addon si el plan actual del usuario está en availableFor
+        if (addon.availableFor && addon.availableFor.includes(this.planUserActual)) {
+          filteredAddons[key] = addon
+        }
+      })
+
+      return filteredAddons
     },
 
     // Computed property para las descripciones de features
@@ -164,7 +179,7 @@ export default {
 
       try {
         const serviceName = 'PetClinic'
-        const version = '1.0.2'
+        const version = '1.0.3'
 
         const response = await api.get(`http://localhost:5000/api/contratos/services/${serviceName}/pricing/${version}`)
 
