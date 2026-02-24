@@ -146,6 +146,14 @@ def test_create_mascota_faltan_campos(client, auth, space_client_allow):
     }, headers={'Authorization': f'Bearer {auth}'})
     assert response.status_code == 400
 
+def test_create_mascota_sin_auth(client, space_client_allow):
+    response = client.post('/api/mascotas/crear-mascota', json={
+        'nombre': 'Fido',
+        'cumpleaños': '2020-01-01',
+        'tipo': 'PERRO'
+    })
+    assert response.status_code in [401, 422]
+
 
 def test_get_mis_mascotas_ok(client, auth, space_client_allow, crear_mascota):
     crear_mascota()
@@ -170,6 +178,12 @@ def test_update_mascota_nombre_requerido(client, auth, space_client_allow, masco
     response = client.patch(f'/api/mascotas/{mascota_id}', json={}, headers={'Authorization': f'Bearer {auth}'})
     assert response.status_code == 400
 
+def test_update_mascota_sin_auth(client, space_client_allow, mascota_id):
+    response = client.patch(f'/api/mascotas/{mascota_id}', json={
+        'nombre': 'Fido Actualizado'
+    })
+    assert response.status_code in [401, 422]
+
 
 def test_delete_mascota_ok(client, auth, space_client_allow, mascota_id):
     response = client.delete(f'/api/mascotas/{mascota_id}', headers={'Authorization': f'Bearer {auth}'})
@@ -179,3 +193,7 @@ def test_delete_mascota_ok(client, auth, space_client_allow, mascota_id):
 def test_delete_mascota_no_encontrada(client, auth, space_client_allow):
     response = client.delete('/api/mascotas/999999', headers={'Authorization': f'Bearer {auth}'})
     assert response.status_code == 404
+
+def test_delete_mascota_sin_auth(client, space_client_allow, mascota_id):
+    response = client.delete(f'/api/mascotas/{mascota_id}')
+    assert response.status_code in [401, 422]

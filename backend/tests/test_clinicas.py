@@ -126,7 +126,7 @@ def test_get_clinica_ok(client, auth, crear_clinica):
 
 def test_get_clinicas_sin_auth(client):
     response = client.get('/api/clinicas/listar-todas')
-    assert response.status_code == 200
+    assert response.status_code == 200 # Es necesario permitir el acceso sin autenticación para listar las clínicas
     assert isinstance(response.json, list)
 
 def test_update_clinica_ok(client, auth, crear_clinica):

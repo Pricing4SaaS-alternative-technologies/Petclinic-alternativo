@@ -154,6 +154,14 @@ def test_create_adopcion_faltan_campos(client, auth, space_client_allow):
     }, headers={'Authorization': f'Bearer {auth}'})
     assert response.status_code == 400
 
+def test_create_adopcion_sin_auth(client, space_client_allow, crear_mascota_para_adopcion):
+    data = {
+        'mascota_id': crear_mascota_para_adopcion,
+        'descripcion': 'Busca un hogar'
+    }
+    response = client.post('/api/adopciones/crear', json=data)
+    assert response.status_code in [401, 422]
+
 def test_get_adopciones_ok(client, auth, space_client_allow, crear_adopcion, add_user):
     crear_adopcion()
     response = client.get(f"/api/adopciones/clinica/{add_user['clinica_id']}", headers={'Authorization': f'Bearer {auth}'})
@@ -171,3 +179,7 @@ def test_delete_adopcion_ok(client, auth, space_client_allow, adopcion_id):
 def test_delete_adopcion_no_encontrada(client, auth, space_client_allow):
     response = client.delete('/api/adopciones/eliminar/999999', headers={'Authorization': f'Bearer {auth}'})
     assert response.status_code == 404
+
+def test_delete_adopcion_sin_auth(client, space_client_allow, adopcion_id):
+    response = client.delete(f'/api/adopciones/eliminar/{adopcion_id}')
+    assert response.status_code in [401, 422]

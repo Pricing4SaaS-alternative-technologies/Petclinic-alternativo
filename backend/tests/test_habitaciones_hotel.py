@@ -85,16 +85,23 @@ def space_client_allow(client):
     client.application.run_async = lambda coro: coro
     return client
 
-def test_create_habitacion_ok(client, auth, add_prop_clinica_and_clinica):
-    clinica_id = add_prop_clinica_and_clinica['clinica_id']
-    data = {
-        'nombre': 'Habitacion Canina 1',
-        'reservable': True,
-        'tamaño': 'KING_SIZE',
-        'tipo': 'PERRO',
-        'clinica_id': clinica_id
-    }
-    response = client.post('/api/habitaciones_hotel/crear-habitacion', json=data, headers={'Authorization': f'Bearer {auth}'})
+@pytest.fixture
+def crear_habitacion(client, auth, add_prop_clinica_and_clinica):
+    def _crear(**kwargs):
+        clinica_id = add_prop_clinica_and_clinica['clinica_id']
+        data = {
+            'nombre': 'Habitacion Canina 1',
+            'reservable': True,
+            'tamaño': 'KING_SIZE',
+            'tipo': 'PERRO',
+            'clinica_id': clinica_id,
+            **kwargs
+        }
+        return client.post('/api/habitaciones_hotel/crear-habitacion', json=data, headers={'Authorization': f'Bearer {auth}'})
+    return _crear
+
+def test_create_habitacion_ok(crear_habitacion):
+    response = crear_habitacion()
     assert response.status_code == 201
     assert response.json['nombre'] == 'Habitacion Canina 1'
 
@@ -111,22 +118,28 @@ def test_create_habitacion_missing_fields(client, auth, add_prop_clinica_and_cli
     assert response.status_code == 400
     assert 'Nombre requerido' in response.json['msg']
 
-def test_get_habitaciones_by_prop_clinica(client, auth, add_prop_clinica_and_clinica):
+def test_create_habitacion_sin_auth(client, add_prop_clinica_and_clinica):
+    clinica_id = add_prop_clinica_and_clinica['clinica_id']
+    data = {
+        'nombre': 'Habitacion Sin Auth',
+        'reservable': True,
+        'tamaño': 'KING_SIZE',
+        'tipo': 'PERRO',
+        'clinica_id': clinica_id
+    }
+    response = client.post('/api/habitaciones_hotel/crear-habitacion', json=data)
+    assert response.status_code in [401, 422]
+
+def test_get_habitaciones_by_prop_clinica(client, auth, add_prop_clinica_and_clinica, crear_habitacion):
+    crear_habitacion()
     prop_clinica_id = add_prop_clinica_and_clinica['prop_clinica_id']
     response = client.get(f'/api/habitaciones_hotel/listar/prop-clinica/{prop_clinica_id}', headers={'Authorization': f'Bearer {auth}'})
     assert response.status_code == 200
     assert isinstance(response.json, list)
+    assert len(response.json) > 0
 
-def test_get_habitacion_details_ok(client, auth, add_prop_clinica_and_clinica):
-    clinica_id = add_prop_clinica_and_clinica['clinica_id']
-    data = {
-        'nombre': 'Habitacion Felina 1',
-        'reservable': True,
-        'tamaño': 'ACOGEDOR',
-        'tipo': 'GATO',
-        'clinica_id': clinica_id
-    }
-    response = client.post('/api/habitaciones_hotel/crear-habitacion', json=data, headers={'Authorization': f'Bearer {auth}'})
+def test_get_habitacion_details_ok(client, auth, crear_habitacion):
+    response = crear_habitacion(nombre='Habitacion Felina 1', tamaño='ACOGEDOR', tipo='GATO')
     assert response.status_code == 201
     habitacion_id = response.json['id']
 
@@ -138,16 +151,8 @@ def test_get_habitacion_details_not_found(client, auth):
     response = client.get('/api/habitaciones_hotel/detalles/999999', headers={'Authorization': f'Bearer {auth}'})
     assert response.status_code == 404
 
-def test_update_habitacion_ok(client, auth, add_prop_clinica_and_clinica):
-    clinica_id = add_prop_clinica_and_clinica['clinica_id']
-    data = {
-        'nombre': 'Habitacion para Actualizar',
-        'reservable': True,
-        'tamaño': 'MEDIANO',
-        'tipo': 'PERRO',
-        'clinica_id': clinica_id
-    }
-    response = client.post('/api/habitaciones_hotel/crear-habitacion', json=data, headers={'Authorization': f'Bearer {auth}'})
+def test_update_habitacion_ok(client, auth, crear_habitacion):
+    response = crear_habitacion(nombre='Habitacion para Actualizar')
     assert response.status_code == 201
     habitacion_id = response.json['id']
 
@@ -166,16 +171,8 @@ def test_update_habitacion_not_found(client, auth):
     response = client.put('/api/habitaciones_hotel/editar/999999', json=update_data, headers={'Authorization': f'Bearer {auth}'})
     assert response.status_code == 404
 
-def test_delete_habitacion_fail_if_reservable(client, auth, add_prop_clinica_and_clinica):
-    clinica_id = add_prop_clinica_and_clinica['clinica_id']
-    data = {
-        'nombre': 'Habitacion a Borrar (Reservable)',
-        'reservable': True,
-        'tamaño': 'KING_SIZE',
-        'tipo': 'GATO',
-        'clinica_id': clinica_id
-    }
-    response = client.post('/api/habitaciones_hotel/crear-habitacion', json=data, headers={'Authorization': f'Bearer {auth}'})
+def test_delete_habitacion_fail_if_reservable(client, auth, crear_habitacion):
+    response = crear_habitacion(nombre='Habitacion a Borrar (Reservable)', reservable=True)
     assert response.status_code == 201
     habitacion_id = response.json['id']
 
@@ -183,16 +180,8 @@ def test_delete_habitacion_fail_if_reservable(client, auth, add_prop_clinica_and
     assert response.status_code == 400
     assert 'No se puede eliminar una habitación que está marcada como reservable' in response.json['msg']
 
-def test_delete_habitacion_ok(client, auth, add_prop_clinica_and_clinica):
-    clinica_id = add_prop_clinica_and_clinica['clinica_id']
-    data = {
-        'nombre': 'Habitacion a Borrar (No Reservable)',
-        'reservable': False,
-        'tamaño': 'ACOGEDOR',
-        'tipo': 'PERRO',
-        'clinica_id': clinica_id
-    }
-    response = client.post('/api/habitaciones_hotel/crear-habitacion', json=data, headers={'Authorization': f'Bearer {auth}'})
+def test_delete_habitacion_ok(client, auth, crear_habitacion):
+    response = crear_habitacion(nombre='Habitacion a Borrar (No Reservable)', reservable=False)
     assert response.status_code == 201
     habitacion_id = response.json['id']
 
@@ -207,3 +196,11 @@ def test_delete_habitacion_ok(client, auth, add_prop_clinica_and_clinica):
 def test_delete_habitacion_not_found(client, auth):
     response = client.delete('/api/habitaciones_hotel/eliminar/999999', headers={'Authorization': f'Bearer {auth}'})
     assert response.status_code == 404
+
+def test_delete_habitacion_sin_auth(client, crear_habitacion):
+    response = crear_habitacion(nombre='Habitacion a Borrar Sin Auth', reservable=False)
+    assert response.status_code == 201
+    habitacion_id = response.json['id']
+    
+    response = client.delete(f'/api/habitaciones_hotel/eliminar/{habitacion_id}')
+    assert response.status_code in [401, 422]
