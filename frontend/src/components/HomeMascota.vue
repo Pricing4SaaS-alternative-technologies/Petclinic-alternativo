@@ -87,14 +87,9 @@
 <script>
 import axios from 'axios'
 import { syncSpaceToken } from '@/utils/spaceSync'
-import { Feature, On } from '@npm_team/space-vue-client'
 
 export default {
   name: 'MisMascotas',
-  components: {
-    Feature,
-    On
-  },
   data () {
     return {
       mascotas: [],

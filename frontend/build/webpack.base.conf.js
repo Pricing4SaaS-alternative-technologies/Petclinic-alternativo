@@ -22,10 +22,13 @@ module.exports = {
       : config.dev.assetsPublicPath
   },
   resolve: {
+    symlinks: false, // <-- Evita que Webpack se confunda con enlaces simbólicos
     extensions: ['.js', '.vue', '.json'],
     alias: {
-      'vue$': 'vue/dist/vue.esm.js',
-      '@': resolve('src'),
+      // <-- Forzamos a que TODO el proyecto use la misma copia exacta de Vue
+      vue$: resolve('node_modules/vue/dist/vue.esm.js'),
+      '@npm_team/space-vue-client$': resolve('node_modules/@npm_team/space-vue-client/dist/space-vue-client.es.js'),
+      '@': resolve('src')
     },
     // <-- El arreglo de los polyfills (sustituye al antiguo bloque 'node')
     fallback: {

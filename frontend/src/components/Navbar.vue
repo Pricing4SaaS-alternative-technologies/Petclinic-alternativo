@@ -1,6 +1,5 @@
 <template>
   <div class="navbar">
-    <!-- Barra superior oscura -->
     <nav class="navbar-top">
       <div class="navbar-logo">
         <router-link to="/" class="nav-logo-link">
@@ -10,7 +9,6 @@
       <div v-if="!loggedIn" class="nav-links-right">
         <router-link to="/auth" class="nav-link">Login</router-link>
       </div>
-      <!-- Muestra el nombre de usuario y el botón de logout si está logueado -->
       <div v-if="loggedIn" class="user-info">
         <span class="usuario">Hola, {{ usuarioActual.usuario }}</span>
         <span v-if="userTipo === 'prop_clinica' && has_plan" class="usuario">
@@ -23,9 +21,7 @@
       </div>
     </nav>
 
-    <!-- Columna lateral gris -->
     <div v-if="loggedIn" class="sidebar">
-      <!-- Mostrar "Visitas" solo para veterinarios -->
       <router-link
         v-if="userTipo === 'veterinario'"
         to="/visitas"
@@ -41,6 +37,7 @@
         Visitas
       </router-link>
 
+      <Feature id="petclinic-visitCalendar" v-if="userTipo === 'prop_mascota'">
         <router-link
           v-if="loggedIn && userTipo === 'prop_mascota'"
           to="/calendario-visitas"
@@ -48,6 +45,7 @@
         >
           Calendario de visitas
         </router-link>
+      </Feature>
 
       <router-link
         v-if="loggedIn && userTipo==='prop_mascota'"
@@ -69,11 +67,16 @@
 
 <script>
 import logoImg from '@/assets/logo.png'
+import { Feature } from '@npm_team/space-vue-client'
+
 export default {
   name: 'Navbar',
+  components: {
+    Feature
+  },
   data () {
     return {
-      loggedIn: !!localStorage.getItem('jwt'), // Estado inicial basado en el token
+      loggedIn: !!localStorage.getItem('jwt'),
       usuarioActual: {},
       userTipo: '',
       contract_info: null,
@@ -82,12 +85,15 @@ export default {
     }
   },
   methods: {
-
     checkAuth () {
       const token = localStorage.getItem('jwt')
       const rawUser = localStorage.getItem('user')
       const rawContrato = localStorage.getItem('contrato')
       const parsedContrato = rawContrato ? JSON.parse(rawContrato) : null
+
+      // 1. Añadimos la lectura del token de precios
+      const pricingToken = localStorage.getItem('pricing_token')
+
       if (!token || !rawUser) {
         this.loggedIn = false
         this.updateBodyClass(false)
@@ -95,12 +101,19 @@ export default {
       }
       this.usuarioActual = JSON.parse(rawUser)
       this.userTipo = this.getUserTipo()
+
       if (parsedContrato !== null && parsedContrato !== '') {
         this.contract_info = parsedContrato
         this.has_plan = true
       }
+
       this.loggedIn = true
       this.updateBodyClass(true)
+
+      // 2. Le inyectamos el token a tu librería usando el método update()
+      if (pricingToken && this.$tokenService) {
+        this.$tokenService.update(pricingToken)
+      }
     },
 
     getUserTipo () {
@@ -110,19 +123,25 @@ export default {
       const tipo = u.tipo
       return tipo ? tipo.toLowerCase() : ''
     },
+
     logout () {
-      // eliminamos tokens(el token de precios deberá ser eliminado tambien si esta)
       localStorage.removeItem('jwt')
       localStorage.removeItem('user')
       localStorage.removeItem('contrato')
       localStorage.removeItem('pricing_token')
+
+      // 3. Limpiamos el token de la librería al cerrar sesión
+      if (this.$tokenService && typeof this.$tokenService.clear === 'function') {
+        this.$tokenService.clear()
+      }
+
       window.dispatchEvent(new Event('logout'))
 
-      // nos cargamos el error de la consola de duplicateNav
       if (this.$route.path !== '/') {
         this.$router.push('/')
       }
     },
+
     handleLogout () {
       this.loggedIn = false
       this.usuarioActual = {}
