@@ -240,6 +240,12 @@
       <p>
         El plan asignado no permite el acceso a la gestión de habitaciones de hotel. Contacta con tu clínica para más información.
       </p>
+      <div v-if="esHoraMagica">
+          <img
+            :src="avdol"
+            alt="Avdol Tsk Tsk"
+          />
+        </div>
     </template>
   </Feature>
 </template>
@@ -248,6 +254,7 @@
 import api from '../api/axios'
 import { syncSpaceToken } from '@/utils/spaceSync'
 import { Feature } from '@npm_team/space-vue-client'
+import avdol from '@/assets/avdol.gif'
 
 export default {
   name: 'HotelRooms',
@@ -262,6 +269,10 @@ export default {
       habitaciones: [],
       loading: false,
       error: '',
+      avdol,
+      ahora: new Date(),
+      timer: null,
+      haSonado: false,
 
       // Datos para el modal de creación
       modalCrearVisible: false,
@@ -302,6 +313,17 @@ export default {
 
   beforeUnmount () {
     window.removeEventListener('logout', this.checkAuth)
+    clearInterval(this.timer)
+  },
+  computed: {
+    esHoraMagica () {
+      return this.ahora.getHours() === 22 && this.ahora.getMinutes() === 11
+    }
+  },
+  mounted () {
+    this.timer = setInterval(() => {
+      this.ahora = new Date()
+    }, 1000)
   },
 
   methods: {
@@ -533,7 +555,7 @@ export default {
     },
 
     handleImageErrorCrear (event) {
-      event.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjZWVlZWVlIi8+Cjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0iY2VudHJhbCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSIjOTk5OTk5Ij5JbWFnZW4gbm8gZGlzcG9uaWJsZTwvdGV4dD4KPC9zdmc+'
+      event.target.src = 'data:image/svg+xmlbase64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjZWVlZWVlIi8+Cjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0iY2VudHJhbCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSIjOTk5OTk5Ij5JbWFnZW4gbm8gZGlzcG9uaWJsZTwvdGV4dD4KPC9zdmc+'
     },
 
     validarFormularioCreacion () {
