@@ -38,13 +38,15 @@
       </router-link>
 
       <Feature id="petclinic-visitCalendar" v-if="userTipo === 'prop_mascota'">
-        <router-link
-          v-if="loggedIn && userTipo === 'prop_mascota'"
-          to="/calendario-visitas"
-          class="sidebar-link"
-        >
-          Calendario de visitas
-        </router-link>
+        <template #on>
+          <router-link
+            v-if="loggedIn && userTipo === 'prop_mascota'"
+            to="/calendario-visitas"
+            class="sidebar-link"
+          >
+            Calendario de visitas
+          </router-link>
+        </template>
       </Feature>
 
       <router-link
@@ -54,6 +56,7 @@
       >
         Adopciones
       </router-link>
+
       <router-link
         v-if="loggedIn && userTipo==='prop_mascota' || userTipo === 'prop_clinica'"
         to="/habitaciones-hotel"
