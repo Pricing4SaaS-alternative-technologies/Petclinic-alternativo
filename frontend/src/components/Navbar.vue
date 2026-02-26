@@ -56,14 +56,17 @@
       >
         Adopciones
       </router-link>
-
-      <router-link
-        v-if="loggedIn && userTipo==='prop_mascota' || userTipo === 'prop_clinica'"
-        to="/habitaciones-hotel"
-        class="sidebar-link"
-      >
-        Habitaciones hotel
-      </router-link>
+    <Feature id="petclinic-petHotelManagement">
+      <template #on>
+        <router-link
+          v-if="loggedIn && userTipo==='prop_mascota' || userTipo === 'prop_clinica'"
+          to="/habitaciones-hotel"
+          class="sidebar-link"
+        >
+          Habitaciones hotel
+        </router-link>
+      </template>
+    </Feature>
     </div>
   </div>
 </template>

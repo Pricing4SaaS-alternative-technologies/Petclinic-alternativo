@@ -5,8 +5,14 @@
         <div class="mascotas-header">
           <h2>🐶 Mis Mascotas</h2>
         </div>
-           <button class="btn-crear" @click="mostrarModal = true">➕ Añadir Mascota</button>
-
+          <Feature id="petclinic-registeredPets">
+            <template #on>
+              <button class="btn-crear" @click="mostrarModal = true">➕ Añadir Mascota</button>
+            </template>
+            <template #fallback>
+              <h3>El plan asignado no permite la adición de mas mascotas al sistema</h3>
+            </template>
+          </Feature>
         <ul v-if="mascotas.length" class="mascota-lista">
           <li v-for="mascota in mascotas" :key="mascota.id" class="mascota-card">
             <div class="mascota-info">
@@ -87,9 +93,13 @@
 <script>
 import axios from 'axios'
 import { syncSpaceToken } from '@/utils/spaceSync'
+import { Feature } from '@npm_team/space-vue-client'
 
 export default {
   name: 'MisMascotas',
+  components: {
+    Feature
+  },
   data () {
     return {
       mascotas: [],

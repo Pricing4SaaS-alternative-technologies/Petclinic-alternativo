@@ -1,245 +1,259 @@
 <template>
-  <div class="pet-hotel-container">
-    <div class="hotel-header">
-      <h1 class="hotel-title">Habitaciones de Hotel</h1>
-      <p class="hotel-description">
-        Deja a tu mascota bajo el mejor cuidado de nuestro personal dedicado en el hotel para mascotas.
-      </p>
-    </div>
-
-    <div v-if="jwtValido" class="white-zone">
-      <div class="rooms-header">
-        <div class="rooms-header-content">
-          <h2 class="rooms-title">Todas las habitaciones</h2>
-
-          <!-- Botón para crear habitación (solo para prop_clinica y admin) -->
-          <button
-            v-if="info_usuario.tipo === 'prop_clinica' || info_usuario.tipo_usuario === 'admin'"
-            class="create-room-btn"
-            @click="abrirModalCrear"
-          >
-            <i class="fas fa-plus"></i> Crear Habitación
-          </button>
+  <Feature id="petclinic-petHotelManagement">
+    <template #on>
+      <div class="pet-hotel-container">
+        <div class="hotel-header">
+          <h1 class="hotel-title">Habitaciones de Hotel</h1>
+          <p class="hotel-description">
+            Deja a tu mascota bajo el mejor cuidado de nuestro personal dedicado en el hotel para mascotas.
+          </p>
         </div>
 
-        <div class="header-actions">
-          <div v-if="info_usuario.tipo === 'prop_mascota'">
-            <button class="see-reservas-btn" @click="verMisReservas">
-              <i class="fas fa-paw"></i> Mis reservas
-            </button>
-          </div>
-        </div>
-      </div>
+        <div v-if="jwtValido" class="white-zone">
+          <div class="rooms-header">
+            <div class="rooms-header-content">
+              <h2 class="rooms-title">Todas las habitaciones</h2>
 
-      <div v-if="loading" class="loading-container">
-        <div class="loading-spinner"></div>
-        <p>Loading rooms...</p>
-      </div>
-
-      <div v-else-if="habitaciones.length > 0" class="rooms-grid">
-        <div v-for="habitacion in habitaciones" :key="habitacion.id" class="room-card">
-          <div class="room-image-container">
-            <img v-if="habitacion.url_imagen" :src="habitacion.url_imagen" :alt="habitacion.nombre" class="room-image" />
-            <div v-else class="no-image-placeholder">
-              <span>No Image</span>
-            </div>
-          </div>
-          <div class="room-content">
-            <h3 class="room-name">{{ habitacion.nombre }}</h3>
-            <p class="room-perfect-for">Perfecto para: {{ habitacion.tipo }}</p>
-            <p v-if="info_usuario.tipo === 'prop_clinica'" class="room-perfect-for">Clínica: {{ habitacion.nombre_clinica }}</p>
-            <button class="see-details-btn" @click="$router.push(`/detalles-habitacion/${habitacion.id}`)">Ver detalles</button>
-          </div>
-        </div>
-      </div>
-
-      <div v-else class="no-rooms">
-        <p>No hay habitaciones disponibles en este momento.</p>
-      </div>
-    </div>
-
-    <div v-else class="no-auth">
-      <p class="error">You are not authorized to view this information. Please log in.</p>
-    </div>
-
-    <div v-if="error" class="error-message">
-      {{ error }}
-    </div>
-
-    <!-- Modal para crear nueva habitación -->
-    <div v-if="modalCrearVisible" class="modal-overlay" @click="cerrarModalCrear">
-      <div class="modal" @click.stop>
-        <h3><i class="fas fa-plus"></i> Crear Nueva Habitación</h3>
-
-        <div v-if="errorCrear" class="error-message-modal">
-          <i class="fas fa-exclamation-circle"></i> {{ errorCrear }}
-        </div>
-
-        <div v-if="successCrear" class="success-message-modal">
-          <i class="fas fa-check-circle"></i> {{ successCrear }}
-        </div>
-
-          <form @submit.prevent="guardarCreacion">
-            <div class="form-group">
-              <label for="crear-nombre">
-                <i class="fas fa-signature"></i> Nombre de la habitación *
-              </label>
-              <input
-                type="text"
-                id="crear-nombre"
-                v-model="formCrear.nombre"
-                required
-                maxlength="100"
-                :disabled="cargandoCrear"
-                placeholder="Ej: Suite para perros grandes"
-              />
-              <small class="text-muted">Máximo 100 caracteres</small>
-            </div>
-
-            <div class="form-group">
-              <label for="crear-descripcion">
-                <i class="fas fa-align-left"></i> Descripción *
-              </label>
-              <textarea
-                id="crear-descripcion"
-                v-model="formCrear.descripcion"
-                required
-                maxlength="255"
-                rows="3"
-                :disabled="cargandoCrear"
-                placeholder="Describe las características de la habitación..."
-              ></textarea>
-              <small class="text-muted">Máximo 255 caracteres</small>
-            </div>
-
-            <div class="form-group">
-              <label><i class="fas fa-ruler-combined"></i> Tamaño *</label>
-              <div class="radio-group">
-                <label
-                  v-for="tamaño in tamaños"
-                  :key="tamaño.value"
-                  :class="{ selected: formCrear.tamaño === tamaño.value }"
-                >
-                  <input
-                    type="radio"
-                    v-model="formCrear.tamaño"
-                    :value="tamaño.value"
-                    required
-                    :disabled="cargandoCrear"
-                  />
-                  {{ tamaño.label }}
-                </label>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label><i class="fas fa-paw"></i> Tipo de mascota *</label>
-              <div class="radio-group">
-                <label
-                  v-for="tipo in tipos"
-                  :key="tipo.value"
-                  :class="{ selected: formCrear.tipo === tipo.value }"
-                >
-                  <input
-                    type="radio"
-                    v-model="formCrear.tipo"
-                    :value="tipo.value"
-                    required
-                    :disabled="cargandoCrear"
-                  />
-                  {{ tipo.label }}
-                </label>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="crear-url_imagen">
-                <i class="fas fa-image"></i> URL de la imagen (opcional)
-              </label>
-              <input
-                type="url"
-                id="crear-url_imagen"
-                v-model="formCrear.url_imagen"
-                maxlength="255"
-                :disabled="cargandoCrear"
-                placeholder="https://ejemplo.com/imagen.jpg"
-              />
-              <small class="text-muted">Enlace a una imagen representativa</small>
-            </div>
-
-            <div class="form-group checkbox-group">
-              <label class="checkbox-label">
-                <input
-                  type="checkbox"
-                  v-model="formCrear.reservable"
-                  :disabled="cargandoCrear"
-                  checked
-                />
-                <span class="checkmark"></span>
-                Habitación reservable
-              </label>
-              <small class="text-muted">Si está desactivado, la habitación no podrá ser reservada</small>
-            </div>
-
-            <!-- Selector de clínica para todos los usuarios con permisos -->
-            <div class="form-group">
-              <label for="crear-clinica_id">
-                <i class="fas fa-hospital"></i> Clínica *
-              </label>
-              <select
-                id="crear-clinica_id"
-                v-model="formCrear.clinica_id"
-                required
-                :disabled="cargandoCrear || cargandoClinicas"
-                class="clinica-select"
+              <!-- Botón para crear habitación (solo para prop_clinica y admin) -->
+              <button
+                v-if="info_usuario.tipo === 'prop_clinica' || info_usuario.tipo_usuario === 'admin'"
+                class="create-room-btn"
+                @click="abrirModalCrear"
               >
-                <option value="" disabled>Selecciona una clínica...</option>
-                <option
-                  v-for="clinica in clinicas"
-                  :key="clinica.id"
-                  :value="clinica.id"
-                >
-                  {{ clinica.nombre }}
-                </option>
-              </select>
-              <small v-if="cargandoClinicas" class="text-muted">
-                <i class="fas fa-spinner fa-spin"></i> Cargando clínicas...
-              </small>
+                <i class="fas fa-plus"></i> Crear Habitación
+              </button>
             </div>
 
-            <!-- Vista previa de la imagen -->
-            <div v-if="formCrear.url_imagen" class="image-preview">
-              <label><i class="fas fa-eye"></i> Vista previa:</label>
-              <div class="preview-container">
-                <img
-                  :src="formCrear.url_imagen"
-                  alt="Vista previa"
-                  @error="handleImageErrorCrear"
-                />
+            <div class="header-actions">
+              <div v-if="info_usuario.tipo === 'prop_mascota'">
+                <button class="see-reservas-btn" @click="verMisReservas">
+                  <i class="fas fa-paw"></i> Mis reservas
+                </button>
               </div>
             </div>
+          </div>
 
-            <div class="modal-buttons">
-              <button type="submit" class="btn-crear" :disabled="cargandoCrear">
-                <i v-if="cargandoCrear" class="fas fa-spinner fa-spin"></i>
-                <i v-else class="fas fa-save"></i>
-                {{ cargandoCrear ? 'Creando...' : 'Crear Habitación' }}
-              </button>
-              <button type="button" class="cancelar" @click="cerrarModalCrear" :disabled="cargandoCrear">
-                Cancelar
-              </button>
+          <div v-if="loading" class="loading-container">
+            <div class="loading-spinner"></div>
+            <p>Loading rooms...</p>
+          </div>
+
+          <div v-else-if="habitaciones.length > 0" class="rooms-grid">
+            <div v-for="habitacion in habitaciones" :key="habitacion.id" class="room-card">
+              <div class="room-image-container">
+                <img v-if="habitacion.url_imagen" :src="habitacion.url_imagen" :alt="habitacion.nombre" class="room-image" />
+                <div v-else class="no-image-placeholder">
+                  <span>No Image</span>
+                </div>
+              </div>
+              <div class="room-content">
+                <h3 class="room-name">{{ habitacion.nombre }}</h3>
+                <p class="room-perfect-for">Perfecto para: {{ habitacion.tipo }}</p>
+                <p v-if="info_usuario.tipo === 'prop_clinica'" class="room-perfect-for">Clínica: {{ habitacion.nombre_clinica }}</p>
+                <button class="see-details-btn" @click="$router.push(`/detalles-habitacion/${habitacion.id}`)">Ver detalles</button>
+              </div>
             </div>
-          </form>
+          </div>
+
+          <div v-else class="no-rooms">
+            <p>No hay habitaciones disponibles en este momento.</p>
+          </div>
+        </div>
+
+        <div v-else class="no-auth">
+          <p class="error">You are not authorized to view this information. Please log in.</p>
+        </div>
+
+        <div v-if="error" class="error-message">
+          {{ error }}
+        </div>
+
+        <!-- Modal para crear nueva habitación -->
+        <div v-if="modalCrearVisible" class="modal-overlay" @click="cerrarModalCrear">
+          <div class="modal" @click.stop>
+            <h3><i class="fas fa-plus"></i> Crear Nueva Habitación</h3>
+
+            <div v-if="errorCrear" class="error-message-modal">
+              <i class="fas fa-exclamation-circle"></i> {{ errorCrear }}
+            </div>
+
+            <div v-if="successCrear" class="success-message-modal">
+              <i class="fas fa-check-circle"></i> {{ successCrear }}
+            </div>
+
+              <form @submit.prevent="guardarCreacion">
+                <div class="form-group">
+                  <label for="crear-nombre">
+                    <i class="fas fa-signature"></i> Nombre de la habitación *
+                  </label>
+                  <input
+                    type="text"
+                    id="crear-nombre"
+                    v-model="formCrear.nombre"
+                    required
+                    maxlength="100"
+                    :disabled="cargandoCrear"
+                    placeholder="Ej: Suite para perros grandes"
+                  />
+                  <small class="text-muted">Máximo 100 caracteres</small>
+                </div>
+
+                <div class="form-group">
+                  <label for="crear-descripcion">
+                    <i class="fas fa-align-left"></i> Descripción *
+                  </label>
+                  <textarea
+                    id="crear-descripcion"
+                    v-model="formCrear.descripcion"
+                    required
+                    maxlength="255"
+                    rows="3"
+                    :disabled="cargandoCrear"
+                    placeholder="Describe las características de la habitación..."
+                  ></textarea>
+                  <small class="text-muted">Máximo 255 caracteres</small>
+                </div>
+
+                <div class="form-group">
+                  <label><i class="fas fa-ruler-combined"></i> Tamaño *</label>
+                  <div class="radio-group">
+                    <label
+                      v-for="tamaño in tamaños"
+                      :key="tamaño.value"
+                      :class="{ selected: formCrear.tamaño === tamaño.value }"
+                    >
+                      <input
+                        type="radio"
+                        v-model="formCrear.tamaño"
+                        :value="tamaño.value"
+                        required
+                        :disabled="cargandoCrear"
+                      />
+                      {{ tamaño.label }}
+                    </label>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label><i class="fas fa-paw"></i> Tipo de mascota *</label>
+                  <div class="radio-group">
+                    <label
+                      v-for="tipo in tipos"
+                      :key="tipo.value"
+                      :class="{ selected: formCrear.tipo === tipo.value }"
+                    >
+                      <input
+                        type="radio"
+                        v-model="formCrear.tipo"
+                        :value="tipo.value"
+                        required
+                        :disabled="cargandoCrear"
+                      />
+                      {{ tipo.label }}
+                    </label>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="crear-url_imagen">
+                    <i class="fas fa-image"></i> URL de la imagen (opcional)
+                  </label>
+                  <input
+                    type="url"
+                    id="crear-url_imagen"
+                    v-model="formCrear.url_imagen"
+                    maxlength="255"
+                    :disabled="cargandoCrear"
+                    placeholder="https://ejemplo.com/imagen.jpg"
+                  />
+                  <small class="text-muted">Enlace a una imagen representativa</small>
+                </div>
+
+                <div class="form-group checkbox-group">
+                  <label class="checkbox-label">
+                    <input
+                      type="checkbox"
+                      v-model="formCrear.reservable"
+                      :disabled="cargandoCrear"
+                      checked
+                    />
+                    <span class="checkmark"></span>
+                    Habitación reservable
+                  </label>
+                  <small class="text-muted">Si está desactivado, la habitación no podrá ser reservada</small>
+                </div>
+
+                <!-- Selector de clínica para todos los usuarios con permisos -->
+                <div class="form-group">
+                  <label for="crear-clinica_id">
+                    <i class="fas fa-hospital"></i> Clínica *
+                  </label>
+                  <select
+                    id="crear-clinica_id"
+                    v-model="formCrear.clinica_id"
+                    required
+                    :disabled="cargandoCrear || cargandoClinicas"
+                    class="clinica-select"
+                  >
+                    <option value="" disabled>Selecciona una clínica...</option>
+                    <option
+                      v-for="clinica in clinicas"
+                      :key="clinica.id"
+                      :value="clinica.id"
+                    >
+                      {{ clinica.nombre }}
+                    </option>
+                  </select>
+                  <small v-if="cargandoClinicas" class="text-muted">
+                    <i class="fas fa-spinner fa-spin"></i> Cargando clínicas...
+                  </small>
+                </div>
+
+                <!-- Vista previa de la imagen -->
+                <div v-if="formCrear.url_imagen" class="image-preview">
+                  <label><i class="fas fa-eye"></i> Vista previa:</label>
+                  <div class="preview-container">
+                    <img
+                      :src="formCrear.url_imagen"
+                      alt="Vista previa"
+                      @error="handleImageErrorCrear"
+                    />
+                  </div>
+                </div>
+
+                <div class="modal-buttons">
+                  <button type="submit" class="btn-crear" :disabled="cargandoCrear">
+                    <i v-if="cargandoCrear" class="fas fa-spinner fa-spin"></i>
+                    <i v-else class="fas fa-save"></i>
+                    {{ cargandoCrear ? 'Creando...' : 'Crear Habitación' }}
+                  </button>
+                  <button type="button" class="cancelar" @click="cerrarModalCrear" :disabled="cargandoCrear">
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
+    </template>
+    <template #fallback>
+      <p>
+        El plan asignado no permite el acceso a la gestión de habitaciones de hotel. Contacta con tu clínica para más información.
+      </p>
+    </template>
+  </Feature>
 </template>
 
 <script>
 import api from '../api/axios'
+import { syncSpaceToken } from '@/utils/spaceSync'
+import { Feature } from '@npm_team/space-vue-client'
 
 export default {
   name: 'HotelRooms',
+  components: {
+    Feature
+  },
 
   data () {
     return {
@@ -281,8 +295,8 @@ export default {
     }
   },
 
-  created () {
-    this.checkAuth()
+  async created () {
+    await this.checkAuth()
     window.addEventListener('logout', this.checkAuth)
   },
 
@@ -291,7 +305,7 @@ export default {
   },
 
   methods: {
-    checkAuth () {
+    async checkAuth () {
       const token = localStorage.getItem('jwt')
       const rawUser = localStorage.getItem('user')
 
@@ -303,7 +317,7 @@ export default {
       try {
         this.info_usuario = JSON.parse(rawUser)
         this.jwtValido = true
-
+        await syncSpaceToken(this.$router)
         // Según el tipo de usuario, cargar las habitaciones correspondientes
         if (this.info_usuario.tipo === 'prop_mascota') {
           this.obtenerHabitaciones()
