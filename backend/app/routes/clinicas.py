@@ -33,7 +33,14 @@ def get_clinicas():
                 'nombre': c.nombre,
                 'direccion': c.direccion,
                 'telefono': c.telefono,
-                'propietario': c.propietario
+                'propietario': {
+                    'id': c.propietario.id,
+                    'nombre': c.propietario.nombre,
+                    'apellidos': c.propietario.apellidos,
+                    'usuario': c.propietario.usuario,
+                    'email': c.propietario.email,
+                    'tipo_usuario': str(c.propietario.tipo_usuario)
+                } if c.propietario else None
             }
             for c in clinicas
         ])

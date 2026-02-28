@@ -23,7 +23,7 @@ from .routes.peticiones_adopcion import peticiones_bp
 
 from .extensions import db
 
-def create_app():
+def create_app(test_config=None):
     ## Construir rutas absolutas para el frontend
     current_dir = os.path.dirname(os.path.abspath(__file__))
     parent_dir = os.path.abspath(os.path.join(current_dir, '..','..'))
@@ -36,6 +36,8 @@ def create_app():
 
     ## Cargar configuración
     app.config.from_object('app.config.Config')
+    if test_config:
+        app.config.update(test_config)
     
     app.config["JWT_TOKEN_LOCATION"] = ["headers"]
     app.config["JWT_HEADER_NAME"] = "Authorization"
@@ -69,11 +71,12 @@ def create_app():
     app.register_blueprint(peticiones_bp)
 
     ## Para desarrollo: crear tablas si no existen
-    with app.app_context():
-        from . import models
-        from .models import Usuario
-        print("Subclases de Usuario registradas:", Usuario.__subclasses__())
-        db.create_all()
+    if not app.config.get("TESTING"):
+        with app.app_context():
+            from . import models
+            from .models import Usuario
+            print("Subclases de Usuario registradas:", Usuario.__subclasses__())
+            db.create_all()
     
     
     ## EVENT LOOP + CLIENTE GLOBAL POR APP
@@ -106,8 +109,9 @@ def create_app():
 
     app.shutdown_space_client = shutdown_space_client
 
-    # Se llamará automáticamente cuando el proceso termine
-    atexit.register(shutdown_space_client)
+    # Se llamará automáticamente cuando el proceso termine (excepto en tests)
+    if not app.config.get("TESTING") and not os.environ.get("PYTEST_CURRENT_TEST"):
+        atexit.register(shutdown_space_client)
 
     return app
 

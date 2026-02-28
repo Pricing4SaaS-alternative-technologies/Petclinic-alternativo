@@ -129,7 +129,7 @@ def editar_nombre_mascota(mascota_id):
     except Exception:
         return jsonify({'error': 'Identidad del token inválida'}), 401
 
-    mascota = Mascota.query.get(mascota_id)
+    mascota = db.session.get(Mascota, mascota_id)
     
     if not mascota:
         return jsonify({'error': 'Mascota no encontrada'}), 404
@@ -149,7 +149,7 @@ def eliminar_mascota(id):
     if not usuario or (usuario.tipo_usuario != TipoUsuarioEnum.PROP_MASCOTA and usuario.tipo_usuario != TipoUsuarioEnum.ADMIN):
         return jsonify({'message': 'No tienes permiso para eliminar mascotas'}), 403
     
-    mascota = Mascota.query.get(id)
+    mascota = db.session.get(Mascota, id)
     if not mascota:
         return jsonify({'error': 'Mascota no encontrada'}), 404
 

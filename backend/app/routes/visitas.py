@@ -40,7 +40,7 @@ def listar_visitas_veterinario(vet_id):
     usuario_id = int(get_jwt_identity())
     rol_usuario = Usuario.query.filter_by(id=usuario_id).first_or_404().tipo_usuario
     
-    vet_buscado = Usuario.query.get_or_404(vet_id)
+    vet_buscado = db.get_or_404(Usuario, vet_id)
     # Roles no autorizados
     if rol_usuario != TipoUsuarioEnum.VETERINARIO and rol_usuario != TipoUsuarioEnum.ADMIN:
         return jsonify({'message': 'No tienes permiso para usar esta operacion'}), 403
@@ -68,9 +68,9 @@ def listar_visitas_veterinario(vet_id):
 @visitas_bp.route('/mascota/<int:mascota_id>', methods=['GET'])
 @jwt_required()
 def listar_visitas_mascota(mascota_id):
-    usuario_id = get_jwt_identity()
+    usuario_id = int(get_jwt_identity())
     rol_usuario = Usuario.query.filter_by(id=usuario_id).first().tipo_usuario
-    mascota = Mascota.query.get_or_404(mascota_id)
+    mascota = db.get_or_404(Mascota, mascota_id)
     
     if rol_usuario != TipoUsuarioEnum.PROP_MASCOTA and rol_usuario != TipoUsuarioEnum.ADMIN:
         return jsonify({'message': 'No tienes permiso para ver las visitas'}), 403
@@ -103,8 +103,8 @@ def crear_visita():
     if usuario.tipo_usuario != TipoUsuarioEnum.VETERINARIO and usuario.tipo_usuario != TipoUsuarioEnum.ADMIN:
         return jsonify({'msg':'No autorizado'}), 403
     
-    dueño_mascota_id= Mascota.query.get_or_404(mascota_id).dueño_id
-    dueño_mascota= Usuario.query.get_or_404(dueño_mascota_id)
+    dueño_mascota_id= db.get_or_404(Mascota, mascota_id).dueño_id
+    dueño_mascota= db.get_or_404(Usuario, dueño_mascota_id)
     
     if dueño_mascota.clinica_id != usuario.clinica_id:
         return jsonify({'msg':'La mascota no pertenece a la clínica del veterinario'}), 403

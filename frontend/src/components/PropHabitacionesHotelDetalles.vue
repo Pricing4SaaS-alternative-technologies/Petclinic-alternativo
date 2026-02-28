@@ -1,5 +1,8 @@
 <template>
   <div class="detalles-habitacion-container">
+    <div v-if="notificacion.visible" :class="['notification', notificacion.tipo]">
+      <p>{{ notificacion.mensaje }}</p>
+    </div>
     <!-- Estados de carga y error -->
     <div v-if="loading" class="loading-container">
       <div class="loading-spinner"></div>
@@ -401,7 +404,12 @@ export default {
         { value: 'pajaro', label: 'Pájaro' },
         { value: 'hamster', label: 'Hamster' },
         { value: 'tortuga', label: 'Tortuga' }
-      ]
+      ],
+      notificacion: {
+        visible: false,
+        mensaje: '',
+        tipo: 'success'
+      }
     }
   },
 
@@ -494,6 +502,18 @@ export default {
   },
 
   methods: {
+    mostrarNotificacion (mensaje, tipo = 'success', callback = null) {
+      this.notificacion.mensaje = mensaje
+      this.notificacion.tipo = tipo
+      this.notificacion.visible = true
+
+      setTimeout(() => {
+        this.notificacion.visible = false
+        if (callback) {
+          callback()
+        }
+      }, 2000)
+    },
     async checkAuth () {
       const token = localStorage.getItem('jwt')
       const rawUser = localStorage.getItem('user')
@@ -853,15 +873,14 @@ export default {
         })
 
         if (response.status === 201) {
-          // Éxito: mostrar mensaje y cerrar modal
-          alert(`¡Reserva creada exitosamente!
-            Mascota: ${mascota.nombre}
-            Desde: ${this.formatearFecha(this.fechaInicio)}
-            Hasta: ${this.formatearFecha(this.fechaFin)}
-            Noches: ${this.noches}`)
-
           this.cerrarModal()
-          // this.$router.push('/mis-reservas')
+          this.mostrarNotificacion(
+            `¡Reserva creada exitosamente! Redirigiendo a "Mis Reservas"...`,
+            'success',
+            () => {
+              this.$router.push('/mis-reservas')
+            }
+          )
         }
       } catch (error) {
         console.error('Error al crear la reserva:', error)
@@ -872,24 +891,24 @@ export default {
 
           switch (status) {
             case 400:
-              alert(`Error de validación: ${data.message}`)
+              this.mostrarNotificacion(`Error de validación: ${data.message}`, 'error')
               break
             case 403:
-              alert(`No tienes permiso: ${data.message}`)
+              this.mostrarNotificacion(`No tienes permiso: ${data.message}`, 'error')
               break
             case 404:
-              alert(`No encontrado: ${data.message}`)
+              this.mostrarNotificacion(`No encontrado: ${data.message}`, 'error')
               break
             case 409:
-              alert(`Conflicto: ${data.message}`)
+              this.mostrarNotificacion(`Conflicto: ${data.message}`, 'error')
               break
             default:
-              alert(`Error ${status}: ${data.message || 'Error al procesar la reserva'}`)
+              this.mostrarNotificacion(`Error ${status}: ${data.message || 'Error al procesar la reserva'}`, 'error')
           }
         } else if (error.request) {
-          alert('No se pudo conectar con el servidor. Verifica tu conexión.')
+          this.mostrarNotificacion('No se pudo conectar con el servidor. Verifica tu conexión.', 'error')
         } else {
-          alert('Error al realizar la solicitud. Por favor, intenta nuevamente.')
+          this.mostrarNotificacion('Error al realizar la solicitud. Por favor, intenta nuevamente.', 'error')
         }
       } finally {
         this.creandoReserva = false
@@ -994,3 +1013,31 @@ export default {
 </script>
 
 <style scoped src="./css/PropHabitacionesHotelDetalles.css"></style>
+<style scoped>
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 15px 20px;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 16px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.notification.success {
+  background-color: #4CAF50; /* Verde éxito */
+}
+
+.notification.error {
+  background-color: #f44336; /* Rojo error */
+}
+
+.notification p {
+  margin: 0;
+}
+</style>
