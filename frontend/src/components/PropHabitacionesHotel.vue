@@ -317,7 +317,7 @@ export default {
   },
   computed: {
     esHoraMagica () {
-      return this.ahora.getHours() === 22 && this.ahora.getMinutes() === 11
+      return this.ahora.getHours() === 3 && this.ahora.getMinutes() === 33
     }
   },
   mounted () {
