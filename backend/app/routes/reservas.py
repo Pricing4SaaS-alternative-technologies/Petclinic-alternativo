@@ -8,6 +8,7 @@ from app.models.clinica import Clinica
 from app.models.enums import TipoUsuarioEnum
 from app.extensions import db
 from app.models.habitacion_hotel import Habitacion_hotel
+from datetime import date
 
 reservas = Blueprint('reservas', __name__, url_prefix='/api/reservas')
 
@@ -15,7 +16,7 @@ reservas = Blueprint('reservas', __name__, url_prefix='/api/reservas')
 @jwt_required()
 def listar_mis_habitaciones_reservas():
     id_usuario = int(get_jwt_identity())
-    usuario = Usuario.query.get_or_404(id_usuario)
+    usuario = db.get_or_404(Usuario, id_usuario)
     rol_usuario = usuario.tipo_usuario
     
     mascota_id = request.args.get('mascota_id', type=int)
@@ -63,7 +64,7 @@ def listar_mis_habitaciones_reservas():
 @jwt_required()
 def listar_reservas():
     id_usuario = int(get_jwt_identity())
-    usuario = Usuario.query.get_or_404(id_usuario)
+    usuario = db.get_or_404(Usuario, id_usuario)
     rol_usuario = usuario.tipo_usuario
     mascota_id = request.args.get('mascota_id', type=int)
 
@@ -98,7 +99,7 @@ def listar_reservas():
 def listar_reservas_habitacion(habitacion_id):
     
     id_usuario = int(get_jwt_identity())
-    usuario = Usuario.query.get_or_404(id_usuario)
+    usuario = db.get_or_404(Usuario, id_usuario)
     rol_usuario = usuario.tipo_usuario
     
     # Solo los dueños de clínica y admins pueden ver las reservas de sus habitaciones
@@ -106,7 +107,7 @@ def listar_reservas_habitacion(habitacion_id):
         return jsonify({'message': 'No tienes permiso para ver las reservas de esta habitación'}), 403
     
     # Verificar que la habitación existe
-    habitacion = Habitacion_hotel.query.get_or_404(habitacion_id)
+    habitacion = db.get_or_404(Habitacion_hotel, habitacion_id)
     
     # Si es prop_clinica, verificar que la habitación pertenece a su clínica
     if rol_usuario == TipoUsuarioEnum.PROP_CLINICA:
@@ -134,7 +135,7 @@ def listar_reservas_habitacion(habitacion_id):
 @jwt_required()
 def crear_reserva():
     id_usuario = int(get_jwt_identity())
-    usuario = Usuario.query.get_or_404(id_usuario)
+    usuario = db.get_or_404(Usuario, id_usuario)
     rol_usuario = usuario.tipo_usuario
 
     if rol_usuario != TipoUsuarioEnum.PROP_MASCOTA and rol_usuario != TipoUsuarioEnum.ADMIN:
@@ -143,8 +144,17 @@ def crear_reserva():
     data = request.get_json()
     mascota_id = data.get('mascota_id')
     habitacion_hotel_id = data.get('habitacion_hotel_id')
-    fecha_inicio = data.get('fecha_inicio')
-    fecha_fin = data.get('fecha_fin')
+    fecha_inicio_str = data.get('fecha_inicio')
+    fecha_fin_str = data.get('fecha_fin')
+
+    if not all([mascota_id, habitacion_hotel_id, fecha_inicio_str, fecha_fin_str]):
+        return jsonify({'message': 'Faltan datos para crear la reserva'}), 400
+
+    try:
+        fecha_inicio = date.fromisoformat(fecha_inicio_str)
+        fecha_fin = date.fromisoformat(fecha_fin_str)
+    except (ValueError, TypeError):
+        return jsonify({'message': 'Formato de fecha inválido. Use AAAA-MM-DD'}), 400
 
     mascota = Mascota.query.filter_by(id=mascota_id, dueño_id=id_usuario).first()
     if not mascota:
@@ -163,7 +173,7 @@ def crear_reserva():
         Reserva.fecha_inicio < fecha_fin
     ).first():
         return jsonify({'message': 'La habitación ya está reservada en las fechas seleccionadas'}), 400
-    id_clinica_mascota = Usuario.query.get_or_404(mascota.dueño_id).clinica_id
+    id_clinica_mascota = db.get_or_404(Usuario, mascota.dueño_id).clinica_id
     if id_clinica_mascota != habitacion.clinica_id:
         return jsonify({'message': 'La mascota no pertenece a la clínica de la habitación'}), 403
 

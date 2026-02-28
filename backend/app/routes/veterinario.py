@@ -11,7 +11,7 @@ veterinario_bp = Blueprint('vet_visitas', __name__, url_prefix='/api/visitas')
 @jwt_required()
 def listar_visitas_mias():
     vet_id = get_jwt_identity()
-    usuario = Usuario.query.get_or_404(vet_id)
+    usuario = db.get_or_404(Usuario, vet_id)
     if usuario.tipo_usuario != TipoUsuarioEnum.VETERINARIO:
         return jsonify({'msg': 'No autorizado'}), 403
     visitas = Visita.query.filter_by(veterinario_id=vet_id).all()

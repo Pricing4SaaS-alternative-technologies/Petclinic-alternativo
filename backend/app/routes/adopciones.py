@@ -14,7 +14,7 @@ adopciones_bp = Blueprint('adopciones', __name__, url_prefix='/api/adopciones')
 @jwt_required()
 def listar_adopciones():
     usuario_id = get_jwt_identity()
-    usuario = Usuario.query.get_or_404(usuario_id)
+    usuario = db.get_or_404(Usuario, usuario_id)
     
     if usuario.tipo_usuario != TipoUsuarioEnum.ADMIN:
         return jsonify({'msg':'No autorizado'}), 403
@@ -41,8 +41,8 @@ def listar_adopciones():
 @jwt_required()
 def listar_adopciones_usuario(user_id):
     usuario_id = int(get_jwt_identity())
-    usuario = Usuario.query.get_or_404(usuario_id)
-    usuario_buscado = Usuario.query.get_or_404(user_id)
+    usuario = db.get_or_404(Usuario, usuario_id)
+    usuario_buscado = db.get_or_404(Usuario, user_id)
     
     if usuario.tipo_usuario != TipoUsuarioEnum.ADMIN and usuario_buscado.tipo_usuario != TipoUsuarioEnum.PROP_MASCOTA:
         return jsonify({'msg':'No estas autorizado para ver estas funciones'}), 403
@@ -75,7 +75,7 @@ def listar_adopciones_usuario(user_id):
 @jwt_required()
 def listar_adopciones_clinica(clinica_id):
     usuario_id = int(get_jwt_identity())
-    usuario = Usuario.query.get_or_404(usuario_id)
+    usuario = db.get_or_404(Usuario, usuario_id)
 
     if usuario.tipo_usuario != TipoUsuarioEnum.ADMIN and usuario.tipo_usuario != TipoUsuarioEnum.PROP_MASCOTA:
         return jsonify({'msg':'No estas autorizado para ver estas funciones'}), 403
@@ -104,12 +104,15 @@ def listar_adopciones_clinica(clinica_id):
 @jwt_required()
 def crear_adopcion():
     usuario_id = int(get_jwt_identity())
-    usuario = Usuario.query.get_or_404(usuario_id)
+    usuario = db.get_or_404(Usuario, usuario_id)
     
     if usuario.tipo_usuario != TipoUsuarioEnum.PROP_MASCOTA:
         return jsonify({'msg':'No puedes crear adopciones sin ser un usuario de mascota'}), 403
     
     data = request.get_json()
+
+    if not data or 'mascota_id' not in data:
+        return jsonify({'msg': 'mascota_id es requerido'}), 400
 
     desc = data.get('descripcion', '').strip()
     if not desc:
@@ -117,7 +120,7 @@ def crear_adopcion():
     if len(desc) > 255:
         return jsonify({'msg':'La descripción no puede tener más de 255 caracteres'}), 400
 
-    mascota_encontrada = Mascota.query.get_or_404(data['mascota_id'])
+    mascota_encontrada = db.get_or_404(Mascota, data['mascota_id'])
     if mascota_encontrada.dueño_id != usuario_id:
         return jsonify({'msg':'No puedes poner en adopcion una mascota que no es tuya'}),400
     
@@ -135,8 +138,8 @@ def crear_adopcion():
 @jwt_required()
 def eliminar_adopcion(adopcion_id):
     usuario_id = int(get_jwt_identity())
-    usuario = Usuario.query.get_or_404(usuario_id)
-    adopcion_borrar = Adopcion.query.get_or_404(adopcion_id)
+    usuario = db.get_or_404(Usuario, usuario_id)
+    adopcion_borrar = db.get_or_404(Adopcion, adopcion_id)
     
     if usuario.tipo_usuario != TipoUsuarioEnum.PROP_MASCOTA and usuario.tipo_usuario != TipoUsuarioEnum.ADMIN:
         return jsonify({'msg':'No puedes eliminar adopciones sin ser un usuario de mascota o admin'}), 403

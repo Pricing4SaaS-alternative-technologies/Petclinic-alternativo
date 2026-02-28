@@ -28,7 +28,9 @@ class Consulta(db.Model):
     # Misma situación con el veterinario, posible borrado del atributo ya que es automatico
     clinica_id = db.Column(db.Integer, db.ForeignKey('clinicas.id', ondelete='SET NULL'), nullable=True)
     clinica = db.relationship('Clinica', foreign_keys=[clinica_id])
-
+    
+    # Relación con las respuestas de consulta
+    respuestas = db.relationship('Respuesta_consulta', back_populates='consulta', cascade='all, delete-orphan', lazy='select')
 
     def __init__(self, titulo, descripcion, coment_clinica, dueño_id, mascota_id, estado=EstadoConsulta.PENDIENTE):
         self.titulo = titulo
