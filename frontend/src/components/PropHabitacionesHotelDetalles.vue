@@ -550,7 +550,7 @@ export default {
         const url = `http://localhost:5000/api/habitaciones_hotel/detalles/${this.habitacionId}`
         const response = await api.get(url, {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+            Authorization: `Bearer ${localStorage.getItem('jwt')}`
           }
         })
 
@@ -723,7 +723,7 @@ export default {
           this.formEditar,
           {
             headers: {
-              'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+              Authorization: `Bearer ${localStorage.getItem('jwt')}`
             }
           }
         )
@@ -868,14 +868,14 @@ export default {
         // Llamada al endpoint del backend
         const response = await api.post('http://localhost:5000/api/reservas/crear', reservaData, {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+            Authorization: `Bearer ${localStorage.getItem('jwt')}`
           }
         })
 
         if (response.status === 201) {
           this.cerrarModal()
           this.mostrarNotificacion(
-            `¡Reserva creada exitosamente! Redirigiendo a "Mis Reservas"...`,
+            '¡Reserva creada exitosamente! Redirigiendo a "Mis Reservas"...',
             'success',
             () => {
               this.$router.push('/mis-reservas')
@@ -938,7 +938,7 @@ export default {
           `http://localhost:5000/api/habitaciones_hotel/eliminar/${this.habitacionId}`,
           {
             headers: {
-              'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+              Authorization: `Bearer ${localStorage.getItem('jwt')}`
             }
           }
         )

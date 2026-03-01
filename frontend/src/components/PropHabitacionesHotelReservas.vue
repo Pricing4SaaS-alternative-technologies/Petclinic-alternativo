@@ -160,7 +160,7 @@ export default {
 
         const response = await api.get('http://localhost:5000/api/reservas/mis_habs_reservas', {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+            Authorization: `Bearer ${localStorage.getItem('jwt')}`
           },
           params: params
         })

@@ -218,7 +218,7 @@ export default {
 
       try {
         await api.post(
-          `/visitas/crear`,
+          '/visitas/crear',
           {
             mascota_id: this.nueva.mascota_id,
             fecha: this.nueva.fecha,

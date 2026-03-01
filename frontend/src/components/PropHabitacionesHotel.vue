@@ -375,7 +375,7 @@ export default {
         console.log('Usuario clínica ID:', this.info_usuario.clinica_id)
         const response = await api.get(`http://localhost:5000/api/habitaciones_hotel/listar/${this.info_usuario.clinica_id}`, {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+            Authorization: `Bearer ${localStorage.getItem('jwt')}`
           }
         })
 
@@ -404,7 +404,7 @@ export default {
         console.log('Dueño clínica ID:', this.info_usuario.id)
         const response = await api.get(`http://localhost:5000/api/habitaciones_hotel/listar/prop-clinica/${this.info_usuario.id}`, {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+            Authorization: `Bearer ${localStorage.getItem('jwt')}`
           }
         })
 
@@ -433,7 +433,7 @@ export default {
         // Endpoint para obtener todas las habitaciones (para admin)
         const response = await api.get('http://localhost:5000/api/habitaciones_hotel/listar', {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+            Authorization: `Bearer ${localStorage.getItem('jwt')}`
           }
         })
 
@@ -494,7 +494,7 @@ export default {
 
         const response = await api.get(url, {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+            Authorization: `Bearer ${localStorage.getItem('jwt')}`
           }
         })
 
@@ -515,7 +515,7 @@ export default {
           try {
             const response = await api.get('http://localhost:5000/api/clinicas/listar', {
               headers: {
-                'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+                Authorization: `Bearer ${localStorage.getItem('jwt')}`
               }
             })
             this.clinicas = response.data || []
@@ -606,7 +606,7 @@ export default {
           this.formCrear,
           {
             headers: {
-              'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+              Authorization: `Bearer ${localStorage.getItem('jwt')}`
             }
           }
         )

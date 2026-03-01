@@ -207,12 +207,18 @@ def generate_user_pricing_token(id_usuario):
 
     space_client = current_app.space_client
     try:
-        token = current_app.run_async(space_client.featureEvaluators.generate_user_pricing_token(id_usuario))
-        print(f"Token generado exitosamente para usuario ID: {id_usuario}", token)
+        token = current_app.run_async(space_client.featureEvaluators.generate_user_pricing_token(str(id_usuario)))
+        
+        if not token:
+            print(f"⚠️ ERROR CRÍTICO: El SDK de Space devolvió None para el usuario {id_usuario}.")
+            return jsonify({"error": "El servidor de Space falló al generar el token. Revisa los logs de Space"}), 500
+
+        print(f"Token generado exitosamente para usuario ID: {id_usuario}")
         return jsonify({"token": token}), 200
+        
     except Exception as e:
         print(f"Error al generar token: {e}")
-        return jsonify({"error": "Error al generar token"}), 500
+        return jsonify({"error": str(e)}), 500
 
 
 '''
