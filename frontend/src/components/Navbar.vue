@@ -73,6 +73,7 @@
 
 <script>
 import logoImg from '@/assets/logo.png'
+import { syncSpaceToken } from '@/utils/spaceSync'
 import { Feature } from '@npm_team/space-vue-client'
 
 export default {
@@ -91,7 +92,7 @@ export default {
     }
   },
   methods: {
-    checkAuth () {
+    async checkAuth () {
       const token = localStorage.getItem('jwt')
       const rawUser = localStorage.getItem('user')
       const rawContrato = localStorage.getItem('contrato')
@@ -115,6 +116,7 @@ export default {
 
       this.loggedIn = true
       this.updateBodyClass(true)
+      await syncSpaceToken(this.$router)
 
       // 2. Le inyectamos el token a tu librería usando el método update()
       if (pricingToken && this.$tokenService) {
@@ -164,8 +166,8 @@ export default {
       }
     }
   },
-  created () {
-    this.checkAuth()
+  async created () {
+    await this.checkAuth()
     window.addEventListener('login', this.checkAuth)
     window.addEventListener('logout', this.handleLogout)
   },
