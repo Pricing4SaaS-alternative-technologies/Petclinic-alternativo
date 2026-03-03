@@ -1,7 +1,7 @@
 <template>
-  <Feature id="petclinic-visitCalendar">
-    <template #on>
-      <div class="calendario-container" v-if="jwtValido">
+  <div class="calendario-container" v-if="jwtValido">
+    <Feature id="petclinic-visitCalendar">
+      <template #on>
         <div class="calendario-header">
           <h1 class="calendario-title">📅 Calendario de Visitas</h1>
           <p class="calendario-description">
@@ -88,18 +88,17 @@
         </div>
 
         <p v-if="error" class="error-message">{{ error }}</p>
-      </div>
-
-      <p v-else class="error-message">
-        No estás autorizado. Inicia sesión como dueño de mascota.
-      </p>
-    </template>
-    <template #fallback>
-      <p class="error-message">
-        El plan asignado no permite el acceso al calendario de visitas. Contacta con tu clínica para más información.
-      </p>
-    </template>
-  </Feature>
+      </template>
+      <template #fallback>
+        <p class="error-message">
+          El plan asignado no permite el acceso al calendario de visitas. Contacta con tu clínica para más información.
+        </p>
+      </template>
+    </Feature>
+  </div>
+  <p v-else class="error-message">
+    No estás autorizado. Inicia sesión como dueño de mascota.
+  </p>
 </template>
 
 <script>

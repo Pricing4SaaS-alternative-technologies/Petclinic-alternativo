@@ -1,7 +1,7 @@
 <template>
-  <Feature id="petclinic-petHotelManagement">
-    <template #on>
-      <div class="pet-hotel-container">
+  <div class="pet-hotel-container" v-if="jwtValido">
+    <Feature id="petclinic-petHotelManagement">
+      <template #on>
         <div class="hotel-header">
           <h1 class="hotel-title">Habitaciones de Hotel</h1>
           <p class="hotel-description">
@@ -9,7 +9,7 @@
           </p>
         </div>
 
-        <div v-if="jwtValido" class="white-zone">
+        <div class="white-zone">
           <div class="rooms-header">
             <div class="rooms-header-content">
               <h2 class="rooms-title">Todas las habitaciones</h2>
@@ -58,10 +58,6 @@
           <div v-else class="no-rooms">
             <p>No hay habitaciones disponibles en este momento.</p>
           </div>
-        </div>
-
-        <div v-else class="no-auth">
-          <p class="error">You are not authorized to view this information. Please log in.</p>
         </div>
 
         <div v-if="error" class="error-message">
@@ -234,20 +230,23 @@
               </form>
           </div>
         </div>
-      </div>
-    </template>
-    <template #fallback>
-      <p>
-        El plan asignado no permite el acceso a la gestión de habitaciones de hotel. Contacta con tu clínica para más información.
-      </p>
-      <div v-if="esHoraMagica">
-          <img
-            :src="avdol"
-            alt="Avdol Tsk Tsk"
-          />
-        </div>
-    </template>
-  </Feature>
+      </template>
+      <template #fallback>
+        <p>
+          El plan asignado no permite el acceso a la gestión de habitaciones de hotel. Contacta con tu clínica para más información.
+        </p>
+        <div v-if="esHoraMagica">
+            <img
+              :src="avdol"
+              alt="Avdol Tsk Tsk"
+            />
+          </div>
+      </template>
+    </Feature>
+  </div>
+  <div v-else class="no-auth">
+      <p class="error">No tienes los permisos para acceder a esta seccion</p>
+  </div>
 </template>
 
 <script>
@@ -335,9 +334,13 @@ export default {
         this.jwtValido = false
         return
       }
+      this.info_usuario = JSON.parse(rawUser)
+      if (this.info_usuario.tipo === 'veterinario') {
+        this.jwtValido = false
+        return
+      }
 
       try {
-        this.info_usuario = JSON.parse(rawUser)
         this.jwtValido = true
         await syncSpaceToken(this.$router)
         // Según el tipo de usuario, cargar las habitaciones correspondientes

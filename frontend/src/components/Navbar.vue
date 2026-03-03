@@ -109,14 +109,16 @@ export default {
       this.usuarioActual = JSON.parse(rawUser)
       this.userTipo = this.getUserTipo()
 
-      if (parsedContrato !== null && parsedContrato !== '') {
+      if (parsedContrato !== null && parsedContrato !== '' && this.userTipo !== 'veterinario') {
         this.contract_info = parsedContrato
         this.has_plan = true
       }
 
       this.loggedIn = true
       this.updateBodyClass(true)
-      await syncSpaceToken(this.$router)
+      if (this.userTipo !== 'veterinario') {
+        await syncSpaceToken(this.$router)
+      }
 
       // 2. Le inyectamos el token a tu librería usando el método update()
       if (pricingToken && this.$tokenService) {
