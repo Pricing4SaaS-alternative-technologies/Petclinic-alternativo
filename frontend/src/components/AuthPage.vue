@@ -173,6 +173,7 @@ export default {
     async fetchClinicas () {
       try {
         const res = await api.get('http://localhost:5000/api/clinicas/listar-todas')
+        // TODO: Añadir filtro para detectar clinicas que no peuden tener usuarios nuevos
         this.clinicasDisponibles = res.data
       } catch (err) {
         console.error('Error al cargar clínicas', err)

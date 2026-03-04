@@ -73,7 +73,17 @@ def register():
     if user is None:
         return jsonify({'message': 'Error al crear el usuario'}), 500
 
-    user.save()
+
+    try:
+        user.save()
+        space_client = current_app.space_client
+        evaluacion = current_app.run_async(space_client.featureEvaluators.evaluate(get_propietario_clinica(user.clinica_id).id, "petclinic-registeredPetOwners", {"petclinic-maxRegisteredPetOwners": 1}))
+        if evaluacion.eval == False:
+            user.delete()
+            return jsonify({'message': 'No se puede crear más usuarios para la clinica actual.'}), 403
+    except Exception as e:  
+        user.delete()
+        return jsonify({'message': str(e)}), 500
     
     if tipo_enum == TipoUsuarioEnum.PROP_CLINICA:
         try:
@@ -99,8 +109,6 @@ def register():
             }
             
             print("Datos del contrato:", contract_data)
-            
-            space_client = current_app.space_client
             resultado = current_app.run_async(space_client.contracts.add_contract(contract_data))
             print(f"Contrato creado exitosamente: {resultado}")
             
@@ -128,7 +136,6 @@ def register():
             space_client = current_app.space_client
             resultado = current_app.run_async(space_client.contracts.add_contract(contrato_pet_owner))
             print(f"Contrato creado exitosamente para dueño de mascota ID: {user.id}", contrato_pet_owner)
-        
         except Exception as e:
             print(f"Error al crear contrato: {e}")
             return jsonify({

@@ -56,7 +56,7 @@ export default {
       try {
         const { data } = await api.get(
           `/clinicas/${this.clinicaId}` +
-          `/props_mascotas/mine/visitas`
+          '/props_mascotas/mine/visitas'
         )
         this.visitas = data
       } catch (e) {

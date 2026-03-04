@@ -13,15 +13,24 @@
         <div v-if="jwtValido && has_plan">
           <!-- Info del plan -->
           <div class="plan-badge">
-            <strong>Plan:</strong> {{ contract_info.subscriptionPlans["petclinic"] }}
+            <strong>Plan:</strong> {{ contract_info.subscriptionPlans["PetClinic"] || contract_info.subscriptionPlans["petclinic"]}}
           </div>
 
           <!-- Botones de acción principales -->
           <div class="action-buttons">
-            <button class="btn-primary" @click="abrirModalCreacion">
-              <i class="fas fa-plus-circle"></i>
-              Añadir Clínica
-            </button>
+            <Feature id="petclinic-registeredClinics">
+              <template #on>
+                <button class="btn-primary" @click="abrirModalCreacion">
+                  <i class="fas fa-plus-circle"></i>
+                  Añadir Clínica
+                </button>
+              </template>
+              <template #fallback>
+                <p class="error-message">
+                  El plan asignado no permite el acceso a la creación de clínicas. Contacta con tu clínica para más información.
+                </p>
+              </template>
+            </Feature>
             <button class="btn-secondary" @click="$router.push('/pricing-plans')">
               <i class="fas fa-star"></i>
               Pricing plans
@@ -69,10 +78,19 @@
             <i class="fas fa-hospital empty-icon"></i>
             <h3>No tienes clínicas asociadas</h3>
             <p>Añade tu primera clínica para empezar a gestionar tu negocio</p>
-            <button class="btn-primary" @click="abrirModalCreacion">
-              <i class="fas fa-plus-circle"></i>
-              Añadir Primera Clínica
-            </button>
+            <Feature id="petclinic-registeredClinics">
+              <template #on>
+                <button class="btn-primary" @click="abrirModalCreacion">
+                  <i class="fas fa-plus-circle"></i>
+                  Añadir Primera Clínica
+                </button>
+              </template>
+              <template #fallback>
+                <p class="error-message">
+                  El plan asignado no permite el acceso a la creación de clínicas. Contacta con tu clínica para más información.
+                </p>
+              </template>
+            </Feature>
           </div>
         </div>
       </div>
@@ -209,9 +227,14 @@
 </template>
 
 <script>
+import { Feature } from '@npm_team/space-vue-client'
+import { syncSpaceToken } from '@/utils/spaceSync'
 import api from '../api/axios'
 
 export default {
+  components: {
+    Feature
+  },
   data () {
     return {
       info_usuario: null,
@@ -233,8 +256,8 @@ export default {
 
     }
   },
-  created () {
-    this.checkAuth()
+  async created () {
+    await this.checkAuth()
     window.addEventListener('logout', this.checkAuth)
   },
   beforeUnmount () {
@@ -246,7 +269,7 @@ export default {
       this.errorCreacion = ''
       this.modalCreacion = true
     },
-    checkAuth () {
+    async checkAuth () {
       const token = localStorage.getItem('jwt')
       const rawUser = localStorage.getItem('user')
       const rawContrato = localStorage.getItem('contrato')
@@ -264,7 +287,7 @@ export default {
           return
         }
         this.jwtValido = true
-        this.fetchClinicasPropias()
+        await this.fetchClinicasPropias()
         if (parsedContrato !== null && parsedContrato !== '') {
           this.contract_info = parsedContrato
           this.has_plan = true
@@ -279,6 +302,7 @@ export default {
       try {
         const res = await api.get(`http://localhost:5000/api/clinicas/listar/${this.info_usuario.id}`)
         this.clinicas = res.data
+        await syncSpaceToken(this.$router)
       } catch (err) {
         console.error('Error al cargar clínicas', err)
       }

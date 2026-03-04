@@ -1,13 +1,13 @@
 # backend/app/__init__.py
 import os
+import threading
+import asyncio
+import atexit
 from app.config import Config
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
-import asyncio
 from app_SpacePyCl.routes.config import SpaceClient
-import atexit
 
 from .routes import auth as auth_blueprint
 from .routes.clinicas import clinicas_bp
@@ -22,6 +22,30 @@ from .routes.reservas import reservas as reservas
 from .routes.peticiones_adopcion import peticiones_bp
 
 from .extensions import db
+
+# 1. Creamos el loop global permanente
+_global_async_loop = asyncio.new_event_loop()
+
+# 2. Definimos la función que mantendrá el loop vivo en un hilo secundario
+def _start_background_loop(loop):
+    asyncio.set_event_loop(loop)
+    loop.run_forever()
+
+# 3. Arrancamos el hilo secundario (daemon=True hace que se cierre solo al apagar Flask)
+_loop_thread = threading.Thread(target=_start_background_loop, args=(_global_async_loop,), daemon=True)
+_loop_thread.start()
+
+# 1. Creamos el loop global permanente
+_global_async_loop = asyncio.new_event_loop()
+
+# 2. Definimos la función que mantendrá el loop vivo en un hilo secundario
+def _start_background_loop(loop):
+    asyncio.set_event_loop(loop)
+    loop.run_forever()
+
+# 3. Arrancamos el hilo secundario (daemon=True hace que se cierre solo al apagar Flask)
+_loop_thread = threading.Thread(target=_start_background_loop, args=(_global_async_loop,), daemon=True)
+_loop_thread.start()
 
 def create_app(test_config=None):
     ## Construir rutas absolutas para el frontend
@@ -43,7 +67,6 @@ def create_app(test_config=None):
     app.config["JWT_HEADER_NAME"] = "Authorization"
     app.config["JWT_HEADER_TYPE"] = "Bearer"
 
-    
     ## metemos esto siguiendo el tutorial
     jwt = JWTManager(app)
 
@@ -67,7 +90,6 @@ def create_app(test_config=None):
     app.register_blueprint(contratos_bp)
     app.register_blueprint(habitaciones_hotel)
     app.register_blueprint(reservas)
-
     app.register_blueprint(peticiones_bp)
 
     ## Para desarrollo: crear tablas si no existen
@@ -78,34 +100,27 @@ def create_app(test_config=None):
             print("Subclases de Usuario registradas:", Usuario.__subclasses__())
             db.create_all()
     
-    
-    ## EVENT LOOP + CLIENTE GLOBAL POR APP
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    app.async_loop = loop
-
-    # Crea el cliente y servicios que lo usan
-    app.space_client = SpaceClient(url="http://localhost:5403", api_key= Config.SPACE_API_KEY)
-    #meter prueba y señalar si esta correcto
-    
-    # helper para usar funciones async desde las rutas sync
+    # 4. Helper mágico: Envía las corrutinas al hilo secundario de forma segura
     def run_async(coro):
-        #try:
-        return app.async_loop.run_until_complete(coro)
-        #except Exception as e:
-        #    print("error:",str(e))
-        #    return {'error': str(e)}, 500
-            
+        future = asyncio.run_coroutine_threadsafe(coro, _global_async_loop)
+        return future.result()
 
     app.run_async = run_async
     
-        # Función de cierre
+    # 5. Inicializamos el SpaceClient DENTRO del loop del hilo secundario
+    # Así su sesión HTTP "nace" atada al loop correcto que nunca se cierra
+    async def init_client():
+        return SpaceClient(url="http://localhost:5403", api_key=Config.SPACE_API_KEY)
+        
+    app.space_client = run_async(init_client())
+    
+    # 6. Función de cierre
     def shutdown_space_client():
         print("Cerrando SpaceClient...")
         try:
-            app.run_async(app.space_client.close())
-        finally:
-            app.async_loop.close()
+            run_async(app.space_client.close())
+        except Exception as e:
+            print(f"Error al cerrar SpaceClient: {e}")
 
     app.shutdown_space_client = shutdown_space_client
 
@@ -114,4 +129,3 @@ def create_app(test_config=None):
         atexit.register(shutdown_space_client)
 
     return app
-

@@ -26,23 +26,28 @@ export default new Router({
       name: 'auth',
       component: AuthPage
     },
-    { path: '/visitas',
+    {
+      path: '/visitas',
       name: 'visitas',
       component: Visitas
     },
-    { path: '/mis-visitas',
+    {
+      path: '/mis-visitas',
       name: 'mis-visitas',
       component: VisitasPropietarios
     },
-    { path: '/calendario-visitas',
+    {
+      path: '/calendario-visitas',
       name: 'calendario-visitas',
       component: CalendarioVisitas
     },
-    { path: '/adopciones',
+    {
+      path: '/adopciones',
       name: 'adopciones',
       component: Adopciones
     },
-    { path: '/pricing-plans',
+    {
+      path: '/pricing-plans',
       name: 'pricing-plans',
       component: PricingPlans
     },

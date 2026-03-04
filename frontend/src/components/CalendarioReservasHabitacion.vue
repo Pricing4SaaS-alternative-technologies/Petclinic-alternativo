@@ -1,75 +1,84 @@
 <template>
   <div class="calendario-reservas-container" v-if="jwtValido">
-    <div class="calendario-header">
-      <h1 class="calendario-title">📅 Calendario de Reservas</h1>
-      <p class="calendario-description">
-        Visualiza todas las reservas de la habitación "<strong>{{ habitacionNombre }}</strong>" en un calendario interactivo
-      </p>
-      <button @click="volverAtras" class="btn-volver">
-        <i class="fas fa-arrow-left"></i> Volver
-      </button>
-    </div>
-
-    <div v-if="loading" class="loading-container">
-      <div class="loading-spinner"></div>
-      <p>Cargando calendario de reservas...</p>
-    </div>
-
-    <div v-else class="calendario-content">
-      <!-- Controles del calendario -->
-      <div class="calendario-controls">
-        <button @click="mesAnterior" class="nav-btn">← Mes Anterior</button>
-        <h2 class="mes-actual">{{ nombreMes }} {{ añoActual }}</h2>
-        <button @click="mesSiguiente" class="nav-btn">Mes Siguiente →</button>
-      </div>
-
-      <!-- Calendario -->
-      <div class="calendario-wrapper">
-        <div class="dias-semana">
-          <div class="dia-semana">Lun</div>
-          <div class="dia-semana">Mar</div>
-          <div class="dia-semana">Mié</div>
-          <div class="dia-semana">Jue</div>
-          <div class="dia-semana">Vie</div>
-          <div class="dia-semana">Sab</div>
-          <div class="dia-semana">Dom</div>
+    <Feature id="petclinic-petHotelCalendar">
+      <template #on>
+        <div class="calendario-header">
+          <h1 class="calendario-title">📅 Calendario de Reservas</h1>
+          <p class="calendario-description">
+            Visualiza todas las reservas de la habitación "<strong>{{ habitacionNombre }}</strong>" en un calendario interactivo
+          </p>
+          <button @click="volverAtras" class="btn-volver">
+            <i class="fas fa-arrow-left"></i> Volver
+          </button>
         </div>
-        <div class="dias-calendario">
-          <div
-            v-for="dia in diasCalendario"
-            :key="`${dia.fecha}`"
-            :class="['dia', { 'otro-mes': !dia.mesActual }, { 'hoy': dia.esHoy }]"
-          >
-            <div class="numero-dia">{{ dia.numero }}</div>
-            <div v-if="dia.reservas.length > 0" class="reservas-en-celda">
-              <div v-for="reserva in dia.reservas" :key="reserva.id" class="reserva-barra" :style="{ backgroundColor: generarColor(reserva.id) }">
-                <span class="reserva-nombre">{{ reserva.mascota_nombre }}</span>
+
+        <div v-if="loading" class="loading-container">
+          <div class="loading-spinner"></div>
+          <p>Cargando calendario de reservas...</p>
+        </div>
+
+        <div v-else class="calendario-content">
+          <!-- Controles del calendario -->
+          <div class="calendario-controls">
+            <button @click="mesAnterior" class="nav-btn">← Mes Anterior</button>
+            <h2 class="mes-actual">{{ nombreMes }} {{ añoActual }}</h2>
+            <button @click="mesSiguiente" class="nav-btn">Mes Siguiente →</button>
+          </div>
+
+          <!-- Calendario -->
+          <div class="calendario-wrapper">
+            <div class="dias-semana">
+              <div class="dia-semana">Lun</div>
+              <div class="dia-semana">Mar</div>
+              <div class="dia-semana">Mié</div>
+              <div class="dia-semana">Jue</div>
+              <div class="dia-semana">Vie</div>
+              <div class="dia-semana">Sab</div>
+              <div class="dia-semana">Dom</div>
+            </div>
+            <div class="dias-calendario">
+              <div
+                v-for="dia in diasCalendario"
+                :key="`${dia.fecha}`"
+                :class="['dia', { 'otro-mes': !dia.mesActual }, { 'hoy': dia.esHoy }]"
+              >
+                <div class="numero-dia">{{ dia.numero }}</div>
+                <div v-if="dia.reservas.length > 0" class="reservas-en-celda">
+                  <div v-for="reserva in dia.reservas" :key="reserva.id" class="reserva-barra" :style="{ backgroundColor: generarColor(reserva.id) }">
+                    <span class="reserva-nombre">{{ reserva.mascota_nombre }}</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <!-- Panel de información de reservas -->
-      <div class="leyenda-reservas">
-        <h3>Reservas en este mes</h3>
-        <div v-if="reservasDelMes.length > 0" class="lista-reservas">
-          <div v-for="reserva in reservasDelMes" :key="reserva.id" class="reserva-item" :style="{ borderLeftColor: generarColor(reserva.id) }">
-            <div class="reserva-mascota">🐾 {{ reserva.mascota_nombre }}</div>
-            <div class="reserva-dueño">👤 {{ reserva.dueño_nombre }}</div>
-            <div class="reserva-fechas">
-              {{ formatearFecha(reserva.fecha_inicio) }} - {{ formatearFecha(reserva.fecha_fin) }}
+          <!-- Panel de información de reservas -->
+          <div class="leyenda-reservas">
+            <h3>Reservas en este mes</h3>
+            <div v-if="reservasDelMes.length > 0" class="lista-reservas">
+              <div v-for="reserva in reservasDelMes" :key="reserva.id" class="reserva-item" :style="{ borderLeftColor: generarColor(reserva.id) }">
+                <div class="reserva-mascota">🐾 {{ reserva.mascota_nombre }}</div>
+                <div class="reserva-dueño">👤 {{ reserva.dueño_nombre }}</div>
+                <div class="reserva-fechas">
+                  {{ formatearFecha(reserva.fecha_inicio) }} - {{ formatearFecha(reserva.fecha_fin) }}
+                </div>
+                <div class="reserva-dias">{{ calcularDias(reserva.fecha_inicio, reserva.fecha_fin) }} días</div>
+              </div>
             </div>
-            <div class="reserva-dias">{{ calcularDias(reserva.fecha_inicio, reserva.fecha_fin) }} días</div>
+            <div v-else class="sin-reservas">
+              <p><i class="fas fa-calendar-check"></i> No hay reservas en este mes</p>
+            </div>
           </div>
         </div>
-        <div v-else class="sin-reservas">
-          <p><i class="fas fa-calendar-check"></i> No hay reservas en este mes</p>
-        </div>
-      </div>
-    </div>
 
-    <p v-if="error" class="error-message">{{ error }}</p>
+        <p v-if="error" class="error-message">{{ error }}</p>
+      </template>
+      <template #fallback>
+        <p class="error-message">
+          El calendario de reservas no está disponible con tu plan actual.
+        </p>
+      </template>
+    </Feature>
   </div>
 
   <p v-else class="error-message">
@@ -79,9 +88,13 @@
 
 <script>
 import api from '@/api/axios'
+import { Feature } from '@npm_team/space-vue-client'
 
 export default {
   name: 'CalendarioReservasHabitacion',
+  components: {
+    Feature
+  },
   props: {
     habitacion_id: {
       type: [String, Number],
