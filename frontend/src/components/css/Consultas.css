@@ -1,0 +1,286 @@
+/* =========================================
+   CONTENEDOR Y ESTRUCTURA PRINCIPAL
+   ========================================= */
+.consultas-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+.white-zone {
+  background-color: #f4f6f8;
+  border-radius: 12px;
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch; /* ESTO ARREGLA QUE LAS TARJETAS SALGAN ENCOGIDAS */
+}
+
+.section-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.main-title {
+  font-size: 2rem;
+  color: #2c3e50;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* =========================================
+   LISTADO DE TARJETAS (Correctamente estiradas)
+   ========================================= */
+.items-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.item-card {
+  background: #ffffff;
+  border: 1px solid #dcdfe3;
+  border-radius: 8px;
+  width: 100%; /* Ocupa todo el ancho de la zona blanca */
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-align: left; /* Todo el texto alineado a la izquierda */
+}
+
+.item-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: #b0b5ba;
+  transform: translateY(-2px);
+}
+
+.item-content {
+  padding: 20px 25px;
+}
+
+.item-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.item-title {
+  margin: 0;
+  font-size: 1.3rem;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.item-desc {
+  margin: 0;
+  color: #555;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* =========================================
+   BOTONES Y ESTADOS (BOTÓN BONITO)
+   ========================================= */
+.add-btn {
+  background-color: #1a1a1a; /* Negro Petclinic */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: 0.2s;
+  justify-content: center;
+}
+
+.add-btn:hover {
+  background-color: #333;
+}
+
+.estado-badge {
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.estado-badge.PENDIENTE {
+  color: #e74c3c; /* Rojo Unresolved */
+}
+
+.estado-badge.RESUELTA, 
+.estado-badge.RESPONDIDA {
+  color: #27ae60; /* Verde Success */
+}
+
+/* =========================================
+   MODALES (Arreglado el cierre y detalle)
+   ========================================= */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 30px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 450px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #f5f5f5;
+  box-sizing: border-box;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.btn-save {
+  flex: 1;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn-cancel {
+  flex: 1;
+  background-color: #ff0000;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* =========================================
+   MODAL DETALLE GRANDE E HISTORIAL
+   ========================================= */
+.modal-large {
+  max-width: 800px !important;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.modal-header-detalle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.close-x {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: #000 !important; /* X en negro */
+  font-weight: bold;
+}
+
+.bubble {
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.bubble-label {
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #888;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.consulta-bubble {
+  background: #f8f9fa;
+  border-left: 4px solid #333;
+}
+
+.respuesta-bubble {
+  background: #eafaf1;
+  border-right: 4px solid #27ae60;
+  text-align: right;
+}
+
+.respuesta-bubble .bubble-label {
+  justify-content: flex-end;
+  color: #117a65;
+}
+
+/* =========================================
+   EXTRAS (Loader y Errores)
+   ========================================= */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 40px 0;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #1a1a1a;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.no-items {
+  width: 100%;
+  text-align: center;
+  padding: 40px;
+  background: white;
+  border-radius: 8px;
+  border: 1px dashed #ccc;
+}
