@@ -56,6 +56,14 @@
       >
         Adopciones
       </router-link>
+
+      <router-link
+        v-if="loggedIn && (userTipo === 'prop_mascota' || userTipo === 'veterinario' || userTipo === 'admin')"
+        to="/consultas"
+        class="sidebar-link"
+      >
+        Consultas
+      </router-link>
     <Feature id="petclinic-petHotelManagement">
       <template #on>
         <router-link
