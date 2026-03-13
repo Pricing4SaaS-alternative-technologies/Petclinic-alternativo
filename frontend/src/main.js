@@ -1,30 +1,33 @@
-// The Vue build version to load with the `import` command
-// (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
 import App from './App'
 import router from './router'
-import { tokenService, SpaceProvider } from '@npm_team/space-vue-client'
-// eslint-disable-next-line no-unused-vars
-import api from './api/axios'
+import { SpaceProvider } from '@npm_team/space-vue-client'
+// import api from './api/axios' // Tus otros imports...
 
 Vue.config.productionTip = false
 
-Vue.prototype.$tokenService = tokenService
+// 1. Nos traemos tu configuración aquí
+const spaceConfig = {
+  url: 'http://localhost:5403/',
+  apiKey: '036bf1da2eba64f3a8de7e4efad2dea97c3d520535b13d73c52dc9f496d6aba5',
+  allowConnectionWithSpace: true
+}
 
-export const spaceState = Vue.observable({
-  payload: tokenService.getPayload()
-})
-
-tokenService.subscribe(() => {
-  spaceState.payload = tokenService.getPayload()
-})
-
-Vue.prototype.$spaceState = spaceState
-
-/* eslint-disable no-new */
+// 2. Envolvemos la <App/> entera
+// eslint-disable-next-line no-new
 new Vue({
   el: '#app',
   router,
   components: { App, SpaceProvider },
-  template: '<App/>'
+  data () {
+    return {
+      spaceConfig // Hacemos la config reactiva para el template
+    }
+  },
+  // ¡AQUÍ ESTÁ LA MAGIA! El Provider abraza a toda la App desde fuera.
+  template: `
+    <SpaceProvider :config="spaceConfig">
+      <App/>
+    </SpaceProvider>
+  `
 })

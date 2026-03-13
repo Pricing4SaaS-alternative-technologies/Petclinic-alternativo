@@ -1,6 +1,5 @@
 import axios from 'axios'
 import { tokenService } from '@npm_team/space-vue-client'
-import { spaceState } from '@/main'
 
 export const syncSpaceToken = async (router) => {
   const user = JSON.parse(localStorage.getItem('user'))
@@ -12,7 +11,11 @@ export const syncSpaceToken = async (router) => {
   }
   let antiguoPayload
   try {
-    antiguoPayload = spaceState.payload || null
+    if (!tokenService) {
+      antiguoPayload = null
+    } else {
+      antiguoPayload = tokenService.getPayload() ? JSON.parse(atob(tokenService.getPayload().split('.')[1])) : null
+    }
   } catch (error) {
     console.error('Error obteniendo el payload antiguo:', error)
   }

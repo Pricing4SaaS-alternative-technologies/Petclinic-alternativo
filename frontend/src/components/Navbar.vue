@@ -74,12 +74,20 @@
 <script>
 import logoImg from '@/assets/logo.png'
 import { syncSpaceToken } from '@/utils/spaceSync'
-import { Feature } from '@npm_team/space-vue-client'
+
+import { Feature, useSpaceClient } from '@npm_team/space-vue-client'
 
 export default {
   name: 'Navbar',
   components: {
     Feature
+  },
+  setup () {
+    // 2. Llamamos al hook de forma síncrona. Aquí Vue sí ve el SpaceProvider.
+    const spaceClient = useSpaceClient()
+
+    // 3. Lo devolvemos para que Vue lo inyecte en el "this" del componente
+    return { spaceClient }
   },
   data () {
     return {
@@ -98,9 +106,6 @@ export default {
       const rawContrato = localStorage.getItem('contrato')
       const parsedContrato = rawContrato ? JSON.parse(rawContrato) : null
 
-      // 1. Añadimos la lectura del token de precios
-      const pricingToken = localStorage.getItem('pricing_token')
-
       if (!token || !rawUser) {
         this.loggedIn = false
         this.updateBodyClass(false)
@@ -117,12 +122,19 @@ export default {
       this.loggedIn = true
       this.updateBodyClass(true)
       if (this.userTipo !== 'veterinario') {
-        await syncSpaceToken(this.$router)
-      }
-
-      // 2. Le inyectamos el token a tu librería usando el método update()
-      if (pricingToken && this.$tokenService) {
-        this.$tokenService.update(pricingToken)
+        // 1. Comprobamos que this.spaceClient exista realmente antes de usarlo
+        // await syncSpaceToken(this.$router)
+        if (this.spaceClient) {
+          console.log('SPACE client is available in Navbar, setting user ID:', this.usuarioActual.id)
+          this.spaceClient.setUserId(this.usuarioActual.id.toString()).then(() => {
+            console.log('User ID set in SPACE client successfully')
+          }).catch(err => {
+            console.error('Error setting user ID in SPACE client:', err)
+          })
+        } else {
+          // 2. Si entra aquí en la primera carga, evitamos el pantallazo rojo
+          console.warn('El spaceClient aún no está listo en el Navbar, omitiendo setUserId de forma segura.');
+        }
       }
     },
 
@@ -138,12 +150,7 @@ export default {
       localStorage.removeItem('jwt')
       localStorage.removeItem('user')
       localStorage.removeItem('contrato')
-      localStorage.removeItem('pricing_token')
-
-      // 3. Limpiamos el token de la librería al cerrar sesión
-      if (this.$tokenService && typeof this.$tokenService.clear === 'function') {
-        this.$tokenService.clear()
-      }
+      localStorage.removeItem('spaceToken')
 
       window.dispatchEvent(new Event('logout'))
 
