@@ -73,7 +73,7 @@
 
 <script>
 import logoImg from '@/assets/logo.png'
-import { syncSpaceToken } from '@/utils/spaceSync'
+// import { syncSpaceToken } from '@/utils/spaceSync'
 
 import { Feature, useSpaceClient } from '@npm_team/space-vue-client'
 
