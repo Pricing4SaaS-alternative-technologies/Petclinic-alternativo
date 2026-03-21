@@ -93,12 +93,19 @@
 <script>
 import axios from 'axios'
 import { syncSpaceToken } from '@/utils/spaceSync'
-import { Feature } from '@npm_team/space-vue-client'
+import { Feature, useSpaceClient } from '@npm_team/space-vue-client'
 
 export default {
   name: 'MisMascotas',
   components: {
     Feature
+  },
+  setup () {
+    // 2. Llamamos al hook de forma síncrona. Aquí Vue sí ve el SpaceProvider.
+    const spaceClient = useSpaceClient()
+
+    // 3. Lo devolvemos para que Vue lo inyecte en el "this" del componente
+    return { spaceClient }
   },
   data () {
     return {

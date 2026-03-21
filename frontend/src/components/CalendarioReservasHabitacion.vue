@@ -169,6 +169,7 @@ export default {
           this.jwtValido = false
           localStorage.removeItem('jwt')
           localStorage.removeItem('user')
+          localStorage.removeItem('spaceToken')
           return
         }
         if (this.info_usuario.tipo !== 'prop_clinica' && this.info_usuario.tipo !== 'admin') {
@@ -180,6 +181,7 @@ export default {
         this.jwtValido = false
         localStorage.removeItem('jwt')
         localStorage.removeItem('user')
+        localStorage.removeItem('spaceToken')
         console.error('Error al parsear usuario:', e)
       }
     },
