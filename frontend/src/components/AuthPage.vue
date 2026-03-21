@@ -58,7 +58,7 @@
         <div class="password-wrapper">
           <label for="contraseña-registro"><i class="fa-solid fa-lock"></i> Contraseña</label>
           <div class="input-icon-wrapper">
-            <input :type="showPassword ? 'text' : 'password'" id="contraseña-registro" v-model="registerForm.contraseña" placeholder="Mínimo 8 caracteres" required />
+            <input :type="showPassword ? 'text' : 'password'" id="contraseña-registro" v-model="registerForm.contraseña" placeholder="Introduce contraseña segura" required />
             <i :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'" @click="showPassword = !showPassword" class="password-toggle-icon"></i>
           </div>
         </div>
