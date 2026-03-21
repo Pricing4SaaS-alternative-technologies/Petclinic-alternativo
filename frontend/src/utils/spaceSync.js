@@ -1,10 +1,10 @@
 import axios from 'axios'
 import { tokenService } from '@npm_team/space-vue-client'
-import { spaceState } from '@/main'
 
 export const syncSpaceToken = async (router) => {
   const user = JSON.parse(localStorage.getItem('user'))
   const jwt = localStorage.getItem('jwt')
+  const spaceToken = localStorage.getItem('spaceToken')
 
   if (!user || !jwt) {
     if (router) router.push('/login')
@@ -12,12 +12,20 @@ export const syncSpaceToken = async (router) => {
   }
   let antiguoPayload
   try {
-    antiguoPayload = spaceState.payload || null
+    if (!spaceToken) {
+      console.warn('No disponemos de payload anterior en LocalStorage')
+      antiguoPayload = null
+    } else {
+      antiguoPayload = JSON.parse((atob(spaceToken.split('.')[1]))) || null
+    }
   } catch (error) {
     console.error('Error obteniendo el payload antiguo:', error)
   }
-  console.log('Antiguo Payload:', antiguoPayload)
-  const antiguoStr = antiguoPayload ? JSON.stringify(antiguoPayload.subscriptionContext) : null
+
+  const antiguoPricingContext = antiguoPayload ? JSON.stringify(antiguoPayload.pricingContext) : null
+  console.log('Antiguo Pricing:', antiguoPricingContext)
+  const antiguoSubscriptionContext = antiguoPayload ? JSON.stringify(antiguoPayload.subscriptionContext) : null
+  console.log('Antiguo Subscription:', antiguoSubscriptionContext)
 
   try {
     const res = await axios.post(
@@ -28,20 +36,21 @@ export const syncSpaceToken = async (router) => {
 
     const nuevoToken = res.data.token
     console.log('Token:', nuevoToken)
-
     const nuevoPayload = nuevoToken ? JSON.parse((atob(nuevoToken.split('.')[1]))) : null
-    console.log('Nuevo Payload:', nuevoPayload)
-    const nuevoStr = nuevoPayload ? JSON.stringify(nuevoPayload.subscriptionContext) : null
 
-    if (antiguoStr !== nuevoStr) {
-      console.log('Antiguo Contexto:', antiguoStr)
-      console.log('Nuevo Contexto:', nuevoStr)
-      tokenService.update(nuevoToken)
+    const nuevoPricing = nuevoPayload ? JSON.stringify(nuevoPayload.pricingContext) : null
+    console.log('Nuevo Pricing:', nuevoPricing)
+    const nuevoSubscriptionContext = nuevoPayload ? JSON.stringify(nuevoPayload.subscriptionContext) : null
+    console.log('Nuevo Subscription:', nuevoSubscriptionContext)
+
+    if (antiguoPricingContext !== nuevoPricing || antiguoSubscriptionContext !== nuevoSubscriptionContext) {
+      localStorage.setItem('spaceToken', nuevoToken)
       console.log('¡EL CONTENIDO DEL TOKEN HA CAMBIADO REALMENTE!')
       console.log('Nuevo Contexto:', nuevoPayload.subscriptionContext)
     } else {
       console.log('El token se ha refrescado (iat nuevo), pero los permisos son idénticos.')
     }
+    tokenService.update(nuevoToken)
   } catch (error) {
     console.error('Error sincronizando token:', error)
   }
