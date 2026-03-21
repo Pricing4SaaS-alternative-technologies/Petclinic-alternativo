@@ -61,6 +61,29 @@ def getPlans(name, version):
     limites_uso = pricing_data.get('usageLimits', {})
     addons = pricing_data.get('addOns', {})
 
+    for nombre_plan, info_plan in planes.items():
+        limites_del_plan = info_plan.get('usageLimits')
+        features_del_plan = info_plan.get('features', {})
+
+        if isinstance(limites_del_plan, dict):
+            limites_a_borrar = []
+            
+            for limite_key in limites_del_plan.keys():
+                info_limite_global = limites_uso.get(limite_key, {})
+                linked_features = info_limite_global.get('linkedFeatures', [])
+                
+                if linked_features:
+                    feature_vinculada = linked_features[0]
+                    feature_data = features_del_plan.get(feature_vinculada)
+                    
+                    is_active = (feature_data is True) or (isinstance(feature_data, dict) and feature_data.get('value') is True)
+                    
+                    if not is_active:
+                        limites_a_borrar.append(limite_key)
+            
+            for k in limites_a_borrar:
+                del limites_del_plan[k]
+
     for addon_key, addon_info in addons.items():
         extensiones = addon_info.get('usageLimitsExtensions', {})
         if not extensiones:
@@ -83,7 +106,10 @@ def getPlans(name, version):
             info_plan = planes.get(nombre_plan, {})
             features_del_plan = info_plan.get('features', {})
             
-            if features_del_plan.get(feature_vinculada) is True:
+            feature_data = features_del_plan.get(feature_vinculada)
+            is_active = (feature_data is True) or (isinstance(feature_data, dict) and feature_data.get('value') is True)
+            
+            if is_active:
                 planes_compatibles.append(nombre_plan)
                 
         addon_info['availableFor'] = planes_compatibles

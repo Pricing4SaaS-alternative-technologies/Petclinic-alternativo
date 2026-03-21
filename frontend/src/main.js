@@ -9,7 +9,7 @@ Vue.config.productionTip = false
 // 1. Nos traemos tu configuración aquí
 const spaceConfig = {
   url: 'http://localhost:5403/',
-  apiKey: '27a13d852ad3b63e0410507e062f66021b48cfb556f895adbc0dde0d96552127',
+  apiKey: '1725e7429f19b0da6b8f024ec27f2b16572df165f5c6b3f498a8e4bb24edf4b9',
   allowConnectionWithSpace: true
 }
 
