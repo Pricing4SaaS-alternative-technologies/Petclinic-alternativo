@@ -22,7 +22,6 @@ class EstadoPeticion(enum.Enum):
 class EstadoConsulta(enum.Enum):
     PENDIENTE = "pendiente"
     RESUELTA = "resuelta"
-    CERRADA = "cerrada"
     
 class TipoMascota(enum.Enum):
     GATO = "gato"

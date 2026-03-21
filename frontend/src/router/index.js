@@ -11,6 +11,7 @@ import PricingPlans from '@/components/PricingPlans.vue'
 import PropHabitacionesHotel from '../components/PropHabitacionesHotel.vue'
 import PropDetallesHabitacionHotel from '../components/PropHabitacionesHotelDetalles.vue'
 import PropMisReservas from '../components/PropHabitacionesHotelReservas.vue'
+import TodasConsultas from '../components/Consultas.vue'
 
 Vue.use(Router)
 
@@ -72,6 +73,11 @@ export default new Router({
       name: 'calendario-reservas',
       component: CalendarioReservasHabitacion,
       props: true
+    },
+    {
+      path: '/consultas',
+      name: 'consultas',
+      component: TodasConsultas
     }
 
   ],

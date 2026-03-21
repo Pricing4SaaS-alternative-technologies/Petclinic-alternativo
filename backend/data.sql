@@ -58,10 +58,10 @@ INSERT IGNORE INTO peticiones_adopcion (id, razon_adopcion, fecha_solicitud, sol
 (1, 'Me gustaria mucho cuidar del pequeñajo', '2023-11-05 12:00:00', 3, 1, 'PENDIENTE'),
 (2, 'Ofrecemos una casa con espacios abiertos para que Lorito pueda volar sin angustias', '2023-10-06 14:00:00', 1, 2, 'APROBADA');
 
-INSERT IGNORE INTO consultas (id, titulo, descripcion, comentario_clinica, estado_consulta, fecha_creacion, dueño_id, vet_id, mascota_id, clinica_id) VALUES
-(1, 'Consulta sobre la salud de Roco', 'Roco lleva varios días malo.' , TRUE, 'PENDIENTE', '2023-10-05 10:00:00', 1, null, 1, 1),
-(2, 'Consulta sobre la adopción de Misifú', '¿Cómo va la adopción?' , TRUE, 'RESUELTA', '2023-10-05 10:00:00', 2, null, 2, 2),
-(3, 'Consulta sobre la vacunación de Lorito', '¿Es monodosis o hay que poner la vacuna más veces?' , FALSE, 'CERRADA', '2023-10-05 10:00:00', 3, 9, 3, 3);  -- el dueño id es 3 porque es anterior a la adopción
+INSERT IGNORE INTO consultas (id, titulo, descripcion, estado_consulta, fecha_creacion, dueño_id, vet_id, mascota_id) VALUES
+(1, 'Consulta sobre la salud de Roco', 'Roco lleva varios días malo.' , 'PENDIENTE', '2023-10-05 10:00:00', 1, null, 1),
+(2, 'Consulta sobre la adopción de Misifú', '¿Cómo va la adopción?' , 'RESUELTA', '2023-10-05 10:00:00', 2, null, 2),
+(3, 'Consulta sobre la vacunación de Lorito', '¿Es monodosis o hay que poner la vacuna más veces?' , 'CERRADA', '2023-10-05 10:00:00', 3, 9, 3);  -- el dueño id es 3 porque es anterior a la adopción
 
 INSERT IGNORE INTO reservas (id, fecha_inicio, fecha_fin, habitacion_id, mascota_id) VALUES
 (1, '2023-10-01', '2023-10-05', 1, 1),
@@ -69,6 +69,6 @@ INSERT IGNORE INTO reservas (id, fecha_inicio, fecha_fin, habitacion_id, mascota
 (3, '2023-10-03', '2023-10-07', 3, 3),
 (4, '2023-10-04', '2023-10-08', 4, 4);
 
-INSERT IGNORE INTO respuesta_consulta (id, titulo, descripcion, fecha_creacion, consulta_id) VALUES
-(1, 'Respuesta a la consulta sobre la adopción de Misifú', 'La adopción está en proceso y debería completarse pronto.', '2023-10-07 14:30:00', 2),
-(2, 'Respuesta a la consulta sobre la vacunación de Lorito', 'La vacuna es monodosis, no es necesario repetirla.', '2023-10-08 09:15:00', 3);
+INSERT IGNORE INTO respuesta_consulta (id, titulo, descripcion, fecha_creacion, consulta_id, vet_id) VALUES
+(1, 'Respuesta a la consulta sobre la adopción de Misifú', 'La adopción está en proceso y debería completarse pronto.', '2023-10-07 14:30:00', 2, 7),
+(2, 'Respuesta a la consulta sobre la vacunación de Lorito', 'La vacuna es monodosis, no es necesario repetirla.', '2023-10-08 09:15:00', 3, 9);
