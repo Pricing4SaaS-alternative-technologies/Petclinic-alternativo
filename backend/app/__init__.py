@@ -21,6 +21,7 @@ from .routes.habitaciones_hotel import habitaciones_hotel as habitaciones_hotel
 from .routes.reservas import reservas as reservas
 from .routes.peticiones_adopcion import peticiones_bp
 from .routes.consultas import consultas as consultas_bp
+from .routes.user_details import usuarios_bp
 
 from .extensions import db
 
@@ -93,6 +94,7 @@ def create_app(test_config=None):
     app.register_blueprint(reservas)
     app.register_blueprint(peticiones_bp)
     app.register_blueprint(consultas_bp)
+    app.register_blueprint(usuarios_bp)
 
     ## Para desarrollo: crear tablas si no existen
     if not app.config.get("TESTING"):
