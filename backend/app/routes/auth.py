@@ -206,7 +206,41 @@ def protected():
     }), 200
 
 
+
 @auth.route('/especialidades', methods=['GET'])
 def get_especialidades():
     from app.models.enums import EspecialidadEnum
     return jsonify([e.value for e in EspecialidadEnum])
+
+@auth.route('/delete_user/<int:user_id>', methods=['DELETE'])
+@jwt_required()
+def delete_user(user_id):
+    identity = int(get_jwt_identity())
+    usuario_registrado = Usuario.query.get(identity)
+    usuario_borrar = Usuario.query.get(user_id)
+
+    if not usuario_borrar:
+        return jsonify({'message': 'Usuario no encontrado'}), 404
+    
+    if(usuario_registrado.tipo_usuario != TipoUsuarioEnum.ADMIN and usuario_registrado.id != usuario_borrar.id):
+        return jsonify({'message': 'No tienes permiso para eliminar este usuario'}), 403
+    
+    if usuario_borrar.tipo_usuario == TipoUsuarioEnum.ADMIN:
+        return jsonify({'message': 'No se puede eliminar un usuario administrador'}), 403
+
+    space_client = current_app.space_client
+    
+    if usuario_borrar.tipo_usuario == TipoUsuarioEnum.PROP_MASCOTA:
+        if usuario_borrar.clinica_id:
+            prop_clinica = get_propietario_clinica(usuario_borrar.clinica_id)
+            contrato = getContratoUsuario(prop_clinica.id)
+            if contrato:
+                usage_levels = { 
+                    "petclinic": {
+                        "maxRegisteredPetOwners": -1
+                    }
+                }
+                current_app.run_async(space_client.contracts.update_usage_levels(prop_clinica.id, usage_levels))
+    
+    usuario_borrar.delete()
+    return jsonify({'message': 'Usuario eliminado con éxito'}), 200

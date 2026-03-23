@@ -116,6 +116,12 @@
             </button>
             </div>
 
+            <div class="action-buttons mt-4">
+              <button class="btn-delete" @click="confirmarEliminacion">
+                <i class="fas fa-trash"></i> Eliminar Cuenta
+              </button>
+            </div>
+
         </div>
 
         <div v-else-if="jwtValido && !usuarioCargado && !errorCarga" class="loading-state">
@@ -263,6 +269,31 @@ export default {
       this.perfilForm = { ...this.perfil }
       this.errorEdicion = ''
       this.modalEdicion = true
+    },
+    async confirmarEliminacion () {
+      const confirmacion = confirm('¿Estás seguro de que quieres eliminar tu cuenta? Esta acción es irreversible.')
+
+      if (!confirmacion) return
+
+      try {
+        const user = JSON.parse(localStorage.getItem('user'))
+
+        await api.delete(`http://localhost:5000/api/auth/delete_user/${user.id}`)
+
+        // Limpiar sesión
+        localStorage.removeItem('jwt')
+        localStorage.removeItem('user')
+        localStorage.removeItem('contrato')
+        localStorage.removeItem('spaceToken')
+
+        window.dispatchEvent(new Event('logout'))
+
+        // Redirigir
+        this.$router.push('/')
+      } catch (error) {
+        console.error('Error al eliminar usuario:', error)
+        alert('No se pudo eliminar la cuenta.')
+      }
     },
 
     async guardarEdicion () {
