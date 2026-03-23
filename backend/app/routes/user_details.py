@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from app.models.usuario import Usuario
 from app.models.veterinario import Veterinario
 from app.models.prop_mascota import Prop_mascota
@@ -17,7 +17,6 @@ def get_perfil():
     if not usuario:
         return jsonify({'message': 'Usuario no encontrado'}), 404
 
-    # 1. Extraemos los campos comunes de la clase base 'Usuario'
     user_data = {
         'id': usuario.id,
         'nombre': usuario.nombre,
@@ -27,7 +26,6 @@ def get_perfil():
         'tipo_usuario': usuario.tipo_usuario.name if usuario.tipo_usuario else None
     }
 
-    # 2. Añadimos los campos específicos según el tipo de usuario usando polimorfismo
     if isinstance(usuario, Prop_mascota):
         user_data.update({
             'direccion': usuario.direccion,
@@ -61,7 +59,6 @@ def edit_perfil():
     if not usuario:
         return jsonify({'message': 'Usuario no encontrado'}), 404
 
-    # --- Validaciones y actualización de campos COMUNES ---
     nombre = data.get('nombre')
     apellidos = data.get('apellidos')
     
@@ -77,9 +74,7 @@ def edit_perfil():
             return jsonify({'message': 'Los apellidos no pueden tener más de 100 caracteres'}), 400
         usuario.apellidos = a
 
-    # --- Validaciones y actualización de campos ESPECÍFICOS ---
     
-    # Teléfono (Lo comparten Propietarios de Mascota y de Clínica)
     if isinstance(usuario, (Prop_mascota, Prop_clinica)):
         telefono = data.get('telefono')
         if telefono is not None:
@@ -88,7 +83,6 @@ def edit_perfil():
                 return jsonify({'message': 'El teléfono debe tener 9 dígitos numéricos'}), 400
             usuario.telefono = t
 
-    # Dirección (Solo Propietario de Mascota)
     if isinstance(usuario, Prop_mascota):
         direccion = data.get('direccion')
         if direccion is not None:
@@ -97,7 +91,6 @@ def edit_perfil():
                 return jsonify({'message': 'La dirección no puede tener más de 100 caracteres'}), 400
             usuario.direccion = d
 
-    # Ciudad y Especialidades (Solo Veterinario)
     if isinstance(usuario, Veterinario):
         ciudad = data.get('ciudad')
         if ciudad is not None:
@@ -109,15 +102,30 @@ def edit_perfil():
         especialidades = data.get('especialidades')
         if especialidades is not None:
             try:
-                # Usamos el método de tu modelo Veterinario
                 usuario.set_especialidades(especialidades)
             except Exception as e:
                 return jsonify({'message': f'Error al procesar las especialidades: {str(e)}'}), 400
 
-    # Guardar en base de datos
     try:
         usuario.save()
-        return jsonify({'message': 'Perfil actualizado correctamente'}), 200
+        
+        datos_contacto_space = {
+            "firstName": usuario.nombre, 
+            "lastName": usuario.apellidos,
+            "email": usuario.email,
+            "username": usuario.usuario
+        }
+
+        if isinstance(usuario, (Prop_mascota, Prop_clinica)) and usuario.telefono:
+            datos_contacto_space["phone"] = usuario.telefono
+
+        space_client = current_app.space_client
+        current_app.run_async(
+            space_client.contracts.update_user_contact(str(id_usuario), datos_contacto_space)
+        )
+
+        return jsonify({'message': 'Perfil actualizado correctamente en BBDD y SPACE'}), 200
+        
     except Exception as e:
         import traceback
         traceback.print_exc()
