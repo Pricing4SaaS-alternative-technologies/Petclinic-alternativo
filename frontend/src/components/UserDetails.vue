@@ -114,13 +114,10 @@
             <button class="btn-edit" @click="abrirModalEdicion">
               <i class="fas fa-user-edit"></i> Editar Perfil
             </button>
-            </div>
-
-            <div class="action-buttons mt-4">
-              <button class="btn-delete" @click="confirmarEliminacion">
-                <i class="fas fa-trash"></i> Eliminar Cuenta
-              </button>
-            </div>
+            <button class="btn-delete" @click="confirmarEliminacion">
+              <i class="fas fa-trash-alt"></i> Eliminar Cuenta
+            </button>
+          </div>
 
         </div>
 
