@@ -1,11 +1,11 @@
 <template>
   <div>
     <div v-if="jwtValido" class="visitas-container">
-      
+
       <h2 style="text-align: center; margin-bottom: 2rem; color: #34495e; font-size: 2rem; font-family: 'Poppins', sans-serif; font-weight: 600;">🐾 Consultas</h2>
 
       <div class="consultas-panel">
-        
+
         <div class="panel-header">
           <h3>Mis Consultas</h3>
           <div v-if="info_usuario && info_usuario.tipo === 'prop_mascota'">
@@ -70,7 +70,9 @@
             <label>Veterinario (Opcional)</label>
             <select v-model="formCrear.vet_id">
               <option :value="null">Consulta genérica a la clínica</option>
-              <option v-for="v in veterinarios" :key="v.id" :value="v.id">{{ v.nombre }}</option>
+              <option v-for="v in veterinarios" :key="v.id" :value="v.id">
+                {{ v.nombre }} | {{ formatEspecialidades(v.especialidades) }}
+              </option>
             </select>
           </div>
           <div class="modal-actions">
@@ -94,7 +96,9 @@
             <p>{{ consultaSeleccionada?.descripcion }}</p>
           </div>
           <div v-for="res in respuestasDetalle" :key="res.id" class="bubble respuesta-bubble">
-            <span class="bubble-label"><i class="fas fa-user-md"></i> Respuesta de veterinario</span>
+            <span class="bubble-label">
+              <i class="fas fa-user-md"></i> Respuesta de {{ res.nombre_vet }} | {{ formatEspecialidades(res.especialidades_vet) }}
+            </span>
             <h3>{{ res.titulo }}</h3><p>{{ res.descripcion }}</p>
           </div>
         </div>
@@ -122,11 +126,11 @@
 </template>
 
 <script>
-import api from '../api/axios';
+import api from '../api/axios'
 
 export default {
   name: 'ConsultasView',
-  data() {
+  data () {
     return {
       info_usuario: null,
       jwtValido: false,
@@ -150,77 +154,99 @@ export default {
         titulo: '',
         descripcion: ''
       }
-    };
+    }
   },
-  async created() {
-    this.checkAuth();
+  async created () {
+    this.checkAuth()
   },
   methods: {
-    checkAuth() {
-      const token = localStorage.getItem('jwt');
-      const user = localStorage.getItem('user');
+    checkAuth () {
+      const token = localStorage.getItem('jwt')
+      const user = localStorage.getItem('user')
       if (token && user) {
-        this.info_usuario = JSON.parse(user);
-        this.jwtValido = true;
-        this.obtenerConsultas();
+        this.info_usuario = JSON.parse(user)
+        this.jwtValido = true
+        this.obtenerConsultas()
       }
     },
-    async obtenerConsultas() {
-      this.loading = true;
+    async obtenerConsultas () {
+      this.loading = true
       try {
-        const res = await api.get(`http://localhost:5000/api/consultas/getConsultas/${this.info_usuario.id}`);
-        this.consultas = res.data;
+        const res = await api.get(`http://localhost:5000/api/consultas/getConsultas/${this.info_usuario.id}`)
+        this.consultas = res.data
       } catch (e) {
-        console.error(e);
+        console.error(e)
       } finally {
-        this.loading = false;
+        this.loading = false
       }
     },
-    formatEstado(e) {
-      return e === 'RESUELTA' ? 'RESUELTA' : 'PENDIENTE';
+    formatEstado (e) {
+      return e === 'RESUELTA' ? 'RESUELTA' : 'PENDIENTE'
     },
-    async abrirModalDetalle(c) {
-      this.consultaSeleccionada = c;
-      this.modalDetalleVisible = true;
-      const res = await api.get(`http://localhost:5000/api/consultas/getRespuestas/${c.id}`);
-      this.respuestasDetalle = res.data;
+    formatEspecialidades (especialidades) {
+      if (!especialidades) return ''
+
+      let arr = []
+      // Comprobamos si viene como un string con formato de array (ej: '["DERMATOLOGIA"]') y lo parseamos
+      if (typeof especialidades === 'string') {
+        try {
+          arr = JSON.parse(especialidades)
+        } catch (e) {
+        // Si no es un JSON válido, lo tratamos como un string simple
+          arr = [especialidades]
+        }
+      } else if (Array.isArray(especialidades)) {
+      // Si ya es un array real
+        arr = especialidades
+      }
+
+      // Formateamos cada palabra y las unimos con comas
+      return arr
+        .map(esp => esp.charAt(0).toUpperCase() + esp.slice(1).toLowerCase())
+        .join(', ')
     },
-    async finalizarConsulta(id) {
-      await api.put(`http://localhost:5000/api/consultas/cerrar-consulta/${id}`);
-      this.modalDetalleVisible = false;
-      this.obtenerConsultas();
+    async abrirModalDetalle (c) {
+      this.consultaSeleccionada = c
+      this.modalDetalleVisible = true
+      const res = await api.get(`http://localhost:5000/api/consultas/getRespuestas/${c.id}`)
+      this.respuestasDetalle = res.data
     },
-    async abrirModalCrear() {
-      this.modalVisible = true;
-      const resM = await api.get('http://localhost:5000/api/mascotas/listar-tus-mascotas');
-      this.mascotas = resM.data;
-      const resV = await api.get('http://localhost:5000/api/consultas/get-veterinarios');
-      this.veterinarios = resV.data;
+    async finalizarConsulta (id) {
+      await api.put(`http://localhost:5000/api/consultas/cerrar-consulta/${id}`)
+      this.modalDetalleVisible = false
+      this.obtenerConsultas()
     },
-    cerrarModalCrear() {
-      this.modalVisible = false;
+    async abrirModalCrear () {
+      this.modalVisible = true
+      const resM = await api.get('http://localhost:5000/api/mascotas/listar-tus-mascotas')
+      this.mascotas = resM.data
+      const resV = await api.get('http://localhost:5000/api/consultas/get-veterinarios')
+      this.veterinarios = resV.data
     },
-    async crearConsulta() {
-      await api.post('http://localhost:5000/api/consultas/crear-consulta', this.formCrear);
-      this.cerrarModalCrear();
-      this.obtenerConsultas();
+    cerrarModalCrear () {
+      this.modalVisible = false
     },
-    abrirModalResponder(c) {
-      this.consultaSeleccionada = c;
-      this.modalResponderVisible = true;
+    async crearConsulta () {
+      await api.post('http://localhost:5000/api/consultas/crear-consulta', this.formCrear)
+      this.cerrarModalCrear()
+      this.obtenerConsultas()
     },
-    cerrarModalResponder() {
-      this.modalResponderVisible = false;
+    abrirModalResponder (c) {
+      this.consultaSeleccionada = c
+      this.modalResponderVisible = true
     },
-    async enviarRespuesta() {
-      await api.post(`http://localhost:5000/api/consultas/responder-consulta/${this.consultaSeleccionada.id}`, this.formResponder);
-      this.cerrarModalResponder();
-      this.obtenerConsultas();
+    cerrarModalResponder () {
+      this.modalResponderVisible = false
     },
-    cerrarModalDetalle() {
-      this.modalDetalleVisible = false;
+    async enviarRespuesta () {
+      await api.post(`http://localhost:5000/api/consultas/responder-consulta/${this.consultaSeleccionada.id}`, this.formResponder)
+      this.cerrarModalResponder()
+      this.obtenerConsultas()
+    },
+    cerrarModalDetalle () {
+      this.modalDetalleVisible = false
     }
   }
-};
+}
 </script>
 <style scoped src="./css/Consultas.css"></style>
