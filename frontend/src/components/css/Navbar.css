@@ -143,3 +143,18 @@
   box-shadow: 0 4px 16px rgba(30, 64, 175, 0.25);
 }
 
+.profile-link {
+  color: #ffffff;
+  text-decoration: none;
+  margin: 0 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: color 0.3s ease;
+  font-size: 1.8rem;
+}
+
+.profile-link:hover {
+  color: #ffffff;
+}

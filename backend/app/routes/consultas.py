@@ -67,7 +67,9 @@ def get_veterinarios_clinica():
     return jsonify([
         {
             "id": v.id, 
-            "nombre": f"{v.nombre} {v.apellidos}"
+            "nombre": f"{v.nombre} {v.apellidos}",
+            # Añadimos las especialidades aquí para que Vue las reciba
+            "especialidades": v.especialidades 
         } for v in vets
     ]), 200
     
@@ -148,11 +150,20 @@ def get_respuestas(consulta_id):
     
     respuestas_json = []
     for r in consulta.respuestas:
+        # Buscamos al veterinario que hizo esta respuesta
+        vet = Veterinario.query.get(r.vet_id) if hasattr(r, 'vet_id') and r.vet_id else None
+        
+        # Preparamos los datos por si el veterinario ya no existe en la BD
+        nombre_vet = f"{vet.nombre} {vet.apellidos}" if vet else "Veterinario Clínico"
+        especialidades_vet = vet.especialidades if vet else []
+
         respuestas_json.append({
             "id": r.id,
             "titulo": r.titulo,
             "descripcion": r.descripcion,
-            "fecha": r.fecha_creacion.isoformat() if r.fecha_creacion else None
+            "fecha": r.fecha_creacion.isoformat() if r.fecha_creacion else None,
+            "nombre_vet": nombre_vet,
+            "especialidades_vet": especialidades_vet
         })
     
     return jsonify(respuestas_json), 200

@@ -17,6 +17,11 @@
         <span v-else-if="userTipo === 'prop_clinica' && !has_plan" class="usuario">
           Sin plan activo
         </span>
+
+        <router-link to="/user-details" class="profile-link" title="Mi Perfil">
+          <i class="fas fa-user-circle"></i>
+        </router-link>
+
         <button class="logout" @click="logout">Cerrar sesión</button>
       </div>
     </nav>
@@ -141,7 +146,7 @@ export default {
           })
         } else {
           // 2. Si entra aquí en la primera carga, evitamos el pantallazo rojo
-          console.warn('El spaceClient aún no está listo en el Navbar, omitiendo setUserId de forma segura.');
+          console.warn('El spaceClient aún no está listo en el Navbar, omitiendo setUserId de forma segura.')
         }
       }
     },

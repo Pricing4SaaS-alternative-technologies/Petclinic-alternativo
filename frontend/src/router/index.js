@@ -12,6 +12,7 @@ import PropHabitacionesHotel from '../components/PropHabitacionesHotel.vue'
 import PropDetallesHabitacionHotel from '../components/PropHabitacionesHotelDetalles.vue'
 import PropMisReservas from '../components/PropHabitacionesHotelReservas.vue'
 import TodasConsultas from '../components/Consultas.vue'
+import UserDetails from '../components/UserDetails.vue'
 
 Vue.use(Router)
 
@@ -78,6 +79,11 @@ export default new Router({
       path: '/consultas',
       name: 'consultas',
       component: TodasConsultas
+    },
+    {
+      path: '/user-details',
+      name: 'user-details',
+      component: UserDetails
     }
 
   ],
