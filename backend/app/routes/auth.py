@@ -49,6 +49,18 @@ def register():
             return jsonify({'message': 'No estan rellenos los campos obligatorios para dueño de mascota'}), 400
         user = Prop_mascota(nombre, apellidos, usuario, email, contraseña, direccion, telefono, clinica)
 
+        # COMPROBAMOS QUE SE PUEDA GENERAR EL CONTRSTO PARA EL USUARIO DE TIPO PROPIETARIO DE MASCOTA, SI NO SE PUEDE GENERAR EL CONTRATO, NO SE CREA EL USUARIO
+        try:
+            # user.save()
+            space_client = current_app.space_client
+            evaluacion = current_app.run_async(space_client.featureEvaluators.evaluate(get_propietario_clinica(user.clinica_id).id, "petclinic-registeredPetOwners", {"petclinic-maxRegisteredPetOwners": 1}))
+            if evaluacion.eval == False:
+                # user.delete()
+                return jsonify({'message': 'No se puede crear más usuarios para la clinica actual.'}), 403
+        except Exception as e:  
+            # user.delete()
+            return jsonify({'message': str(e)}), 500
+        
     elif tipo_enum == TipoUsuarioEnum.VETERINARIO:
         ciudad = data.get('ciudad')
         especialidades_raw = data.get('especialidades', [])
@@ -74,16 +86,7 @@ def register():
         return jsonify({'message': 'Error al crear el usuario'}), 500
 
 
-    try:
-        user.save()
-        space_client = current_app.space_client
-        evaluacion = current_app.run_async(space_client.featureEvaluators.evaluate(get_propietario_clinica(user.clinica_id).id, "petclinic-registeredPetOwners", {"petclinic-maxRegisteredPetOwners": 1}))
-        if evaluacion.eval == False:
-            user.delete()
-            return jsonify({'message': 'No se puede crear más usuarios para la clinica actual.'}), 403
-    except Exception as e:  
-        user.delete()
-        return jsonify({'message': str(e)}), 500
+    user.save()
     
     if tipo_enum == TipoUsuarioEnum.PROP_CLINICA:
         try:
@@ -114,6 +117,7 @@ def register():
             
         except Exception as e:
             print(f"Error al crear contrato: {e}")
+            user.delete()  # Eliminar el usuario si falla la creación del contrato
             return jsonify({
                 'message': f'{tipo_enum.value.capitalize()} registrado, pero falló la creación del contrato',
                 'error': str(e)
@@ -137,7 +141,15 @@ def register():
             resultado = current_app.run_async(space_client.contracts.add_contract(contrato_pet_owner))
             print(f"Contrato creado exitosamente para dueño de mascota ID: {user.id}", contrato_pet_owner)
         except Exception as e:
-            print(f"Error al crear contrato: {e}")
+            print(f"Error al crear contrato, elimianndo usuario y revirtiendo estado de la suscripcion: {e}")
+            # Eliminamos usuario y revertimos la evaluación anterior
+            user.delete()
+            usage_levels = {
+                "petclinic": {
+                    "maxRegisteredPetOwners": -1
+                }
+            }
+            current_app.run_async(space_client.contracts.update_usage_levels(get_propietario_clinica(user.clinica_id).id, usage_levels))
             return jsonify({
                 'message': f'{tipo_enum.value.capitalize()} registrado, pero falló la creación del contrato',
                 'error': str(e)
