@@ -5,10 +5,11 @@
 
     <div v-if="jwtValido">
       <div class="plans-grid">
-        <div v-for="(plan, planName) in pricingPlans" :key="planName" class="plan-card"
-          :class="{ 'current-plan': isCurrentPlan(planName) }">
+        <div v-for="plan in orderedPricingPlans" :key="plan.name" class="plan-card"
+          :class="{ 'current-plan': isCurrentPlan(plan.name) }">
+
           <div class="plan-header">
-            <h3>{{ planName }}</h3>
+            <h3>{{ plan.name }}</h3>
             <div class="plan-price">
               <span v-if="plan.price === 0">FREE</span>
               <span v-else>€{{ plan.price }}/month</span>
@@ -43,8 +44,8 @@
           </div>
 
           <div class="plan-actions">
-            <button class="change-plan-btn" @click="changePlan(planName)" :disabled="isCurrentPlan(planName)">
-              {{ isCurrentPlan(planName) ? 'CURRENT PLAN' : 'Change to plan' }}
+            <button class="change-plan-btn" @click="changePlan(plan.name)" :disabled="isCurrentPlan(plan.name)">
+              {{ isCurrentPlan(plan.name) ? 'CURRENT PLAN' : 'Change to plan' }}
             </button>
           </div>
         </div>
@@ -108,41 +109,44 @@ export default {
       info_usuario: null,
       jwtValido: false,
       datosPricing: null,
-      planUserActual: null, // Esto deberías obtenerlo del backend según el usuario
+      planUserActual: null,
       errorEdicion: '',
       loading: false
     }
   },
 
   computed: {
-    // Computed property para los planes principales
-    pricingPlans () {
-      if (!this.datosPricing || !this.datosPricing.plans) return {}
-      return this.datosPricing.plans
+    // Orden visual: SILVER -> GOLD -> PLATINUM
+    orderedPricingPlans () {
+      if (!this.datosPricing || !this.datosPricing.plans) return []
+
+      const order = ['SILVER', 'GOLD', 'PLATINUM']
+
+      return order
+        .filter(planName => this.datosPricing.plans[planName])
+        .map(planName => {
+          return {
+            name: planName,
+            ...this.datosPricing.plans[planName]
+          }
+        })
     },
 
-    // Computed property para los add-ons (AHORA FILTRADO)
     addOns () {
-      if (!this.datosPricing || !this.datosPricing.addOns) return {}
-
-      // Si no tenemos el plan actual cargado, no mostramos addons por seguridad
-      if (!this.planUserActual) return {}
+      if (!this.datosPricing || !this.datosPricing.addOns || !this.planUserActual) return {}
 
       const allAddons = this.datosPricing.addOns
       const filteredAddons = {}
 
       Object.keys(allAddons).forEach(key => {
         const addon = allAddons[key]
-        // Solo incluimos el addon si el plan actual del usuario está en availableFor
         if (addon.availableFor && addon.availableFor.includes(this.planUserActual)) {
           filteredAddons[key] = addon
         }
       })
-
       return filteredAddons
     },
 
-    // Computed property para las descripciones de features
     featureDescriptions () {
       if (!this.datosPricing || !this.datosPricing.features) return {}
       const descriptions = {}
@@ -179,33 +183,23 @@ export default {
         this.info_usuario = JSON.parse(rawUser)
         this.jwtValido = true
         this.obtenerPlanes()
-        if (parsedContrato !== null && parsedContrato !== '') {
-          this.planUserActual = parsedContrato.subscriptionPlans.petclinic || parsedContrato.subscriptionPlans.PetClinic || null
+        if (parsedContrato) {
+          this.planUserActual = parsedContrato.subscriptionPlans.PetClinic || parsedContrato.subscriptionPlans.petclinic || null
         }
       } catch (e) {
-        console.error('Error al parsear el usuario:', e)
         this.jwtValido = false
       }
     },
 
     async obtenerPlanes () {
       if (!this.jwtValido) return
-
       this.loading = true
-      this.errorEdicion = ''
-
       try {
         const serviceName = 'PetClinic'
         const version = '1.0.3'
-
         const response = await api.get(`http://localhost:5000/api/contratos/services/${serviceName}/pricing/${version}`)
-
-        console.log('Datos de los pricings:', response.data)
-
         if (response.data) {
           this.datosPricing = response.data
-        } else {
-          this.errorEdicion = 'No se recibieron datos de pricing'
         }
       } catch (error) {
         console.error('Error al obtener planes:', error)
@@ -217,34 +211,20 @@ export default {
     getAddonQuantity (addonKey) {
       const rawContrato = localStorage.getItem('contrato')
       if (!rawContrato) return 0
-
       try {
         const contrato = JSON.parse(rawContrato)
-        if (!contrato.subscriptionAddOns) return 0
+        const petClinicAddons = contrato.subscriptionAddOns?.PetClinic || contrato.subscriptionAddOns?.petclinic || {}
+        const addonData = petClinicAddons[addonKey]
 
-        const petClinicAddons = contrato.subscriptionAddOns.PetClinic || contrato.subscriptionAddOns.petclinic || {}
-
-        if (petClinicAddons[addonKey] !== undefined) {
-          if (typeof petClinicAddons[addonKey] === 'number') {
-            return petClinicAddons[addonKey]
-          } else if (petClinicAddons[addonKey].quantity !== undefined) {
-            return petClinicAddons[addonKey].quantity
-          }
+        if (addonData !== undefined) {
+          return typeof addonData === 'number' ? addonData : (addonData.quantity || 0)
         }
-
-        const oldAddonData = contrato.subscriptionAddOns[addonKey]
-        if (oldAddonData && oldAddonData.quantity !== undefined) {
-          return oldAddonData.quantity
-        }
-
         return 0
       } catch (e) {
-        console.error('Error leyendo cantidad de addon:', e)
         return 0
       }
     },
 
-    // Función para obtener nombres amigables de features
     getFeatureName (featureKey) {
       const featureMap = {
         petHotelCalendar: 'Pet Hotel Calendar',
@@ -257,7 +237,6 @@ export default {
       return featureMap[featureKey] || featureKey
     },
 
-    // Función para obtener nombres amigables de límites
     getLimitName (limitKey) {
       const limitMap = {
         maxRegisteredPets: 'Max Pets',
@@ -268,171 +247,99 @@ export default {
       return limitMap[limitKey] || limitKey
     },
 
-    // Verificar si este es el plan actual del usuario
     isCurrentPlan (planName) {
       return this.planUserActual === planName
     },
 
-    // Función para cambiar de plan
     async changePlan (planName) {
       if (!this.jwtValido) return
-
       try {
         const response = await api.put(`http://localhost:5000/api/contratos/update/${this.info_usuario.id}`, {
           newPlan: planName
         }, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
-          }
+          headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` }
         })
 
-        console.log(`Cambiando al plan ${planName}`, response.data)
-
         const nuevoPlan = response.data.subscriptionPlans.PetClinic || response.data.subscriptionPlans.petclinic || planName
-
         this.planUserActual = nuevoPlan
 
         const contratoActual = JSON.parse(localStorage.getItem('contrato') || '{}')
-
-        if (!contratoActual.subscriptionPlans) {
-          contratoActual.subscriptionPlans = {}
-        }
-
-        // Actualizar el plan en el localStorage
+        if (!contratoActual.subscriptionPlans) contratoActual.subscriptionPlans = {}
         contratoActual.subscriptionPlans.PetClinic = nuevoPlan
         localStorage.setItem('contrato', JSON.stringify(contratoActual))
 
-        window.dispatchEvent(new Event('contrato-updated')) // Para notificar a otros componentes que el contrato ha sido actualizado
-
+        window.dispatchEvent(new Event('contrato-updated'))
         alert(`Plan cambiado a ${planName} exitosamente`)
         this.$router.go()
       } catch (error) {
-        console.error('Error al cambiar de plan:', error)
-        this.errorEdicion = 'Error al cambiar de plan. Por favor, intenta nuevamente.'
+        this.errorEdicion = 'Error al cambiar de plan.'
       }
     },
 
     async subscribeToAddon (addonKey) {
-      if (!this.jwtValido) {
-        alert('Debes iniciar sesión para contratar un addon.')
-        return
-      }
-
-      // Confirmación simple al usuario
-      if (!confirm(`¿Estás seguro de que deseas suscribirte al addon: ${addonKey}?`)) {
-        return
-      }
+      if (!this.jwtValido) return
+      if (!confirm(`¿Estás seguro de que deseas suscribirte al addon: ${addonKey}?`)) return
 
       this.loading = true
-      this.errorEdicion = ''
-
       try {
         const response = await api.put(`http://localhost:5000/api/contratos/contractAddon/${this.info_usuario.id}`, {
           addons: addonKey
         }, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('jwt')}`,
-            'Content-Type': 'application/json'
-          }
+          headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` }
         })
 
-        console.log('Addon contratado exitosamente:', response.data)
-
         localStorage.setItem('contrato', JSON.stringify(response.data))
-
         window.dispatchEvent(new Event('contrato-updated'))
-
         alert(`Te has suscrito a ${addonKey} correctamente.`)
-        // Opcional: recargar contrato localmente para actualizar badge sin refrescar
-        this.obtenerContrato()
         this.$router.go()
       } catch (error) {
-        console.error('Error al contratar addon:', error)
-        this.errorEdicion = error.response?.data?.error || 'Error al procesar la suscripción del addon.'
-        alert(this.errorEdicion)
+        alert(error.response?.data?.error || 'Error en la suscripción.')
       } finally {
         this.loading = false
       }
     },
 
-    async actualizarDatosUsuario () {
-      const rawContrato = localStorage.getItem('contrato')
-      const parsedContrato = rawContrato ? JSON.parse(rawContrato) : null
-
-      if (parsedContrato !== null) {
-        this.planUserActual = parsedContrato.subscriptionPlans.PetClinic || parsedContrato.subscriptionPlans.petclinic || this.planUserActual
-      }
-    },
-
     async obtenerContrato () {
       try {
-        const token = localStorage.getItem('token') || localStorage.getItem('jwt')
+        const token = localStorage.getItem('jwt') || localStorage.getItem('token')
         const response = await api.get(`http://localhost:5000/api/contratos/getContract/${this.info_usuario.id}`, {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          }
+          headers: { Authorization: `Bearer ${token}` }
         })
-
-        const contrato = response.data
-        console.log('¡CONTRATO RECUPERADO!', contrato)
-        if (contrato) {
-          this.planUserActual = contrato.subscriptionPlans.PetClinic || contrato.subscriptionPlans.petclinic
-          localStorage.setItem('contrato', JSON.stringify(contrato))
+        if (response.data) {
+          this.planUserActual = response.data.subscriptionPlans.PetClinic || response.data.subscriptionPlans.petclinic
+          localStorage.setItem('contrato', JSON.stringify(response.data))
         }
-        return contrato
       } catch (error) {
-        if (error.response && error.response.status === 404) {
-          console.warn('El usuario no tiene un contrato activo.')
-          return null
-        }
-        console.error('Error al obtener el contrato:', error)
+        console.error('Error al obtener contrato')
       }
     },
-    // Obtiene el máximo permitido (soporta posibles errores tipográficos del Swagger como subscriptionContraint)
+
     getAddonMaxQuantity (addon) {
       const constraints = addon.subscriptionConstraints || addon.subscriptionContraint || {}
       return constraints.maxQuantity || 'Sin límite'
     },
 
-    // Genera el texto de cuánto aumenta ("+3 Max Pets")
     getAddonIncrementText (addon) {
       if (!addon.usageLimitsExtensions) return null
-
       const keys = Object.keys(addon.usageLimitsExtensions)
       if (keys.length === 0) return null
-
       const limitKey = keys[0]
-      let limitValue = addon.usageLimitsExtensions[limitKey]
-
-      // En el JSON, puede venir directamente como número (3) o como objeto { value: 3 }
-      if (typeof limitValue === 'object' && limitValue !== null) {
-        limitValue = limitValue.value
-      }
-
-      const friendlyName = this.getLimitName(limitKey)
-      return `+${limitValue} ${friendlyName}`
+      const val = addon.usageLimitsExtensions[limitKey]
+      const num = (typeof val === 'object') ? val.value : val
+      return `+${num} ${this.getLimitName(limitKey)}`
     },
 
-    // Comprueba si el usuario ya ha llegado al tope de compras de este add-on
     isAddonMaxedOut (addonKey, addon) {
       const currentQty = this.getAddonQuantity(addonKey)
       const maxQty = this.getAddonMaxQuantity(addon)
-
-      if (maxQty === 'Sin límite') return false
-      return currentQty >= maxQty
-    },
-
-    // Función para formatear números grandes
-    formatNumber (value) {
-      if (value >= 100000000) return 'Unlimited'
-      return value.toLocaleString()
+      return maxQty !== 'Sin límite' && currentQty >= maxQty
     }
   }
 }
 </script>
 
 <style scoped>
-@import './css/PricingPlan.css'
+@import './css/PricingPlan.css';
+/* He eliminado los estilos de .current-badge de aquí
+   para que no interfieran con tu CSS original */
 </style>

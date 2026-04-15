@@ -8,7 +8,7 @@ Vue.config.productionTip = false
 // SPACE configuration
 const spaceConfig = {
   url: 'http://localhost:5403/',
-  apiKey: '1725e7429f19b0da6b8f024ec27f2b16572df165f5c6b3f498a8e4bb24edf4b9',
+  apiKey: '8bf040d8893421e6eac7c4b81fc191c68fd912847e9c187a62b4232a53e5f7f7',
   allowConnectionWithSpace: true
 }
 

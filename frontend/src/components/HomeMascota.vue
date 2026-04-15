@@ -10,7 +10,7 @@
               <button class="btn-crear" @click="mostrarModal = true">➕ Añadir Mascota</button>
             </template>
             <template #fallback>
-              <h3>El plan asignado no permite la adición de mas mascotas al sistema</h3>
+              <h3>El plan asignado no permite la adición de más mascotas al sistema</h3>
             </template>
           </Feature>
         <ul v-if="mascotas.length" class="mascota-lista">
@@ -18,7 +18,7 @@
             <div class="mascota-info">
               <h3>{{ mascota.nombre }}</h3>
               <div class="mascota-tipo">Tipo: <span class="tipo-valor">{{ mascota.tipo }}</span></div>
-              <div class="mascota-fecha">Cumpleaños: <span class="fecha-valor">{{ formatearFecha(mascota.cumpleaños) }}</span></div>
+              <div class="mascota-fecha">Nacimiento: <span class="fecha-valor">{{ formatearFecha(mascota.cumpleaños) }}</span></div>
             </div>
             <div class="mascota-acciones">
               <button class="btn-editar" @click="abrirEdicion(mascota)" title="Editar">✏️</button>
@@ -48,7 +48,7 @@
             <option value="tortuga">TORTUGA</option>
           </select>
 
-          <label>Cumpleaños:</label>
+          <label>Nacimiento:</label>
           <input type="date" v-model="nuevaMascota.cumpleaños" required />
 
           <p v-if="errorCreacion" class="mensaje-error">{{ errorCreacion }}</p>
