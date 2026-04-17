@@ -1,5 +1,6 @@
-# backend/app/config.py
-# class Config:
-#     SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:root@localhost/petclinic_alternativo"  # Ajusta estos valores
-#     SQLALCHEMY_TRACK_MODIFICATIONS = False
-#     SECRET_KEY = 'tu_clave_secreta'
+#class Config:
+#    SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:root@localhost/petclinic_alternativo"  # Ajusta estos valores
+#    SQLALCHEMY_TRACK_MODIFICATIONS = False
+#    SECRET_KEY = 'tu_clave_secreta'
+#    JWT_SECRET_KEY='jwt_clave_secreta'
+#    SPACE_API_KEY = # Introduce la api_key del usuario que validará las peticiones en SPACE

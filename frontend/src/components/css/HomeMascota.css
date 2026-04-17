@@ -1,113 +1,312 @@
-.mascotas-container {
-  max-width: 600px;
-  margin: 2rem auto;
-  padding: 1.5rem;
-  border: 1px solid #ccc;
-  border-radius: 12px;
-  background-color: #f9f9f9;
+/* Wrapper del contenedor */
+.mascotas-wrapper {
+  background: transparent;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  position: relative;
+  z-index: 1;
 }
 
-.mascotas-container h2 {
+/* Contenedor principal */
+.mascotas-content {
+  max-width: 1100px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 3rem 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.mascotas-header {
   text-align: center;
-  color: #333;
+  margin-bottom: 2rem;
 }
 
+.mascotas-header h2 {
+  color: #2c3e50;
+  font-size: 2.5rem;
+  margin: 0;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Botón crear mascota */
 .btn-crear {
   display: block;
-  margin: 1rem auto;
-  padding: 0.5rem 1.2rem;
-  background-color: #4caf50;
+  margin: 1.5rem auto 2rem;
+  padding: 0.75rem 1.8rem;
+  background: linear-gradient(135deg, #1e90ff 0%, #1c7ed6 100%);
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 25px;
   cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(30, 144, 255, 0.3);
 }
 
 .btn-crear:hover {
-  background-color: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(30, 144, 255, 0.4);
+  background: linear-gradient(135deg, #1c7ed6 0%, #155bc0 100%);
 }
 
+.btn-crear:active {
+  transform: translateY(0);
+}
+
+/* Lista de mascotas */
 .mascota-lista {
   list-style: none;
   padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
 }
 
+/* Tarjeta de mascota */
 .mascota-card {
-  background-color: #fff;
-  margin: 0.7rem 0;
-  padding: 1rem;
-  border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-left: 6px solid #1e90ff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
+.mascota-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 30px rgba(30, 144, 255, 0.2);
+}
+
+.mascota-info {
+  flex: 1;
+}
+
+.mascota-card h3 {
+  font-size: 1.4rem;
+  color: #2c3e50;
+  margin: 0 0 1rem 0;
+  font-weight: 600;
+}
+
+.mascota-tipo,
+.mascota-fecha {
+  color: #7f8c8d;
+  font-size: 0.95rem;
+  margin-bottom: 0.6rem;
+  line-height: 1.6;
+}
+
+.tipo-valor,
+.fecha-valor {
+  color: #2c3e50;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.mascota-acciones {
+  display: flex;
+  gap: 0.7rem;
+  margin-top: 1rem;
+  justify-content: center;
+}
+
+.btn-editar,
+.btn-eliminar {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-editar {
+  background-color: #3498db;
+  color: white;
+}
+
+.btn-editar:hover {
+  background-color: #2980b9;
+  transform: scale(1.1);
+}
+
+.btn-eliminar {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.btn-eliminar:hover {
+  background-color: #c0392b;
+  transform: scale(1.1);
+}
+
+/* Sin mascotas */
 .no-mascotas {
   text-align: center;
-  color: #777;
-  margin-top: 1rem;
+  color: #7f8c8d;
+  margin-top: 3rem;
+  font-size: 1.1rem;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 15px;
 }
 
+/* Modal overlay */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 999;
+  will-change: opacity;
 }
 
+/* Modal */
 .modal {
   background: white;
-  padding: 2rem;
-  border-radius: 12px;
+  padding: 2.5rem;
+  border-radius: 20px;
   width: 90%;
-  max-width: 400px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  max-width: 450px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform, opacity;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal h3 {
+  color: #2c3e50;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
 }
 
 .modal label {
   display: block;
-  margin-top: 1rem;
-  font-weight: bold;
+  margin-top: 1.2rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 0.95rem;
 }
 
 .modal input,
 .modal select {
   width: 100%;
-  padding: 0.5rem;
-  margin-top: 0.3rem;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+  padding: 0.75rem 1rem;
+  margin-top: 0.5rem;
+  border-radius: 10px;
+  border: 2px solid #ecf0f1;
+  font-size: 0.95rem;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.modal input:focus,
+.modal select:focus {
+  outline: none;
+  border-color: #1e90ff;
+  box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.1);
 }
 
 .modal-buttons {
   display: flex;
-  justify-content: space-between;
-  margin-top: 1.5rem;
+  gap: 1rem;
+  margin-top: 2rem;
 }
 
 .modal-buttons button {
-  padding: 0.5rem 1rem;
+  flex: 1;
+  padding: 0.75rem 1.5rem;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.modal-buttons button[type="submit"] {
+  background: linear-gradient(135deg, #1e90ff 0%, #1c7ed6 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(30, 144, 255, 0.3);
+}
+
+.modal-buttons button[type="submit"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(30, 144, 255, 0.4);
 }
 
 .modal-buttons .cancelar {
-  background-color: #f44336;
-  color: white;
+  background-color: #ecf0f1;
+  color: #2c3e50;
+  border: 2px solid #bdc3c7;
 }
 
 .modal-buttons .cancelar:hover {
-  background-color: #d32f2f;
+  background-color: #bdc3c7;
+  border-color: #95a5a6;
 }
 
+.modal-buttons .btn-eliminar {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+  border: none;
+}
+
+.modal-buttons .btn-eliminar:hover {
+  background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+  box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+  transform: translateY(-2px);
+}
+
+/* Advertencia */
+.advertencia {
+  color: #e67e22;
+  background: linear-gradient(135deg, rgba(230, 126, 34, 0.1) 0%, rgba(243, 156, 18, 0.1) 100%);
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  margin: 1rem 0;
+  border-left: 4px solid #e67e22;
+  font-weight: 500;
+}
+
+/* Mensaje de error */
 .mensaje-error {
-  color: red;
+  color: #e74c3c;
   font-size: 0.9rem;
   margin-top: 1rem;
-  text-align: center;
+  padding: 0.75rem;
+  background-color: #fadbd8;
+  border-radius: 8px;
+  border-left: 4px solid #e74c3c;
+  text-align: left;
 }

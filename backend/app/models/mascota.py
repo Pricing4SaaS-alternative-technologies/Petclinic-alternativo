@@ -10,10 +10,12 @@ class Mascota(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     nombre = db.Column(db.String(50), nullable=False)
     cumpleaños = db.Column(db.Date, nullable=False)
-    tipo = db.Column(db.Enum(TipoMascota), nullable=False) # NO SE SI AL SER NULLABLE FALSE HAY QUE PONER DEFAULT
+    tipo = db.Column(db.Enum(TipoMascota), nullable=False)
     
     dueño_id = db.Column(db.Integer, db.ForeignKey('usuarios.id', ondelete='CASCADE'), nullable=False)
     dueño = db.relationship('Usuario', foreign_keys=[dueño_id], passive_deletes=True)
+    
+    #Revisar relacion con visitas y su borrado
     visitas = db.relationship('Visita', back_populates='mascota', cascade='all, delete-orphan', lazy='select')
     
     def __init__(self, nombre, cumpleaños, tipo, dueño_id):

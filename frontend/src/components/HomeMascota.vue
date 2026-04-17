@@ -1,22 +1,35 @@
 <template>
-  <div class="mascotas-container">
-    <h2>🐶 Mis Mascotas</h2>
+  <div>
+    <div class="mascotas-wrapper">
+      <div class="mascotas-content">
+        <div class="mascotas-header">
+          <h2>🐶 Mis Mascotas</h2>
+        </div>
+          <Feature id="petclinic-registeredPets">
+            <template #on>
+              <button class="btn-crear" @click="mostrarModal = true">➕ Añadir Mascota</button>
+            </template>
+            <template #fallback>
+              <h3>El plan asignado no permite la adición de más mascotas al sistema</h3>
+            </template>
+          </Feature>
+        <ul v-if="mascotas.length" class="mascota-lista">
+          <li v-for="mascota in mascotas" :key="mascota.id" class="mascota-card">
+            <div class="mascota-info">
+              <h3>{{ mascota.nombre }}</h3>
+              <div class="mascota-tipo">Tipo: <span class="tipo-valor">{{ mascota.tipo }}</span></div>
+              <div class="mascota-fecha">Nacimiento: <span class="fecha-valor">{{ formatearFecha(mascota.cumpleaños) }}</span></div>
+            </div>
+            <div class="mascota-acciones">
+              <button class="btn-editar" @click="abrirEdicion(mascota)" title="Editar">✏️</button>
+              <button class="btn-eliminar" @click="abrirModalEliminar(mascota)" title="Eliminar">🗑️</button>
+            </div>
+          </li>
+        </ul>
+        <p v-else class="no-mascotas">No tienes mascotas registradas.</p>
+      </div>
+    </div>
 
-    <button class="btn-crear" @click="mostrarModal = true">➕ Añadir Mascota</button>
-
-    <ul v-if="mascotas.length" class="mascota-lista">
-      <li v-for="mascota in mascotas" :key="mascota.id" class="mascota-card">
-        <strong>{{ mascota.nombre }}</strong>
-        <button @click="abrirEdicion(mascota)">✏️</button>
-        <button @click="eliminarMascota(mascota.id)">🗑️</button>
-        <br />
-        <span>Tipo: {{ mascota.tipo }}</span><br />
-        <span>Cumpleaños: {{ formatearFecha(mascota.cumpleaños) }}</span>
-      </li>
-    </ul>
-    <p v-else class="no-mascotas">No tienes mascotas registradas.</p>
-
-    <!-- Modal para crear mascota -->
     <div class="modal-overlay" v-if="mostrarModal">
       <div class="modal">
         <h3>Nueva Mascota</h3>
@@ -35,7 +48,7 @@
             <option value="tortuga">TORTUGA</option>
           </select>
 
-          <label>Cumpleaños:</label>
+          <label>Nacimiento:</label>
           <input type="date" v-model="nuevaMascota.cumpleaños" required />
 
           <p v-if="errorCreacion" class="mensaje-error">{{ errorCreacion }}</p>
@@ -48,7 +61,6 @@
       </div>
     </div>
 
-    <!-- Modal para editar -->
     <div class="modal-overlay" v-if="mostrarModalEditar">
       <div class="modal">
         <h3>Editar Nombre</h3>
@@ -63,19 +75,44 @@
         </form>
       </div>
     </div>
+
+    <div class="modal-overlay" v-if="mostrarModalEliminar">
+      <div class="modal">
+        <h3>Eliminar Mascota</h3>
+        <p>¿Estás seguro de que deseas eliminar a <strong>{{ mascotaSeleccionada.nombre }}</strong>?</p>
+        <p class="advertencia">Esta acción no se puede deshacer.</p>
+        <div class="modal-buttons">
+          <button type="button" @click="confirmarEliminar" class="btn-eliminar">Eliminar</button>
+          <button type="button" class="cancelar" @click="cerrarModalEliminar">Cancelar</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import axios from 'axios'
+import { syncSpaceToken } from '@/utils/spaceSync'
+import { Feature, useSpaceClient } from '@npm_team/space-vue-client'
 
 export default {
   name: 'MisMascotas',
+  components: {
+    Feature
+  },
+  setup () {
+    // 2. Llamamos al hook de forma síncrona. Aquí Vue sí ve el SpaceProvider.
+    const spaceClient = useSpaceClient()
+
+    // 3. Lo devolvemos para que Vue lo inyecte en el "this" del componente
+    return { spaceClient }
+  },
   data () {
     return {
       mascotas: [],
       mostrarModal: false,
       mostrarModalEditar: false,
+      mostrarModalEliminar: false,
       errorCreacion: '',
       errorEdicion: '',
       nuevaMascota: {
@@ -84,6 +121,11 @@ export default {
         tipo: ''
       },
       mascotaSeleccionada: null
+    }
+  },
+  computed: {
+    spaceKey () {
+      return this.$spaceState.payload ? this.$spaceState.payload.iat : 'sin-token'
     }
   },
   methods: {
@@ -98,6 +140,7 @@ export default {
           }
         })
         this.mascotas = res.data
+        await syncSpaceToken(this.$router)
       } catch (error) {
         console.error('Error al cargar mascotas:', error)
       }
@@ -158,15 +201,22 @@ export default {
         console.error('Error al editar nombre:', error)
       }
     },
-    async eliminarMascota (id) {
-      if (!confirm('¿Estás seguro de que quieres eliminar esta mascota?')) return
-
+    abrirModalEliminar (mascota) {
+      this.mascotaSeleccionada = { ...mascota }
+      this.mostrarModalEliminar = true
+    },
+    cerrarModalEliminar () {
+      this.mostrarModalEliminar = false
+      this.mascotaSeleccionada = null
+    },
+    async confirmarEliminar () {
       try {
-        await axios.delete(`http://localhost:5000/api/mascotas/${id}`, {
+        await axios.delete(`http://localhost:5000/api/mascotas/${this.mascotaSeleccionada.id}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('jwt')}`
           }
         })
+        this.cerrarModalEliminar()
         await this.cargarMascotas()
       } catch (error) {
         console.error('Error al eliminar mascota:', error)
@@ -184,9 +234,11 @@ export default {
       const [a, m, d] = fechaISO.split('T')[0].split('-')
       return `${d}-${m}-${a}`
     }
+
   },
-  created () {
-    this.cargarMascotas()
+  async created () {
+    // await syncSpaceToken(this.$router)
+    await this.cargarMascotas()
   }
 }
 </script>

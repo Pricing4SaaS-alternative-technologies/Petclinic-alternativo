@@ -1,0 +1,796 @@
+/* HotelRooms.css */
+.pet-hotel-container {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Arial', sans-serif;
+}
+
+/* Header Styles */
+.hotel-header {
+  text-align: center;
+  margin-bottom: 50px;
+  padding: 0 20px;
+}
+
+/* White Zone */
+.white-zone {
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(44, 62, 80, 0.08);
+  border-radius: 18px;
+  padding: 40px 36px;
+}
+
+.hotel-title {
+  font-size: 3.5rem;
+  color: #2c3e50;
+  margin-bottom: 20px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.hotel-description {
+  font-size: 1.4rem;
+  color: #7f8c8d;
+  line-height: 1.6;
+  max-width: 800px;
+  margin: 0 auto;
+  font-weight: 300;
+}
+
+/* Rooms Section */
+.rooms-title {
+  font-size: 2.2rem;
+  color: #2c3e50;
+  margin-bottom: 0;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 3px solid #3498db;
+  display: inline-block;
+  padding-bottom: 10px;
+  white-space: nowrap;
+}
+
+.rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 35px;
+  margin-top: 20px;
+}
+
+
+.room-description {
+  color: #666;
+  line-height: 1.5;
+  margin-bottom: 20px;
+  height: auto; 
+  white-space: normal; 
+  overflow: visible; 
+  word-wrap: break-word;
+}
+
+.room-card {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  min-height: 400px;
+  background: #ffffff;
+  border: 1px solid #e6e8ec;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.room-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 24px 28px;
+}
+
+.description-container {
+  flex: 1;
+  overflow: visible;
+}
+
+.room-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+  border-color: #3498db;
+}
+
+/* Room Image */
+.room-image-container {
+  height: 220px;
+  overflow: hidden;
+  position: relative;
+}
+
+.room-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.room-card:hover .room-image {
+  transform: scale(1.05);
+}
+
+.no-image-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.room-name {
+  font-size: 1.8rem;
+  color: #2c3e50;
+  margin-bottom: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.room-perfect-for {
+  font-size: 1.1rem;
+  color: #7f8c8d;
+  margin-bottom: 25px;
+  flex-grow: 1;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+/* Button */
+.see-details-btn {
+  background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+  color: white;
+  border: none;
+  padding: 14px 30px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  width: 100%;
+  margin-top: auto;
+}
+
+.see-details-btn:hover {
+  background: linear-gradient(135deg, #2980b9 0%, #1a252f 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+}
+
+.see-details-btn:active {
+  transform: translateY(0);
+}
+
+/* Loading State */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 20px;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 60px;
+  height: 60px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-container p {
+  font-size: 1.2rem;
+  color: #7f8c8d;
+  margin-top: 15px;
+}
+
+/* Empty and Error States */
+.no-rooms,
+.no-auth {
+  text-align: center;
+  padding: 80px 20px;
+  color: #7f8c8d;
+  font-size: 1.3rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  margin-top: 30px;
+}
+
+.error-message {
+  background: #ffebee;
+  color: #c62828;
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 30px;
+  text-align: center;
+  font-size: 1.1rem;
+  border-left: 5px solid #c62828;
+}
+
+.error {
+  color: #e74c3c;
+  font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .pet-hotel-container {
+    padding: 20px 15px;
+  }
+  
+  .hotel-title {
+    font-size: 2.5rem;
+  }
+  
+  .hotel-description {
+    font-size: 1.2rem;
+    padding: 0 10px;
+  }
+  
+  .rooms-title {
+    font-size: 1.8rem;
+  }
+  
+  .rooms-grid {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+  
+  .room-card {
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  
+  .room-content {
+    padding: 20px;
+  }
+  
+  .room-name {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hotel-title {
+    font-size: 2rem;
+  }
+  
+  .hotel-description {
+    font-size: 1.1rem;
+  }
+  
+  .rooms-title {
+    font-size: 1.6rem;
+  }
+  
+  .room-image-container {
+    height: 180px;
+  }
+  
+  .room-name {
+    font-size: 1.4rem;
+  }
+  
+  .room-perfect-for {
+    font-size: 1rem;
+  }
+  
+  .see-details-btn {
+    padding: 12px 20px;
+    font-size: 1rem;
+  }
+}
+
+
+/* Reservas */
+.see-reservas-btn {
+  background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.see-reservas-btn:hover {
+  background: linear-gradient(135deg, #2980b9 0%, #1a252f 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+}
+
+/* PropHabitacionesHotelModal.css */
+
+/* Estilos para el header de las habitaciones */
+.rooms-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.rooms-header-content {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  flex: 1;
+  min-width: 300px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* Estilos para el botón de crear habitación (tonos azules) */
+.create-room-btn {
+  background: linear-gradient(135deg, #5dade2 0%, #2e86c1 100%);
+  color: white;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.05rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 15px rgba(46, 134, 193, 0.28);
+  white-space: nowrap;
+}
+
+.create-room-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(46, 134, 193, 0.42);
+  background: linear-gradient(135deg, #2e86c1 0%, #5dade2 100%);
+}
+
+.create-room-btn:active {
+  transform: translateY(0);
+}
+
+.create-room-btn:disabled {
+  background: linear-gradient(135deg, #cccccc 0%, #999999 100%);
+  cursor: not-allowed;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transform: none;
+}
+
+.create-room-btn i {
+  font-size: 1.1rem;
+}
+
+/* Estilos del modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  will-change: opacity;
+}
+
+.modal {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 2.5rem;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  animation: slideInModal 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideInModal {
+  from {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal h3 {
+  color: #2c3e50;
+  font-size: 1.6rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  margin-top: 0;
+}
+
+.modal label {
+  font-weight: 600;
+  color: #2c3e50;
+  display: block;
+  margin-top: 1.2rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.modal input,
+.modal select,
+.modal textarea {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  border: 2px solid #ecf0f1;
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.modal input:focus,
+.modal select:focus,
+.modal textarea:focus {
+  outline: none;
+  border-color: #1e90ff;
+  box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.1);
+}
+
+.modal textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Estilos del formulario */
+.form-group {
+  margin-bottom: 0;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  margin-top: 1.2rem;
+}
+
+.form-group input[type="text"],
+.form-group input[type="url"],
+.form-group input[type="number"],
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 2px solid #ecf0f1;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  margin-top: 0.5rem;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #1e90ff;
+  box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.1);
+}
+
+.clinica-select {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 2px solid #ecf0f1;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  background-color: white;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  margin-top: 0.5rem;
+}
+
+.clinica-select:focus {
+  outline: none;
+  border-color: #1e90ff;
+  box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.1);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.text-muted {
+  display: block;
+  margin-top: 0.5rem;
+  color: #7f8c8d;
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+
+/* Radio group para tamaños y tipos */
+.radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 0.75rem;
+}
+
+.radio-group label {
+  padding: 10px 15px;
+  border: 2px solid #ecf0f1;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 0;
+  margin-bottom: 0;
+  font-weight: 500;
+}
+
+.radio-group label.selected {
+  background-color: #1e90ff;
+  color: white;
+  border-color: #1e90ff;
+}
+
+.radio-group input[type="radio"] {
+  display: none;
+}
+
+/* Checkbox para reservable */
+.checkbox-group {
+  margin-top: 1.2rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+  padding-left: 35px;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.checkbox-label input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 25px;
+  width: 25px;
+  background-color: #ecf0f1;
+  border-radius: 6px;
+  border: 2px solid #ecf0f1;
+  transition: all 0.3s ease;
+}
+
+.checkbox-label:hover input ~ .checkmark {
+  border-color: #1e90ff;
+}
+
+.checkbox-label input:checked ~ .checkmark {
+  background-color: #1e90ff;
+  border-color: #1e90ff;
+}
+
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+.checkbox-label input:checked ~ .checkmark:after {
+  display: block;
+}
+
+.checkbox-label .checkmark:after {
+  left: 8px;
+  top: 4px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 3px 3px 0;
+  transform: rotate(45deg);
+}
+
+/* Vista previa de imagen */
+.image-preview {
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.image-preview label {
+  margin-top: 1rem;
+  margin-bottom: 0.75rem;
+  display: block;
+}
+
+.preview-container {
+  width: 100%;
+  max-width: 200px;
+  height: 150px;
+  border: 2px solid #ecf0f1;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.preview-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Botones del modal */
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.modal-buttons button {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-crear {
+  background: linear-gradient(135deg, #1e90ff 0%, #1c7ed6 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(30, 144, 255, 0.3);
+}
+
+.btn-crear:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1c7ed6 0%, #155bc0 100%);
+  box-shadow: 0 6px 20px rgba(30, 144, 255, 0.4);
+}
+
+.modal-buttons .cancelar {
+  background-color: #ecf0f1;
+  color: #2c3e50;
+  border: 2px solid #bdc3c7;
+}
+
+.modal-buttons .cancelar:hover:not(:disabled) {
+  background-color: #bdc3c7;
+  border-color: #95a5a6;
+}
+
+.modal-buttons button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Mensajes de error y éxito */
+.error-message-modal,
+.success-message-modal {
+  padding: 1rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.error-message-modal {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.success-message-modal {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+/* Estilos específicos para el modal en pantallas pequeñas */
+@media (max-width: 768px) {
+  .rooms-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  
+  .rooms-header-content {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .create-room-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 14px 20px;
+  }
+  
+  .header-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .modal {
+    width: 95%;
+    max-width: 95%;
+    padding: 2rem 1.5rem;
+  }
+  
+  .modal h3 {
+    font-size: 1.4rem;
+  }
+  
+  .radio-group {
+    flex-direction: column;
+  }
+  
+  .modal-buttons {
+    flex-direction: column-reverse;
+  }
+  
+  .modal-buttons button {
+    padding: 0.85rem 1.5rem;
+  }
+}
+
+/* Estilos para el spinner de carga */
+.fa-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

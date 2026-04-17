@@ -1,21 +1,33 @@
 <template>
-  <div class="visitas-container" v-if="jwtValido">
-    <h2>🩺 Visitas</h2>
-    <button class="btn-crear" @click="openCrear">➕ Nueva Visita</button>
-
-    <ul v-if="visitas.length" class="visita-lista">
-      <li v-for="v in visitas" :key="v.id" class="visita-card">
-        <span>{{ formatearFecha(v.date_time) }}</span>
-        <span>{{ v.dueno }}</span>
-        <span>{{ v.mascota }}</span>
-        <span>{{ v.description }}</span>
-        <div class="acciones">
-          <button @click="abrirEditar(v)">✏️</button>
-          <button @click="abrirEliminar(v)">🗑️</button>
+  <div>
+    <div class="visitas-wrapper" v-if="jwtValido">
+      <div class="visitas-content">
+        <div class="visitas-header">
+          <h2>🩺 Mis Visitas</h2>
         </div>
-      </li>
-    </ul>
-    <p v-else class="no-visitas">No hay visitas registradas.</p>
+
+        <button class="btn-crear" @click="openCrear">➕ Nueva Visita</button>
+
+        <ul v-if="visitas.length" class="visita-lista">
+          <li v-for="v in visitas" :key="v.id" class="visita-card">
+            <div class="visita-info">
+              <h3>{{ v.mascota_nombre }}</h3>
+              <div class="visita-desc">{{ v.descripcion }}</div>
+              <div class="visita-fecha">📅 {{ formatearFecha(v.fecha) }}</div>
+            </div>
+            <div class="visita-acciones">
+              <button class="btn-editar" @click="abrirEditar(v)" title="Editar">✏️</button>
+              <button class="btn-eliminar" @click="abrirEliminar(v)" title="Eliminar">🗑️</button>
+            </div>
+          </li>
+        </ul>
+        <p v-else class="no-visitas">No hay visitas registradas.</p>
+      </div>
+    </div>
+
+    <div class="no-auth" v-else>
+      <p class="error">No estás autorizado. Por favor, inicia sesión como veterinario.</p>
+    </div>
 
     <!-- Modal Crear -->
     <div class="modal-overlay" v-if="mostrarCrear">
@@ -23,7 +35,7 @@
         <h3>Crear Visita</h3>
         <label>Propietario</label>
         <select v-model="nueva.dueno_id" @change="cargarMascotasDelPropietario" required>
-          <option disabled value="">Selecciona dueño</option>
+          <option disabled value="">Selecciona un dueño</option>
           <option v-for="p in propietarios" :key="p.id" :value="p.id">
             {{ p.usuario }}
           </option>
@@ -31,17 +43,17 @@
 
         <label>Mascota</label>
         <select v-model="nueva.mascota_id" required>
-          <option disabled value="">Selecciona mascota</option>
+          <option disabled value="">Selecciona una mascota</option>
           <option v-for="m in mascotasDelPropietario" :key="m.id" :value="m.id">
             {{ m.nombre }}
           </option>
         </select>
 
         <label>Fecha y hora</label>
-        <input type="datetime-local" v-model="nueva.date_time" required />
+        <input type="datetime-local" v-model="nueva.fecha" required />
 
         <label>Descripción</label>
-        <input v-model="nueva.description" required />
+        <input v-model="nueva.descripcion" required />
         <p v-if="errorCreacion" class="mensaje-error">{{ errorCreacion }}</p>
         <div class="modal-buttons">
           <button @click="crearVisita">Guardar</button>
@@ -53,12 +65,12 @@
     <!-- Modal Editar -->
     <div class="modal-overlay" v-if="mostrarEditar">
       <div class="modal">
-        <h3>Editar Visita</h3>
+        <h3>Editando visita para {{ seleccionada.mascota_nombre }}</h3>
         <label>Fecha y hora</label>
-        <input type="datetime-local" v-model="seleccionada.date_time" required />
+        <input type="datetime-local" v-model="seleccionada.fecha" required />
 
-        <label>Descripción</label>
-        <input v-model="seleccionada.description" />
+        <label>Descripción de la visita</label>
+        <input v-model="seleccionada.descripcion" />
         <p v-if="errorEdicion" class="mensaje-error">{{ errorEdicion }}</p>
         <div class="modal-buttons">
           <button @click="editarVisita">Actualizar</button>
@@ -66,11 +78,12 @@
         </div>
       </div>
     </div>
+
     <!-- Modal Eliminar -->
     <div class="modal-overlay" v-if="mostrarEliminar">
       <div class="modal">
         <h3>Eliminar Visita</h3>
-        <p>¿Seguro que quieres eliminar la visita del {{ formatearFecha(seleccionadaEliminar.date_time) }}?</p>
+        <p>¿Seguro que quieres eliminar la visita del {{ formatearFecha(seleccionadaEliminar.fecha) }} para {{ seleccionadaEliminar.mascota_nombre }}?</p>
         <div class="modal-buttons">
           <button @click="confirmarEliminarVisita">Eliminar</button>
           <button class="cancelar" @click="cerrarEliminar">Cancelar</button>
@@ -78,16 +91,13 @@
       </div>
     </div>
   </div>
-  <div v-else class="no-auth">
-    <p class="error">No estás autorizado. Por favor, inicia sesión como veterinario.</p>
-  </div>
 </template>
 
 <script>
 import api from '@/api/axios'
 
 export default {
-  name: 'HomeVisitas',
+  name: 'Visitas',
   data () {
     return {
       info_usuario: null,
@@ -108,8 +118,8 @@ export default {
         clinica_id: '',
         dueno_id: '',
         mascota_id: '',
-        date_time: '',
-        description: ''
+        fecha: '',
+        descripcion: ''
       }
     }
   },
@@ -137,26 +147,16 @@ export default {
         this.jwtValido = true
         this.usuarioId = this.info_usuario.id
         this.clinicaId = this.info_usuario.clinica_id
-        this.fetchMisVisitas()
+        this.cargarVisitas()
       } catch (e) {
         console.error('Error al parsear usuario:', e)
         this.jwtValido = false
       }
     },
 
-    // carga todas las visitas del dueño de clínica
-    async fetchMisVisitas () {
-      try {
-        const { data } = await api.get('/visitas/mine')
-        this.visitas = data
-      } catch (e) {
-        console.error('No se pudieron cargar tus visitas:', e)
-      }
-    },
-
     openCrear () {
       this.mostrarCrear = true
-      this.nueva = { clinica_id: '', dueno_id: '', mascota_id: '', date_time: '', description: '' }
+      this.nueva = { clinica_id: '', dueno_id: '', mascota_id: '', fecha: '', descripcion: '' }
       this.propietarios = []
       this.mascotasDelPropietario = []
       this.errorCreacion = ''
@@ -178,10 +178,7 @@ export default {
       this.nueva.mascota_id = ''
       this.mascotasDelPropietario = []
       try {
-        const { data } = await api.get(
-          `/clinicas/${this.clinicaId}` +
-          `/props_mascotas/${this.nueva.dueno_id}/mascotas`
-        )
+        const { data } = await api.get(`/mascotas/dueno-mascota/${this.nueva.dueno_id}`)
         this.mascotasDelPropietario = data
       } catch (e) {
         console.error('Error al cargar mascotas:', e)
@@ -189,36 +186,31 @@ export default {
     },
 
     async cargarVisitas () {
-      if (!this.nueva.mascota_id) return
       try {
-        const { data } = await api.get(
-          `/clinicas/${this.clinicaId}` +
-          `/props_mascotas/${this.nueva.dueno_id}` +
-          `/mascotas/${this.nueva.mascota_id}/visitas`
-        )
+        const { data } = await api.get(`visitas/veterinario/${this.usuarioId}`)
         this.visitas = data
       } catch (e) {
-        console.error('Error al cargar visitas:', e)
+        console.error('Error al cargar visitas:', e.response)
       }
     },
 
     async crearVisita () {
       this.errorCreacion = ''
       // validación fecha+hora
-      if (!this.nueva.date_time) {
+      if (!this.nueva.fecha) {
         this.errorCreacion = 'Fecha y hora requerida'
         return
       }
-      const sel = new Date(this.nueva.date_time)
+      const sel = new Date(this.nueva.fecha)
       if (sel < new Date()) {
         this.errorCreacion = 'La fecha y hora no puede ser anterior al momento actual'
         return
       }
-      if (!this.nueva.description.trim()) {
+      if (!this.nueva.descripcion.trim()) {
         this.errorCreacion = 'Descripción requerida'
         return
       }
-      if (this.nueva.description.length > 255) {
+      if (this.nueva.descripcion.length > 255) {
         this.errorCreacion = 'La descripción no puede tener más de 255 caracteres'
         return
       }
@@ -226,15 +218,14 @@ export default {
 
       try {
         await api.post(
-          `/clinicas/${this.clinicaId}` +
-          `/props_mascotas/${this.nueva.dueno_id}` +
-          `/mascotas/${this.nueva.mascota_id}/visitas`,
+          '/visitas/crear',
           {
-            date_time: this.nueva.date_time,
-            description: this.nueva.description
+            mascota_id: this.nueva.mascota_id,
+            fecha: this.nueva.fecha,
+            descripcion: this.nueva.descripcion
           }
         )
-        await this.fetchMisVisitas()
+        await this.cargarVisitas()
         this.cerrarCrear()
       } catch (e) {
         console.error('Error al crear visita:', e)
@@ -244,37 +235,34 @@ export default {
     async editarVisita () {
       this.errorEdicion = ''
       // validación fecha+hora
-      if (!this.seleccionada.date_time) {
+      if (!this.seleccionada.fecha) {
         this.errorEdicion = 'Fecha y hora requerida'
         return
       }
-      const sel = new Date(this.seleccionada.date_time)
+      const sel = new Date(this.seleccionada.fecha)
       if (sel < new Date()) {
         this.errorEdicion = 'La fecha y hora no puede ser anterior al momento actual'
         return
       }
       // validación descripción
-      if (!this.seleccionada.description.trim()) {
+      if (!this.seleccionada.descripcion.trim()) {
         this.errorEdicion = 'Descripción requerida'
         return
       }
-      if (this.seleccionada.description.length > 255) {
+      if (this.seleccionada.descripcion.length > 255) {
         this.errorEdicion = 'La descripción no puede tener más de 255 caracteres'
         return
       }
       this.errorEdicion = ''
 
       try {
-        await api.patch(
-          `/clinicas/${this.clinicaId}` +
-          `/props_mascotas/${this.seleccionada.dueno_id}` +
-          `/mascotas/${this.seleccionada.mascota_id}/visitas/${this.seleccionada.id}`,
+        await api.patch(`/visitas/actualizar/${this.seleccionada.id}`,
           {
-            date_time: this.seleccionada.date_time,
-            description: this.seleccionada.description
+            fecha: this.seleccionada.fecha,
+            descripcion: this.seleccionada.descripcion
           }
         )
-        await this.fetchMisVisitas()
+        await this.cargarVisitas()
         this.cerrarEditar()
       } catch (e) {
         console.error('Error al editar visita:', e)
@@ -286,11 +274,8 @@ export default {
     async confirmarEliminarVisita () {
       try {
         await api.delete(
-          `/clinicas/${this.clinicaId}` +
-          `/props_mascotas/${this.seleccionadaEliminar.dueno_id}` +
-          `/mascotas/${this.seleccionadaEliminar.mascota_id}/visitas/${this.seleccionadaEliminar.id}`
-        )
-        await this.fetchMisVisitas()
+          `/visitas/eliminar/${this.seleccionadaEliminar.id}`)
+        await this.cargarVisitas()
         this.cerrarEliminar()
       } catch (e) {
         console.error('Error al eliminar visita:', e)
@@ -314,7 +299,8 @@ export default {
     },
 
     abrirEliminar (v) {
-      this.seleccionadaEliminar = { ...v }
+      console.log('Eliminar visita:', v)
+      this.seleccionadaEliminar = v
       this.mostrarEliminar = true
     },
 
@@ -334,5 +320,5 @@ export default {
 </script>
 
 <style scoped>
-@import './css/HomeVisitas.css';
+@import './css/Visitas.css';
 </style>

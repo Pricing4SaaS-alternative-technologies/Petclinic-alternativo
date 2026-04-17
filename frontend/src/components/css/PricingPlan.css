@@ -1,0 +1,368 @@
+.pricing-container {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-title {
+  font-size: 2.5rem;
+  color: #2c3e50;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.page-subtitle {
+  font-size: 1.2rem;
+  color: #7f8c8d;
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 30px;
+  margin-bottom: 60px;
+}
+
+.plan-card {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.plan-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.plan-card.current-plan {
+  border-color: #3498db;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.plan-card.current-plan::before {
+  content: 'CURRENT';
+  position: absolute;
+  top: 15px;
+  right: -35px;
+  background: #ffcc00;
+  color: white;
+  padding: 5px 40px;
+  transform: rotate(45deg);
+  font-size: 0.8rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.plan-header {
+  text-align: center;
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #f1f2f6;
+}
+
+.plan-header h3 {
+  font-size: 1.8rem;
+  color: #2c3e50;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.plan-price {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #3498db;
+  margin-bottom: 15px;
+}
+
+.plan-price span {
+  display: block;
+}
+
+.plan-description {
+  color: #7f8c8d;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.plan-features {
+  margin-bottom: 25px;
+}
+
+.plan-features h4,
+.plan-limits h4 {
+  color: #2c3e50;
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+
+.plan-features ul,
+.plan-limits ul {
+  list-style: none;
+  padding: 0;
+}
+
+.plan-features li {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  padding: 8px 0;
+  border-bottom: 1px dashed #f1f2f6;
+}
+
+.plan-features li:last-child {
+  border-bottom: none;
+}
+
+.feature-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  flex-shrink: 0;
+  font-weight: bold;
+}
+
+.feature-active {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.feature-inactive {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.feature-name {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-right: 8px;
+  min-width: 150px;
+}
+
+.feature-description {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  flex: 1;
+}
+
+.plan-limits ul {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.plan-limits li {
+  background: #f8f9fa;
+  padding: 10px;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.limit-name {
+  color: #555;
+  font-weight: 500;
+}
+
+.limit-value {
+  font-weight: bold;
+  color: #3498db;
+  font-size: 1.1rem;
+}
+
+.plan-actions {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.change-plan-btn {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 14px 30px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  letter-spacing: 0.5px;
+}
+
+.change-plan-btn:hover:not(:disabled) {
+  background: #2980b9;
+  transform: translateY(-2px);
+}
+
+.change-plan-btn:disabled {
+  background: #aaaaaa;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.addons-section {
+  background: #f8f9fa;
+  padding: 30px;
+  border-radius: 12px;
+  margin-top: 40px;
+}
+
+.addons-section h3 {
+  color: #2c3e50;
+  margin-bottom: 25px;
+  text-align: center;
+  font-size: 1.8rem;
+}
+
+.addons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.addon-card {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e1e1e1;
+  transition: transform 0.3s ease;
+}
+
+.addon-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.addon-card h4 {
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.addon-description {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+.addon-price {
+  font-weight: bold;
+  color: #e74c3c;
+  font-size: 1.2rem;
+  margin-bottom: 5px;
+}
+
+.addon-available {
+  font-size: 0.85rem;
+  color: #95a5a6;
+  font-style: italic;
+}
+
+.no-auth {
+  text-align: center;
+  padding: 40px;
+  background: #fff3cd;
+  border-radius: 8px;
+  border: 1px solid #ffeaa7;
+}
+
+.error {
+  color: #e74c3c;
+  font-weight: 600;
+}
+
+.error-message {
+  background: #ffebee;
+  color: #c62828;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  font-size: 1.2rem;
+  color: #7f8c8d;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .plans-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .plans-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .plans-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .plan-card {
+    padding: 20px;
+  }
+  
+  .plan-features li {
+    flex-direction: column;
+  }
+  
+  .feature-name {
+    min-width: auto;
+    margin-bottom: 5px;
+  }
+  
+  .plan-limits ul {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-title {
+    font-size: 2rem;
+  }
+  
+  .plan-price {
+    font-size: 2rem;
+  }
+  
+  .addons-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.addon-card {
+  position: relative;
+}
+
+.addon-quantity-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #4caf50;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}

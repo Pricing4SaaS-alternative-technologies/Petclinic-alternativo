@@ -1,154 +1,158 @@
+
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.extensions import db
 from app.models.adopcion import Adopcion
 from app.models.mascota import Mascota
-from app.models.prop_mascota import Prop_mascota
-from app.models.enums import EstadoAdopcion
+from app.models.usuario import Usuario
+from app.models.peticion_adopcion import Peticion_adopcion
+from app.models.enums import TipoUsuarioEnum, EstadoPeticion
 
-bp = Blueprint('adopciones', __name__, url_prefix='/api/adopciones')
+adopciones_bp = Blueprint('adopciones', __name__, url_prefix='/api/adopciones')
 
-@bp.route('', methods=['GET'])
-@jwt_required(optional=True)
-def listar_todas():
-    return jsonify([a.to_dict() for a in Adopcion.query.all()]), 200
-
-@bp.route('/mine/creadas', methods=['GET'])
+@adopciones_bp.route('/admin/listar', methods=['GET'])
 @jwt_required()
-def listar_creadas():
-    user = get_jwt_identity()
-    return jsonify([a.to_dict()
-      for a in Adopcion.query.filter_by(dueño_nuevo_id=user).all()
-    ]), 200
+def listar_adopciones():
+    usuario_id = get_jwt_identity()
+    usuario = db.get_or_404(Usuario, usuario_id)
+    
+    if usuario.tipo_usuario != TipoUsuarioEnum.ADMIN:
+        return jsonify({'msg':'No autorizado'}), 403
+    
+    adopciones = Adopcion.query.all()
+    return jsonify([
+        {
+            'id': a.id,
+            'descripcion': a.descripcion,
+            'adopcion_cerrada': a.adopcion_cerrada,
+            'fecha_creacion': a.fecha_creacion.isoformat(),
+            'mascota_id': a.mascota_id,
+            'mascota_nombre': a.mascota.nombre,
+            'dueño_anterior_id': a.dueño_anterior_id,
+            'dueño_anterior_nombre': a.dueño_anterior.nombre+' '+a.dueño_anterior.apellidos ,
+            'dueño_nuevo_id': a.dueño_nuevo_id,
+            'dueño_nuevo_nombre': a.dueño_nuevo.nombre+' '+a.dueño_nuevo.apellidos if a.dueño_nuevo else "No tiene dueño adoptivo"
+        }
+        for a in adopciones
+        ]), 200
 
-@bp.route('/mine/pendientes', methods=['GET'])
+# Este metodo actua como filtro para el admin o como el listar_todas para el prop_mascota
+@adopciones_bp.route('/usuario/<int:user_id>', methods=['GET'])
 @jwt_required()
-def listar_pendientes():
-    user = get_jwt_identity()
-    propuestas = Adopcion.query.filter(
-        Adopcion.dueño_anterior_id == user,
-        Adopcion.estado_adopcion == EstadoAdopcion.PENDIENTE,
-        Adopcion.dueño_nuevo_id.isnot(None)    # sólo propuestas reales
-    ).all()
-    return jsonify([a.to_dict() for a in propuestas]), 200
+def listar_adopciones_usuario(user_id):
+    usuario_id = int(get_jwt_identity())
+    usuario = db.get_or_404(Usuario, usuario_id)
+    usuario_buscado = db.get_or_404(Usuario, user_id)
+    
+    if usuario.tipo_usuario != TipoUsuarioEnum.ADMIN and usuario_buscado.tipo_usuario != TipoUsuarioEnum.PROP_MASCOTA:
+        return jsonify({'msg':'No estas autorizado para ver estas funciones'}), 403
+    
+    if usuario_buscado.tipo_usuario != TipoUsuarioEnum.PROP_MASCOTA:
+        return jsonify({'msg':'El ID proporcionado no corresponde a un propietario de mascota'}), 400
+    
+    if usuario.tipo_usuario != TipoUsuarioEnum.ADMIN and usuario_id != user_id:
+        return jsonify({'msg':'No puedes listar las adopciones de otro usuario'}), 403
+    
+    adopciones = Adopcion.query.filter(Adopcion.dueño_anterior_id==user_id).all()
+    return jsonify([
+        {
+            'id': a.id,
+            'descripcion': a.descripcion,
+            'adopcion_cerrada': a.adopcion_cerrada,
+            'fecha_creacion': a.fecha_creacion.isoformat(),
+            'mascota_id': a.mascota_id,
+            'mascota_nombre': a.mascota.nombre,
+            'dueño_anterior_id': a.dueño_anterior_id,
+            'dueño_anterior_nombre': a.dueño_anterior.nombre+' '+a.dueño_anterior.apellidos ,
+            'dueño_nuevo_id': a.dueño_nuevo_id,
+            'dueño_nuevo_nombre': a.dueño_nuevo.nombre+' '+a.dueño_nuevo.apellidos if a.dueño_nuevo else "No tiene dueño adoptivo"
+        }
+        for a in adopciones
+        ]), 200
 
-@bp.route('', methods=['POST'])
+# Orientado para que los solicitantes puedan ver las adopciones disponibles ne su clinica
+@adopciones_bp.route('/clinica/<int:clinica_id>', methods=['GET'])
+@jwt_required()
+def listar_adopciones_clinica(clinica_id):
+    usuario_id = int(get_jwt_identity())
+    usuario = db.get_or_404(Usuario, usuario_id)
+
+    if usuario.tipo_usuario != TipoUsuarioEnum.ADMIN and usuario.tipo_usuario != TipoUsuarioEnum.PROP_MASCOTA:
+        return jsonify({'msg':'No estas autorizado para ver estas funciones'}), 403
+    
+    if usuario.tipo_usuario != TipoUsuarioEnum.PROP_MASCOTA and usuario.clinica_id != clinica_id:
+        return jsonify({'msg':'No puedes listar las adopciones de una clinica a la que no perteneces'}), 403
+
+    adopciones = Adopcion.query.filter().all()
+    return jsonify([
+        {
+            'id': a.id,
+            'descripcion': a.descripcion,
+            'adopcion_cerrada': a.adopcion_cerrada,
+            'fecha_creacion': a.fecha_creacion.isoformat(),
+            'mascota_id': a.mascota_id,
+            'mascota_nombre': a.mascota.nombre,
+            'dueño_anterior_id': a.dueño_anterior_id,
+            'dueño_anterior_nombre': a.dueño_anterior.nombre+' '+a.dueño_anterior.apellidos ,
+            'dueño_nuevo_id': a.dueño_nuevo_id,
+            'dueño_nuevo_nombre': a.dueño_nuevo.nombre+' '+a.dueño_nuevo.apellidos if a.dueño_nuevo else "No tiene dueño adoptivo"
+        }
+        for a in adopciones if a.dueño_anterior.clinica_id==clinica_id
+        ]), 200
+
+@adopciones_bp.route('/crear', methods=['POST'])
 @jwt_required()
 def crear_adopcion():
-    user = get_jwt_identity()
+    usuario_id = int(get_jwt_identity())
+    usuario = db.get_or_404(Usuario, usuario_id)
+    
+    if usuario.tipo_usuario != TipoUsuarioEnum.PROP_MASCOTA:
+        return jsonify({'msg':'No puedes crear adopciones sin ser un usuario de mascota'}), 403
+    
     data = request.get_json()
 
+    if not data or 'mascota_id' not in data:
+        return jsonify({'msg': 'mascota_id es requerido'}), 400
+
     desc = data.get('descripcion', '').strip()
     if not desc:
         return jsonify({'msg':'Descripción requerida'}), 400
     if len(desc) > 255:
         return jsonify({'msg':'La descripción no puede tener más de 255 caracteres'}), 400
 
-    m = Mascota.query.get_or_404(data['mascota_id'])
-    if m.dueño_id == user:
-        return jsonify({'msg':'No puedes proponer adopción de tu propia mascota'}),400
-    ad = Adopcion(
-      descripcion=data.get('descripcion',''),
-      mascota_id=m.id,
-      dueño_anterior_id=m.dueño_id,
-      dueño_nuevo_id=None
-    )
-    db.session.add(ad)
-    db.session.commit()
-    return jsonify(ad.to_dict()), 201
-
-@bp.route('/<int:aid>/aceptar', methods=['PUT'])
-@jwt_required()
-def aceptar(aid):
-    user = get_jwt_identity()
-    try:
-        user = int(user)
-    except (TypeError, ValueError):
-        pass
-    ad = Adopcion.query.get_or_404(aid)
-    if ad.dueño_anterior_id!=user or ad.estado_adopcion!=EstadoAdopcion.PENDIENTE:
-        return jsonify({'msg':'No autorizado'}),403
-    ad.estado_adopcion = EstadoAdopcion.APROBADA
-    ad.mascota.dueño_id = ad.dueño_nuevo_id
-    db.session.commit()
-    return jsonify(ad.to_dict()),200
-
-@bp.route('/<int:aid>/rechazar', methods=['PUT'])
-@jwt_required()
-def rechazar(aid):
-    user = get_jwt_identity()
-    try:
-        user = int(user)
-    except (TypeError, ValueError):
-        pass
-    ad = Adopcion.query.get_or_404(aid)
-    if ad.dueño_anterior_id!=user or ad.estado_adopcion!=EstadoAdopcion.PENDIENTE:
-        return jsonify({'msg':'No autorizado'}),403
-    ad.estado_adopcion = EstadoAdopcion.RECHAZADA
-    nueva_ad = Adopcion(
-        descripcion       = ad.descripcion,
-        mascota_id        = ad.mascota_id,
-        dueño_anterior_id = ad.dueño_anterior_id,
-        dueño_nuevo_id    = None
-    )
-    db.session.add(nueva_ad)
-    db.session.commit()
-    return jsonify(nueva_ad.to_dict()), 200
-
-@bp.route('/<int:aid>/solicitar', methods=['PUT'])
-@jwt_required()
-def solicitar(aid):
-    user = get_jwt_identity()
-    ad = Adopcion.query.get_or_404(aid)
-
-    if ad.dueño_anterior_id == user:
-        return jsonify({'msg':'No puedes solicitar tu propia adopción'}), 403
-    if ad.estado_adopcion != EstadoAdopcion.CREADA:
-        return jsonify({'msg':'Sólo adopciones en estado CREADA se pueden solicitar'}), 400
-
-    ad.dueño_nuevo_id    = user
-    ad.estado_adopcion   = EstadoAdopcion.PENDIENTE
-    db.session.commit()
-    return jsonify(ad.to_dict()), 200
-
-@bp.route('/<int:aid>', methods=['DELETE'])
-@jwt_required()
-def eliminar_adopcion(aid):
-    user = get_jwt_identity()
-    try:
-        user = int(user)
-    except (TypeError, ValueError):
-        pass
+    mascota_encontrada = db.get_or_404(Mascota, data['mascota_id'])
+    if mascota_encontrada.dueño_id != usuario_id:
+        return jsonify({'msg':'No puedes poner en adopcion una mascota que no es tuya'}),400
     
-    ad = Adopcion.query.get_or_404(aid)
-    if ad.dueño_anterior_id != user:
-        return jsonify({'msg':'No autorizado'}), 403
+    adopcion_crear = Adopcion(
+      descripcion=desc,
+      mascota_id=mascota_encontrada.id,
+    )
+    adopcion_crear.dueño_anterior_id = usuario_id
 
-    db.session.delete(ad)
-    db.session.commit()
-    return '', 204
+    adopcion_crear.save()
+    return jsonify({"id": adopcion_crear.id}), 201
 
-@bp.route('/<int:aid>', methods=['PATCH'])
+
+@adopciones_bp.route('/eliminar/<int:adopcion_id>', methods=['DELETE'])
 @jwt_required()
-def editar_adopcion(aid):
-    user = get_jwt_identity()
-    try:
-        user = int(user)
-    except (TypeError, ValueError):
-        pass
+def eliminar_adopcion(adopcion_id):
+    usuario_id = int(get_jwt_identity())
+    usuario = db.get_or_404(Usuario, usuario_id)
+    adopcion_borrar = db.get_or_404(Adopcion, adopcion_id)
+    
+    if usuario.tipo_usuario != TipoUsuarioEnum.PROP_MASCOTA and usuario.tipo_usuario != TipoUsuarioEnum.ADMIN:
+        return jsonify({'msg':'No puedes eliminar adopciones sin ser un usuario de mascota o admin'}), 403
 
-    ad = Adopcion.query.get_or_404(aid)
-    if ad.dueño_anterior_id != user or ad.estado_adopcion != EstadoAdopcion.CREADA:
-        return jsonify({'msg':'No autorizado'}), 403
+    if adopcion_borrar.dueño_anterior_id != usuario_id:
+        return jsonify({'msg':'No puedes eliminar una adopcion de otro dueño!'}), 403
 
-    data = request.get_json() or {}
-    desc = data.get('descripcion', '').strip()
-    if not desc:
-        return jsonify({'msg':'Descripción requerida'}), 400
-    if len(desc) > 255:
-        return jsonify({'msg':'La descripción no puede tener más de 255 caracteres'}), 400
+    # Verificar si hay peticiones pendientes o aprobadas
+    peticiones = Peticion_adopcion.query.filter_by(adopcion_id=adopcion_id).all()
+    
+    for peticion in peticiones:
+        if peticion.estado_peticion != EstadoPeticion.RECHAZADA:
+            return jsonify({'msg':'No puedes eliminar una adopción con peticiones pendientes o aprobadas'}), 400
 
-
-    ad.descripcion = desc
-    db.session.commit()
-    return jsonify(ad.to_dict()), 200
+    adopcion_borrar.delete()
+    return jsonify({'msg': 'Eliminada'}), 200

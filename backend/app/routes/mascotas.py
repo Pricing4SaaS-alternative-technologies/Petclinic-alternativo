@@ -1,10 +1,10 @@
 from datetime import datetime, date
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models.mascota import Mascota
 from app.models.usuario import Usuario
 from app.models.enums import TipoMascota
-from app.models.enums import TipoUsuarioEnum, Plan
+from app.models.enums import TipoUsuarioEnum
 from app.extensions import db
 from datetime import datetime
 
@@ -32,10 +32,35 @@ def get_mis_mascotas():
         } for m in mascotas
     ]), 200
 
+
+@mascotas_bp.route('/dueno-mascota/<int:dueno_id>', methods=['GET'])
+@jwt_required()
+def get_mascotas_by_dueño(dueno_id):
+    user_id = get_jwt_identity()
+    usuario = Usuario.query.filter_by(id=user_id).first()
+
+    dueño = Usuario.query.get_or_404(dueno_id)
+    if (usuario.tipo_usuario != TipoUsuarioEnum.VETERINARIO and dueño.clinica_id != usuario.clinica_id) and usuario.tipo_usuario != TipoUsuarioEnum.ADMIN:
+        return jsonify({'message': 'No tienes permiso para ver las mascotas de este dueño'}), 403
+
+    mascotas = Mascota.query.filter_by(dueño_id=dueno_id).all()
+    if not mascotas:
+        return jsonify([]), 200
+
+    return jsonify([
+        {
+            'id': m.id,
+            'nombre': m.nombre,
+            'cumpleaños': m.cumpleaños.isoformat(),
+            'tipo': m.tipo.value
+        } for m in mascotas
+    ]), 200
+
 @mascotas_bp.route('/crear-mascota', methods=['POST'])
 @jwt_required()
 def crear_mascota():
     data = request.get_json()
+    id_usuario = int(get_jwt_identity())
 
     nombre = data.get('nombre')
     cumpleaños = data.get('cumpleaños')
@@ -50,10 +75,10 @@ def crear_mascota():
         return jsonify({'error': 'Formato de fecha inválido (esperado: yyyy-MM-dd)'}), 400
 
     if cumpleaños_dt > date.today():
-        return jsonify({'error': 'La fecha de cumpleaños no puede ser futura'}), 400
+        return jsonify({'error': 'La fecha de nacimiento no puede ser futura'}), 400
     
     if cumpleaños_dt < date(1800, 1, 1):
-        return jsonify({'error': 'La fecha de cumpleaños no puede ser anterior al 1 de enero de 1800'}), 400
+        return jsonify({'error': 'La fecha de nacimiento no puede ser anterior al 1 de enero de 1800'}), 400
 
     user_id = get_jwt_identity()
     usuario = Usuario.query.filter_by(id=user_id).first()
@@ -70,9 +95,19 @@ def crear_mascota():
         tipo=tipo,
         dueño_id=user_id
     )
-
-    db.session.add(nueva_mascota)
-    db.session.commit()
+    try:
+        db.session.add(nueva_mascota)
+        db.session.commit()
+        
+        space_client = current_app.space_client
+        evaluacion = current_app.run_async(space_client.featureEvaluators.evaluate(id_usuario, "petclinic-registeredPets", {"petclinic-maxRegisteredPets": 1}))
+        if evaluacion.eval == False:
+            nueva_mascota.delete()
+            return jsonify({'message': 'No se puede crear más mascotas con el plan actual. El dueño de la clínica debe actualizar su plan.'}), 403
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Error al crear la mascota'}), 500
 
     return jsonify({'mensaje': 'Mascota creada con éxito'}), 201
 
@@ -94,7 +129,7 @@ def editar_nombre_mascota(mascota_id):
     except Exception:
         return jsonify({'error': 'Identidad del token inválida'}), 401
 
-    mascota = Mascota.query.get(mascota_id)
+    mascota = db.session.get(Mascota, mascota_id)
     
     if not mascota:
         return jsonify({'error': 'Mascota no encontrada'}), 404
@@ -109,15 +144,22 @@ def editar_nombre_mascota(mascota_id):
 @mascotas_bp.route('/<int:id>', methods=['DELETE'])
 @jwt_required()
 def eliminar_mascota(id):
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     usuario = Usuario.query.filter_by(id=user_id).first()
     if not usuario or (usuario.tipo_usuario != TipoUsuarioEnum.PROP_MASCOTA and usuario.tipo_usuario != TipoUsuarioEnum.ADMIN):
         return jsonify({'message': 'No tienes permiso para eliminar mascotas'}), 403
     
-    mascota = Mascota.query.get(id)
+    mascota = db.session.get(Mascota, id)
     if not mascota:
         return jsonify({'error': 'Mascota no encontrada'}), 404
 
     db.session.delete(mascota)
+    space_client = current_app.space_client
+    usage_levels = { 
+        "petclinic": {
+            "maxRegisteredPets": -1
+        }
+    }
+    current_app.run_async(space_client.contracts.update_usage_levels(user_id, usage_levels))
     db.session.commit()
     return jsonify({'mensaje': 'Mascota eliminada correctamente'}), 200

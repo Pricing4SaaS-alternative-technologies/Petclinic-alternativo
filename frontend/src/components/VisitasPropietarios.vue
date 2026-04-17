@@ -19,7 +19,7 @@
 import api from '@/api/axios'
 
 export default {
-  name: 'HomeVisitasPropietario',
+  name: 'VisitasPropietarios',
   data () {
     return {
       jwtValido: false,
@@ -56,7 +56,7 @@ export default {
       try {
         const { data } = await api.get(
           `/clinicas/${this.clinicaId}` +
-          `/props_mascotas/mine/visitas`
+          '/props_mascotas/mine/visitas'
         )
         this.visitas = data
       } catch (e) {
@@ -74,5 +74,5 @@ export default {
 </script>
 
 <style scoped>
-@import './css/HomeVisitas.css';
+@import './css/Visitas.css';
 </style>

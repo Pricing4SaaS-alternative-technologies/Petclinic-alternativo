@@ -22,6 +22,7 @@ api.interceptors.response.use(
     if (error.response && error.response.status === 401 && token) {
       localStorage.removeItem('jwt')
       localStorage.removeItem('user')
+      localStorage.removeItem('spaceToken')
       window.dispatchEvent(new Event('logout'))
       window.location.href = '/auth'
       console.warn('Token expirado o inválido, se ha cerrado la sesion automáticamente.')

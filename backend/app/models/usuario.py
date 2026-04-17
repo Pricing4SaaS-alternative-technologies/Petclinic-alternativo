@@ -13,7 +13,7 @@ class Usuario(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     nombre = db.Column(db.String(100), nullable=False)
     apellidos = db.Column(db.String(100), nullable=False)
-    usuario = db.Column(db.String(50), nullable=False)
+    usuario = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     contraseña = db.Column(db.String(500), nullable=False)
     tipo_usuario = db.Column(SqlEnum(TipoUsuarioEnum), nullable=False)
