@@ -90,6 +90,7 @@ def register():
     
     if tipo_enum == TipoUsuarioEnum.PROP_CLINICA:
         try:
+            space_client = current_app.space_client
             contract_data = {
                 "userContact": {
                     "userId": str(user.id),
@@ -103,7 +104,7 @@ def register():
                     "renewalDays": 30
                 },
                 "contractedServices": {
-                    "PetClinic": "1.0.0"
+                    "PetClinic": "1.0.3"
                 },
                 "subscriptionPlans": {
                     "PetClinic": "SILVER"
@@ -121,7 +122,7 @@ def register():
             return jsonify({
                 'message': f'{tipo_enum.value.capitalize()} registrado, pero falló la creación del contrato',
                 'error': str(e)
-            }), 201
+            }), 500
             
     elif tipo_enum == TipoUsuarioEnum.PROP_MASCOTA:
         try:
